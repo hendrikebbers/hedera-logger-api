@@ -17,9 +17,9 @@
 
 package com.swirlds.logging.test.api.internal;
 
-import com.swirlds.logging.api.internal.LogEvent;
-import com.swirlds.logging.test.api.LoggerMirror;
 import com.swirlds.logging.api.Level;
+import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.test.api.LoggerMirror;
 import java.util.List;
 import java.util.function.Function;
 

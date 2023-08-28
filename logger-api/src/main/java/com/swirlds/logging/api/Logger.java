@@ -16,26 +16,14 @@
 
 package com.swirlds.logging.api;
 
-import java.util.function.Supplier;
-
 public interface Logger {
 
     default void error(String message) {
         log(Level.ERROR, message);
     }
 
-    @Deprecated
-    default void error(Supplier<String> messageSupplier) {
-        log(Level.ERROR, messageSupplier);
-    }
-
     default void error(String message, Throwable throwable) {
         log(Level.ERROR, message, throwable);
-    }
-
-    @Deprecated
-    default void error(Supplier<String> messageSupplier, Throwable throwable) {
-        log(Level.ERROR, messageSupplier, throwable);
     }
 
     default void error(String message, Object... args) {
@@ -66,18 +54,8 @@ public interface Logger {
         log(Level.WARN, message);
     }
 
-    @Deprecated
-    default void warn(Supplier<String> messageSupplier) {
-        log(Level.WARN, messageSupplier);
-    }
-
     default void warn(String message, Throwable throwable) {
         log(Level.WARN, message, throwable);
-    }
-
-    @Deprecated
-    default void warn(Supplier<String> messageSupplier, Throwable throwable) {
-        log(Level.WARN, messageSupplier, throwable);
     }
 
     default void warn(String message, Object... args) {
@@ -108,18 +86,8 @@ public interface Logger {
         log(Level.INFO, message);
     }
 
-    @Deprecated
-    default void info(Supplier<String> messageSupplier) {
-        log(Level.INFO, messageSupplier);
-    }
-
     default void info(String message, Throwable throwable) {
         log(Level.INFO, message, throwable);
-    }
-
-    @Deprecated
-    default void info(Supplier<String> messageSupplier, Throwable throwable) {
-        log(Level.INFO, messageSupplier, throwable);
     }
 
     default void info(String message, Object... args) {
@@ -150,18 +118,8 @@ public interface Logger {
         log(Level.DEBUG, message);
     }
 
-    @Deprecated
-    default void debug(Supplier<String> messageSupplier) {
-        log(Level.DEBUG, messageSupplier);
-    }
-
     default void debug(String message, Throwable throwable) {
         log(Level.DEBUG, message, throwable);
-    }
-
-    @Deprecated
-    default void debug(Supplier<String> messageSupplier, Throwable throwable) {
-        log(Level.DEBUG, messageSupplier, throwable);
     }
 
     default void debug(String message, Object... args) {
@@ -192,18 +150,8 @@ public interface Logger {
         log(Level.TRACE, message);
     }
 
-    @Deprecated
-    default void trace(Supplier<String> messageSupplier) {
-        log(Level.TRACE, messageSupplier);
-    }
-
     default void trace(String message, Throwable throwable) {
         log(Level.TRACE, message, throwable);
-    }
-
-    @Deprecated
-    default void trace(Supplier<String> messageSupplier, Throwable throwable) {
-        log(Level.TRACE, messageSupplier, throwable);
     }
 
     default void trace(String message, Object... args) {
@@ -232,13 +180,8 @@ public interface Logger {
 
     void log(Level level, String message);
 
-    @Deprecated
-    void log(Level level, Supplier<String> messageSupplier);
 
     void log(Level level, String message, Throwable throwable);
-
-    @Deprecated
-    void log(Level level, Supplier<String> messageSupplier, Throwable throwable);
 
     void log(Level level, String message, Object... args);
 
@@ -318,8 +261,6 @@ public interface Logger {
         return withContext(key, stringValues);
     }
 
-    Logger withContext(String key, Supplier<String> value);
-
     boolean isEnabled(Level level);
 
     default boolean isTraceEnabled() {
@@ -341,4 +282,8 @@ public interface Logger {
     default boolean isErrorEnabled() {
         return isEnabled(Level.ERROR);
     }
+
+    void logImpl(Level level, String message, final Throwable throwable);
+
+    String getName();
 }

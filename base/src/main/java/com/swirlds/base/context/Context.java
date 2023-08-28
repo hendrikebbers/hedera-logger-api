@@ -18,22 +18,24 @@ package com.swirlds.base.context;
 
 import com.swirlds.base.context.internal.GlobalContext;
 import com.swirlds.base.context.internal.ThreadLocalContext;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 
 public interface Context {
 
-    void put(String key, String value);
+    void put(@NonNull String key, @Nullable String value);
 
-    void put(String key, String... values);
+    void put(@NonNull String key, @Nullable String... values);
 
-    void remove(String key);
+    void remove(@NonNull String key);
 
     void clear();
 
-    default void put(String key, int value) {
+    default void put(@NonNull String key, int value) {
         put(key, Integer.toString(value));
     }
 
-    default void put(String key, int... values) {
+    default void put(@NonNull String key, int... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Integer.toString(values[i]);
@@ -41,11 +43,11 @@ public interface Context {
         put(key, stringValues);
     }
 
-    default void put(String key, long value) {
+    default void put(@NonNull String key, long value) {
         put(key, Long.toString(value));
     }
 
-    default void put(String key, long... values) {
+    default void put(@NonNull String key, long... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Long.toString(values[i]);
@@ -53,11 +55,11 @@ public interface Context {
         put(key, stringValues);
     }
 
-    default void put(String key, float value) {
+    default void put(@NonNull String key, float value) {
         put(key, Float.toString(value));
     }
 
-    default void put(String key, float... values) {
+    default void put(@NonNull String key, float... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Float.toString(values[i]);
@@ -65,11 +67,11 @@ public interface Context {
         put(key, stringValues);
     }
 
-    default void put(String key, double value) {
+    default void put(@NonNull String key, double value) {
         put(key, Double.toString(value));
     }
 
-    default void put(String key, double... values) {
+    default void put(@NonNull String key, double... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Double.toString(values[i]);
@@ -77,11 +79,11 @@ public interface Context {
         put(key, stringValues);
     }
 
-    default void put(String key, boolean value) {
+    default void put(@NonNull String key, boolean value) {
         put(key, Boolean.toString(value));
     }
 
-    default void put(String key, boolean... values) {
+    default void put(@NonNull String key, boolean... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Boolean.toString(values[i]);
@@ -89,10 +91,12 @@ public interface Context {
         put(key, stringValues);
     }
 
+    @NonNull
     static Context getGlobalContext() {
         return GlobalContext.getInstance();
     }
 
+    @NonNull
     static Context getThreadLocalContext() {
         return ThreadLocalContext.getInstance();
     }

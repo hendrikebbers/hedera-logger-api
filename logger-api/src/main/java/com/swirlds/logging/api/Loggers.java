@@ -17,19 +17,25 @@
 package com.swirlds.logging.api;
 
 
-import com.swirlds.logging.api.internal.LoggerManager;
+import com.swirlds.logging.api.extensions.DefaultLoggerSystem;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.Objects;
 
 public class Loggers {
 
-    public static Logger getLogger(String name) {
-        return LoggerManager.getInstance().getLogger(name);
+    @NonNull
+    public static Logger getLogger(@NonNull String name) {
+        return DefaultLoggerSystem.getInstance().getLogger(name);
     }
 
-    public static Logger getLogger(Class<?> clazz) {
+    @NonNull
+    public static Logger getLogger(@NonNull Class<?> clazz) {
+        Objects.requireNonNull(clazz, "clazz must not be null");
         return getLogger(clazz.getName());
     }
 
-    public static Marker getMarker(String name) {
-        return LoggerManager.getInstance().getMarker(name);
+    @NonNull
+    public static Marker getMarker(@NonNull String name) {
+        return DefaultLoggerSystem.getInstance().getMarker(name);
     }
 }

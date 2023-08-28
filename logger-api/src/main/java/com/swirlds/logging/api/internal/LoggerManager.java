@@ -17,36 +17,140 @@
 
 package com.swirlds.logging.api.internal;
 
+import com.swirlds.base.context.internal.GlobalContext;
+import com.swirlds.base.context.internal.ThreadLocalContext;
+import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
-import com.swirlds.logging.api.internal.console.ConsoleLogger;
-import com.swirlds.logging.api.internal.marker.MarkerImpl;
+import com.swirlds.logging.api.extensions.LogAdapter;
+import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.LogHandler;
+import com.swirlds.logging.api.extensions.LogHandlerFactory;
+import com.swirlds.logging.api.extensions.LogListener;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class LoggerManager {
 
-    private final static LoggerManager INSTANCE = new LoggerManager();
+    private final List<LogHandler> handlers;
 
-    private final Map<String, AbstractLogger> loggers;
+    private final Map<String, LoggerImpl> loggers;
 
-    public LoggerManager() {
-        loggers = new ConcurrentHashMap<>();
+    private final List<LogListener> listeners;
+
+    private final AtomicBoolean hasListeners;
+
+    private final LoggingLevelConfig levelConfig;
+
+    public LoggerManager(@NonNull final Configuration configuration) {
+        Objects.requireNonNull(configuration, "configuration must not be null");
+
+        this.loggers = new ConcurrentHashMap<>();
+        this.handlers = new CopyOnWriteArrayList<>();
+        this.listeners = new CopyOnWriteArrayList<>();
+        this.hasListeners = new AtomicBoolean(false);
+        this.levelConfig = new LoggingLevelConfig(configuration);
+
+        ServiceLoader<LogHandlerFactory> handlerServiceLoader = ServiceLoader.load(LogHandlerFactory.class);
+        handlerServiceLoader.stream()
+                .map(ServiceLoader.Provider::get)
+                .map(factory -> factory.create(configuration))
+                .filter(handler -> handler.isActive())
+                .forEach(handlers::add);
+
+        ServiceLoader<LogAdapter> adapterServiceLoader = ServiceLoader.load(LogAdapter.class);
+        List<LogAdapter> adapters = adapterServiceLoader.stream()
+                .map(ServiceLoader.Provider::get)
+                .filter(adapter -> adapter.isActive(configuration))
+                .collect(Collectors.toList());
+
+        adapters.forEach(adapter -> adapter.install());
+
+        handlers.forEach(handler -> {
+            handler.onLogEvent(new LogEvent("LoggerManager initialized with " + handlers.size()
+                    + " handlers: " + handlers, LocalDateTime.now(), Thread.currentThread().getName(), "", Level.DEBUG,
+                    null, Map.of(), null));
+            handler.onLogEvent(
+                    new LogEvent("LoggerManager installed with " + adapters.size() + " adapters: " + adapters,
+                            LocalDateTime.now(), Thread.currentThread().getName(), "", Level.DEBUG, null, Map.of(),
+                            null));
+        });
     }
 
-    public AbstractLogger getLogger(String name) {
-        return loggers.computeIfAbsent(name, n -> new ConsoleLogger(n));
+    @NonNull
+    public LoggerImpl getLogger(@NonNull String name) {
+        Objects.requireNonNull(name, "name must not be null");
+        return loggers.computeIfAbsent(name, n -> new LoggerImpl(n, this));
     }
 
-    public static LoggerManager getInstance() {
-        return INSTANCE;
-    }
-
-    public Marker getMarker(String name) {
+    @NonNull
+    public Marker getMarker(@NonNull String name) {
         return new MarkerImpl(name);
     }
 
-    public boolean isEnabled(String name, Level level) {
-        return true;
+    public boolean isEnabled(@NonNull String name, @NonNull Level level) {
+        if (handlers.isEmpty()) {
+            return levelConfig.isEnabled(name, level);
+        } else {
+            boolean match = handlers.stream()
+                    .anyMatch(handler -> handler.isEnabled(name, level));
+            if (handlers.isEmpty() || match) {
+                return levelConfig.isEnabled(name, level);
+            }
+        }
+        return false;
     }
+
+    public void onLogEvent(@NonNull LogEvent event) {
+        Objects.requireNonNull(event, "event must not be null");
+        LogEvent enrichedEvent = null;
+        for (LogHandler handler : handlers) {
+            if (handler.isEnabled(event.loggerName(), event.level())) {
+                if (enrichedEvent == null) {
+                    Map<String, String> context = new HashMap<>(event.context());
+                    context.putAll(GlobalContext.getContextMap());
+                    context.putAll(ThreadLocalContext.getContextMap());
+                    enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
+                            Collections.unmodifiableMap(context));
+                }
+                handler.onLogEvent(enrichedEvent);
+            }
+        }
+        if (hasListeners.get()) {
+            if (enrichedEvent == null) {
+                Map<String, String> context = new HashMap<>(event.context());
+                context.putAll(GlobalContext.getContextMap());
+                context.putAll(ThreadLocalContext.getContextMap());
+                enrichedEvent = LogEvent.createCopyWithDifferentContext(event, Collections.unmodifiableMap(context));
+            }
+            for (LogListener listener : listeners) {
+                if (enrichedEvent.loggerName().startsWith(listener.getLoggerName())) {
+                    listener.onLogEvent(enrichedEvent);
+                }
+            }
+        }
+    }
+
+    public void addListener(@NonNull LogListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        listeners.add(listener);
+        hasListeners.set(true);
+    }
+
+    public void removeListener(@NonNull LogListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        listeners.remove(listener);
+        hasListeners.set(!listeners.isEmpty());
+    }
+
 }

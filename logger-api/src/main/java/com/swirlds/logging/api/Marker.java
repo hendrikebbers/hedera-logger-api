@@ -16,11 +16,14 @@
 
 package com.swirlds.logging.api;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Optional;
 
 public interface Marker {
 
+    @NonNull
     String getName();
 
+    @NonNull
     Optional<Marker> getParent();
 }

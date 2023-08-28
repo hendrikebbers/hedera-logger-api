@@ -16,10 +16,18 @@
 
 package com.swirlds.logging.api;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.Objects;
+
 public enum Level {
     ERROR,
     WARN,
     INFO,
     DEBUG,
     TRACE;
+
+    public boolean enabledLoggingOfLevel(@NonNull Level level) {
+        Objects.requireNonNull(level, "level must not be null");
+        return this.ordinal() >= level.ordinal();
+    }
 }

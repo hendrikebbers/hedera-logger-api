@@ -1,6 +1,7 @@
 package com.swirlds.logging.usage;
 
 import com.swirlds.base.context.Context;
+import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.Loggers;
 import java.util.concurrent.Executors;
@@ -11,6 +12,12 @@ public class Demo2 {
 
     public static void main(String[] args) throws Exception {
 
+        logger.log(Level.TRACE, "Hello world!");
+        logger.log(Level.INFO, "Hello world!");
+        logger.log(Level.DEBUG, "Hello world!");
+        logger.log(Level.WARN, "Hello world!");
+        logger.log(Level.ERROR, "Hello world!");
+
         logger.info("Hello world!");
         logger.debug("Hello world!");
         logger.warn("Hello world!");
@@ -20,16 +27,6 @@ public class Demo2 {
         logger.debug("Hello world!", new RuntimeException("OH NO!"));
         logger.warn("Hello world!", new RuntimeException("OH NO!"));
         logger.error("Hello world!", new RuntimeException("OH NO!"));
-
-        logger.info(() -> "Hello world!");
-        logger.debug(() -> "Hello world!");
-        logger.warn(() -> "Hello world!");
-        logger.error(() -> "Hello world!");
-
-        logger.info(() -> "Hello world!", new RuntimeException("OH NO!"));
-        logger.debug(() -> "Hello world!", new RuntimeException("OH NO!"));
-        logger.warn(() -> "Hello world!", new RuntimeException("OH NO!"));
-        logger.error(() -> "Hello world!", new RuntimeException("OH NO!"));
 
         logger.info("Hello {}!", "world");
         logger.debug("Hello {}!", "world");
@@ -154,5 +151,41 @@ public class Demo2 {
         logger.withContext("context", "value").debug("Hello world!");
         logger.withContext("context", "value").warn("Hello world!");
         logger.withContext("context", "value").error("Hello world!");
+
+        final System.Logger systemLogger = System.getLogger(Demo2.class.getName());
+        systemLogger.log(System.Logger.Level.TRACE, "Hello system!");
+        systemLogger.log(System.Logger.Level.INFO, "Hello system!");
+        systemLogger.log(System.Logger.Level.DEBUG, "Hello system!");
+        systemLogger.log(System.Logger.Level.WARNING, "Hello system!");
+        systemLogger.log(System.Logger.Level.ERROR, "Hello system!");
+
+        systemLogger.log(System.Logger.Level.TRACE, "Hello system!", new RuntimeException("OH NO!"));
+        systemLogger.log(System.Logger.Level.INFO, "Hello system!", new RuntimeException("OH NO!"));
+        systemLogger.log(System.Logger.Level.DEBUG, "Hello system!", new RuntimeException("OH NO!"));
+        systemLogger.log(System.Logger.Level.WARNING, "Hello system!", new RuntimeException("OH NO!"));
+        systemLogger.log(System.Logger.Level.ERROR, "Hello system!", new RuntimeException("OH NO!"));
+
+        systemLogger.log(System.Logger.Level.TRACE, "Hello {0}!", "system");
+        systemLogger.log(System.Logger.Level.INFO, "Hello {0}!", "system");
+        systemLogger.log(System.Logger.Level.DEBUG, "Hello {0}!", "system");
+        systemLogger.log(System.Logger.Level.WARNING, "Hello {0}!", "system");
+        systemLogger.log(System.Logger.Level.ERROR, "Hello {0}!", "system");
+
+        java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger(Demo2.class.getName());
+        julLogger.severe("Hello jul!");
+        julLogger.warning("Hello jul!");
+        julLogger.info("Hello jul!");
+        julLogger.config("Hello jul!");
+        julLogger.fine("Hello jul!");
+        julLogger.finer("Hello jul!");
+        julLogger.finest("Hello jul!");
+
+        julLogger.log(java.util.logging.Level.SEVERE, "Hello {0}!", "jul");
+        julLogger.log(java.util.logging.Level.WARNING, "Hello {0}!", "jul");
+        julLogger.log(java.util.logging.Level.INFO, "Hello {0}!", "jul");
+        julLogger.log(java.util.logging.Level.CONFIG, "Hello {0}!", "jul");
+        julLogger.log(java.util.logging.Level.FINE, "Hello {0}!", "jul");
+        julLogger.log(java.util.logging.Level.FINER, "Hello {0}!", "jul");
+        julLogger.log(java.util.logging.Level.FINEST, "Hello {0}!", "jul");
     }
 }

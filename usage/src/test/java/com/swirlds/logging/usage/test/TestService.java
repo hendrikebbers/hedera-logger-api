@@ -2,7 +2,6 @@ package com.swirlds.logging.usage.test;
 
 import com.swirlds.logging.test.api.LoggerMirror;
 import com.swirlds.logging.test.api.LoggerTestSupport;
-import com.swirlds.logging.usage.Service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

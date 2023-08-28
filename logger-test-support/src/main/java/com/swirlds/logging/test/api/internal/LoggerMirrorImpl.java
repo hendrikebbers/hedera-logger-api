@@ -17,17 +17,16 @@
 
 package com.swirlds.logging.test.api.internal;
 
-import static com.swirlds.logging.test.api.LoggerTestSupport.*;
+import static com.swirlds.logging.test.api.LoggerTestSupport.disposeMirror;
 
-import com.swirlds.logging.api.internal.LogEvent;
-import com.swirlds.logging.api.internal.LoggerListener;
-import com.swirlds.logging.api.internal.LoggerManager;
+import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.test.api.LoggerMirror;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
-public class LoggerMirrorImpl extends AbstractLoggerMirror implements LoggerListener {
+public class LoggerMirrorImpl extends AbstractLoggerMirror implements LogListener {
 
     private final List<LogEvent> events = new CopyOnWriteArrayList<>();
 
@@ -38,6 +37,11 @@ public class LoggerMirrorImpl extends AbstractLoggerMirror implements LoggerList
     }
 
     @Override
+    public String getLoggerName() {
+        return name;
+    }
+
+    @Override
     public void onLogEvent(LogEvent event) {
         events.add(event);
     }
@@ -45,11 +49,6 @@ public class LoggerMirrorImpl extends AbstractLoggerMirror implements LoggerList
     @Override
     public void dispose() {
         disposeMirror(this);
-    }
-
-
-    public String getName() {
-        return name;
     }
 
     @Override

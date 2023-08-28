@@ -17,18 +17,26 @@
 package com.swirlds.base.context.internal;
 
 import com.swirlds.base.context.Context;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-public class ThreadLocalContext implements Context {
+public final class ThreadLocalContext implements Context {
 
     private static final ThreadLocalContext INSTANCE = new ThreadLocalContext();
 
-    private ThreadLocal<Map<String, String>> contextThreadLocal = new ThreadLocal<>();
+    private final ThreadLocal<Map<String, String>> contextThreadLocal;
+
+    private ThreadLocalContext() {
+        this.contextThreadLocal = new ThreadLocal<>();
+    }
 
     @Override
-    public void put(String key, String value) {
+    public void put(@NonNull String key, @Nullable String value) {
+        Objects.requireNonNull(key, "key must not be null");
         Map<String, String> contextMap = contextThreadLocal.get();
         if (contextMap == null) {
             contextMap = new HashMap<>();
@@ -38,7 +46,8 @@ public class ThreadLocalContext implements Context {
     }
 
     @Override
-    public void put(String key, String... values) {
+    public void put(@NonNull String key, @Nullable String... values) {
+        Objects.requireNonNull(key, "key must not be null");
         Map<String, String> contextMap = contextThreadLocal.get();
         if (contextMap == null) {
             contextMap = new HashMap<>();
@@ -48,7 +57,8 @@ public class ThreadLocalContext implements Context {
     }
 
     @Override
-    public void remove(String key) {
+    public void remove(@NonNull String key) {
+        Objects.requireNonNull(key, "key must not be null");
         Map<String, String> contextMap = contextThreadLocal.get();
         if (contextMap != null) {
             contextMap.remove(key);
@@ -63,10 +73,12 @@ public class ThreadLocalContext implements Context {
         }
     }
 
+    @NonNull
     public static ThreadLocalContext getInstance() {
         return INSTANCE;
     }
 
+    @NonNull
     public static Map<String, String> getContextMap() {
         final Map<String, String> current = INSTANCE.contextThreadLocal.get();
         if (current != null) {

@@ -17,7 +17,7 @@
 
 package com.swirlds.logging.test.api.internal;
 
-import com.swirlds.logging.api.internal.LogEvent;
+import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.test.api.LoggerMirror;
 import java.util.AbstractList;
 import java.util.List;

@@ -9,7 +9,7 @@
     <artifactId>hedera-logging</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-    <artifactId>usage</artifactId>
+  <artifactId>usage</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <dependencies>
@@ -17,6 +17,30 @@
       <groupId>${groupId}</groupId>
       <artifactId>logger-api</artifactId>
       <version>${version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${groupId}</groupId>
+      <artifactId>logger-console-handler</artifactId>
+      <version>${version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>${groupId}</groupId>
+      <artifactId>logger-noop-handler</artifactId>
+      <version>${version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>${groupId}</groupId>
+      <artifactId>logger-jul-adapter</artifactId>
+      <version>${version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>${groupId}</groupId>
+      <artifactId>logger-system-adapter</artifactId>
+      <version>${version}</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>${groupId}</groupId>
