@@ -36,18 +36,19 @@ public final class GlobalContext implements Context {
     }
 
     @Override
-    public void put(@NonNull String key, @Nullable String value) {
+    public AutoCloseable put(@NonNull String key, @Nullable String value) {
         Objects.requireNonNull(key, "key must not be null");
         contextMapRef.getAndUpdate(map -> {
             Map<String, String> newMap = new HashMap<>(map);
             newMap.put(key, value);
             return newMap;
         });
+        return () -> remove(key);
     }
 
     @Override
-    public void put(@NonNull String key, @Nullable String... values) {
-        put(key, String.join(",", values));
+    public AutoCloseable put(@NonNull String key, @Nullable String... values) {
+        return put(key, String.join(",", values));
     }
 
     @Override

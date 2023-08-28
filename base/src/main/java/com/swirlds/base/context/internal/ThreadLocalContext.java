@@ -35,7 +35,7 @@ public final class ThreadLocalContext implements Context {
     }
 
     @Override
-    public void put(@NonNull String key, @Nullable String value) {
+    public AutoCloseable put(@NonNull String key, @Nullable String value) {
         Objects.requireNonNull(key, "key must not be null");
         Map<String, String> contextMap = contextThreadLocal.get();
         if (contextMap == null) {
@@ -43,17 +43,12 @@ public final class ThreadLocalContext implements Context {
             contextThreadLocal.set(contextMap);
         }
         contextMap.put(key, value);
+        return () -> remove(key);
     }
 
     @Override
-    public void put(@NonNull String key, @Nullable String... values) {
-        Objects.requireNonNull(key, "key must not be null");
-        Map<String, String> contextMap = contextThreadLocal.get();
-        if (contextMap == null) {
-            contextMap = new HashMap<>();
-            contextThreadLocal.set(contextMap);
-        }
-        contextMap.put(key, String.join(",", values));
+    public AutoCloseable put(@NonNull String key, @Nullable String... values) {
+        return put(key, String.join(",", values));
     }
 
     @Override

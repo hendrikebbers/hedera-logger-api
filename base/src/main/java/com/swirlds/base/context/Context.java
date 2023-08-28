@@ -23,72 +23,72 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 
 public interface Context {
 
-    void put(@NonNull String key, @Nullable String value);
+    AutoCloseable put(@NonNull String key, @Nullable String value);
 
-    void put(@NonNull String key, @Nullable String... values);
+    AutoCloseable put(@NonNull String key, @Nullable String... values);
 
     void remove(@NonNull String key);
 
     void clear();
 
-    default void put(@NonNull String key, int value) {
-        put(key, Integer.toString(value));
+    default AutoCloseable put(@NonNull String key, int value) {
+        return put(key, Integer.toString(value));
     }
 
-    default void put(@NonNull String key, int... values) {
+    default AutoCloseable put(@NonNull String key, int... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Integer.toString(values[i]);
         }
-        put(key, stringValues);
+        return put(key, stringValues);
     }
 
-    default void put(@NonNull String key, long value) {
-        put(key, Long.toString(value));
+    default AutoCloseable put(@NonNull String key, long value) {
+        return put(key, Long.toString(value));
     }
 
-    default void put(@NonNull String key, long... values) {
+    default AutoCloseable put(@NonNull String key, long... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Long.toString(values[i]);
         }
-        put(key, stringValues);
+        return put(key, stringValues);
     }
 
-    default void put(@NonNull String key, float value) {
-        put(key, Float.toString(value));
+    default AutoCloseable put(@NonNull String key, float value) {
+        return put(key, Float.toString(value));
     }
 
-    default void put(@NonNull String key, float... values) {
+    default AutoCloseable put(@NonNull String key, float... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Float.toString(values[i]);
         }
-        put(key, stringValues);
+        return put(key, stringValues);
     }
 
-    default void put(@NonNull String key, double value) {
-        put(key, Double.toString(value));
+    default AutoCloseable put(@NonNull String key, double value) {
+        return put(key, Double.toString(value));
     }
 
-    default void put(@NonNull String key, double... values) {
+    default AutoCloseable put(@NonNull String key, double... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Double.toString(values[i]);
         }
-        put(key, stringValues);
+        return put(key, stringValues);
     }
 
-    default void put(@NonNull String key, boolean value) {
-        put(key, Boolean.toString(value));
+    default AutoCloseable put(@NonNull String key, boolean value) {
+        return put(key, Boolean.toString(value));
     }
 
-    default void put(@NonNull String key, boolean... values) {
+    default AutoCloseable put(@NonNull String key, boolean... values) {
         String[] stringValues = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             stringValues[i] = Boolean.toString(values[i]);
         }
-        put(key, stringValues);
+        return put(key, stringValues);
     }
 
     @NonNull
