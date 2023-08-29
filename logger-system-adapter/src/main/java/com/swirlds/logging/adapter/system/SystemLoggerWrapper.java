@@ -42,7 +42,7 @@ public class SystemLoggerWrapper implements System.Logger {
     @Override
     public void log(Level level, ResourceBundle bundle, String msg, Throwable thrown) {
         if (isLoggable(level)) {
-            com.swirlds.logging.api.Level convertedLevel = convert(level);
+            com.swirlds.logging.api.Level convertedLevel = SystemLoggerConverter.convertFromSystemLogger(level);
             final String message;
             if (bundle != null) {
                 message = getString(bundle, msg);
@@ -56,7 +56,7 @@ public class SystemLoggerWrapper implements System.Logger {
     @Override
     public void log(Level level, ResourceBundle bundle, String format, Object... params) {
         if (isLoggable(level)) {
-            com.swirlds.logging.api.Level convertedLevel = convert(level);
+            com.swirlds.logging.api.Level convertedLevel = SystemLoggerConverter.convertFromSystemLogger(level);
             final String message;
             if (bundle != null) {
                 String translated = getString(bundle, format);
@@ -67,26 +67,6 @@ public class SystemLoggerWrapper implements System.Logger {
             }
             innerLogger.logImpl(convertedLevel, message, null);
         }
-    }
-
-    private static com.swirlds.logging.api.Level convert(Level level) {
-        switch (level) {
-            case ALL:
-                return com.swirlds.logging.api.Level.TRACE;
-            case TRACE:
-                return com.swirlds.logging.api.Level.TRACE;
-            case DEBUG:
-                return com.swirlds.logging.api.Level.DEBUG;
-            case INFO:
-                return com.swirlds.logging.api.Level.INFO;
-            case WARNING:
-                return com.swirlds.logging.api.Level.WARN;
-            case ERROR:
-                return com.swirlds.logging.api.Level.ERROR;
-            case OFF:
-                return com.swirlds.logging.api.Level.ERROR;
-        }
-        return com.swirlds.logging.api.Level.ERROR;
     }
 
     private static String getString(ResourceBundle bundle, String key) {

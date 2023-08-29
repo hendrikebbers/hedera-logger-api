@@ -5,19 +5,25 @@ import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.internal.LoggerManager;
 import com.swirlds.logging.api.internal.configuration.LogConfiguration;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultLoggerSystem {
 
-    private final static DefaultLoggerSystem INSTANCE = new DefaultLoggerSystem();
+    private static class InstanceHolder {
+        private static final DefaultLoggerSystem INSTANCE = new DefaultLoggerSystem();
+    }
+
+    private final static AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
     private final LoggerManager loggerManager;
 
     private DefaultLoggerSystem() {
         this.loggerManager = new LoggerManager(new LogConfiguration());
+        INITIALIZED.set(true);
     }
 
     public static DefaultLoggerSystem getInstance() {
-        return INSTANCE;
+        return InstanceHolder.INSTANCE;
     }
 
     public LoggerManager getLoggerManager() {
@@ -40,5 +46,9 @@ public class DefaultLoggerSystem {
     @NonNull
     public Marker getMarker(@NonNull String name) {
         return loggerManager.getMarker(name);
+    }
+
+    public static boolean isInitialized() {
+        return INITIALIZED.get();
     }
 }

@@ -17,6 +17,8 @@
 
 package com.swirlds.logging.api.internal;
 
+import static java.lang.System.Logger.Level.TRACE;
+
 import com.swirlds.base.context.internal.GlobalContext;
 import com.swirlds.base.context.internal.ThreadLocalContext;
 import com.swirlds.config.api.Configuration;
@@ -42,6 +44,8 @@ import java.util.stream.Collectors;
 
 public class LoggerManager {
 
+    private final static System.Logger LOGGER = System.getLogger(LoggerManager.class.getName());
+
     private final List<LogHandler> handlers;
 
     private final Map<String, LoggerImpl> loggers;
@@ -54,12 +58,13 @@ public class LoggerManager {
 
     public LoggerManager(@NonNull final Configuration configuration) {
         Objects.requireNonNull(configuration, "configuration must not be null");
+        LOGGER.log(TRACE, "LoggerManager initialization starts");
 
+        this.levelConfig = new LoggingLevelConfig(configuration);
         this.loggers = new ConcurrentHashMap<>();
         this.handlers = new CopyOnWriteArrayList<>();
         this.listeners = new CopyOnWriteArrayList<>();
         this.hasListeners = new AtomicBoolean(false);
-        this.levelConfig = new LoggingLevelConfig(configuration);
 
         ServiceLoader<LogHandlerFactory> handlerServiceLoader = ServiceLoader.load(LogHandlerFactory.class);
         handlerServiceLoader.stream()
@@ -76,15 +81,19 @@ public class LoggerManager {
 
         adapters.forEach(adapter -> adapter.install());
 
+        final String handlerMessage = "LoggerManager initialized with " + handlers.size()
+                + " handlers: " + handlers;
+        final String adapterMessage = "LoggerManager installed with " + adapters.size()
+                + " adapters: " + adapters;
+        LOGGER.log(TRACE, handlerMessage);
+        LOGGER.log(TRACE, adapterMessage);
         handlers.forEach(handler -> {
-            handler.onLogEvent(new LogEvent("LoggerManager initialized with " + handlers.size()
-                    + " handlers: " + handlers, LocalDateTime.now(), Thread.currentThread().getName(), "", Level.DEBUG,
-                    null, Map.of(), null));
-            handler.onLogEvent(
-                    new LogEvent("LoggerManager installed with " + adapters.size() + " adapters: " + adapters,
-                            LocalDateTime.now(), Thread.currentThread().getName(), "", Level.DEBUG, null, Map.of(),
-                            null));
+            final LocalDateTime time = LocalDateTime.now();
+            final String threadName = Thread.currentThread().getName();
+            handler.onLogEvent(new LogEvent(handlerMessage, time, threadName, "", Level.DEBUG, null, Map.of(), null));
+            handler.onLogEvent(new LogEvent(adapterMessage, time, threadName, "", Level.DEBUG, null, Map.of(), null));
         });
+        LOGGER.log(TRACE, "LoggerManager initialization ends");
     }
 
     @NonNull

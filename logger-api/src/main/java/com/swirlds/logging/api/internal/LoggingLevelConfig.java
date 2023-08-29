@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public class LoggingLevelConfig {
 
+    private final static System.Logger LOGGER = System.getLogger(LoggingLevelConfig.class.getName());
+
     private final Map<String, Level> levelCache;
 
     private final Configuration configuration;
@@ -32,6 +34,8 @@ public class LoggingLevelConfig {
                 })
                 .sorted()
                 .collect(Collectors.toList());
+        LOGGER.log(System.Logger.Level.TRACE, "LoggingLevelConfig initialized with {0} properties",
+                levelConfigProperties.size());
     }
 
     public boolean isEnabled(@NonNull String name, @NonNull Level level) {

@@ -8,6 +8,6 @@ public class Demo1 {
     private final static Logger logger = Loggers.getLogger(Demo1.class);
 
     public static void main(String[] args) {
-        logger.info("Hello World!");
+        logger.error("Hello World!");
     }
 }
