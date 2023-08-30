@@ -29,26 +29,20 @@ import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
-import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
-import com.swirlds.logging.api.extensions.shipper.LogShipper;
-import com.swirlds.logging.api.extensions.shipper.LogShipperFactory;
 import com.swirlds.logging.api.internal.util.EmergencyLogger;
 import com.swirlds.logging.api.internal.util.LoggingLevelConfig;
 import com.swirlds.logging.api.internal.util.MarkerImpl;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.lang.System.Logger;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class LoggingSystem implements LogEventConsumer {
 
@@ -61,46 +55,26 @@ public class LoggingSystem implements LogEventConsumer {
     private final Map<String, LoggerImpl> loggers;
 
     private final List<LogListener> listeners;
-    
+
     private final LoggingLevelConfig levelConfig;
 
     public LoggingSystem(@NonNull final Configuration configuration) {
         Objects.requireNonNull(configuration, "configuration must not be null");
-        LOGGER.log(TRACE, "LoggerManager initialization starts");
+        LOGGER.log(TRACE, "Logging system initialization");
 
         this.levelConfig = new LoggingLevelConfig(configuration);
         this.loggers = new ConcurrentHashMap<>();
         this.handlers = new CopyOnWriteArrayList<>();
         this.listeners = new CopyOnWriteArrayList<>();
+    }
 
-        final ServiceLoader<LogHandlerFactory> handlerServiceLoader = ServiceLoader.load(LogHandlerFactory.class);
-        handlerServiceLoader.stream()
-                .map(ServiceLoader.Provider::get)
-                .map(factory -> factory.apply(configuration))
-                .filter(handler -> handler.isActive())
-                .forEach(handlers::add);
-
-        final ServiceLoader<LogShipperFactory> adapterServiceLoader = ServiceLoader.load(LogShipperFactory.class);
-        final List<LogShipper> providers = adapterServiceLoader.stream()
-                .map(ServiceLoader.Provider::get)
-                .map(factory -> factory.apply(configuration))
-                .filter(adapter -> adapter.isActive())
-                .collect(Collectors.toList());
-        providers.forEach(adapter -> adapter.install(this));
-
-        final String handlerMessage = "LoggerManager initialized with " + handlers.size()
-                + " handlers: " + handlers;
-        final String adapterMessage = "LoggerManager installed with " + providers.size()
-                + " providers: " + providers;
-        LOGGER.log(TRACE, handlerMessage);
-        LOGGER.log(TRACE, adapterMessage);
-        handlers.forEach(handler -> {
-            final LocalDateTime time = LocalDateTime.now();
-            final String threadName = Thread.currentThread().getName();
-            handler.accept(new LogEvent(handlerMessage, time, threadName, "", Level.DEBUG, null, Map.of(), null));
-            handler.accept(new LogEvent(adapterMessage, time, threadName, "", Level.DEBUG, null, Map.of(), null));
-        });
-        LOGGER.log(TRACE, "LoggerManager initialization ends");
+    public void addHandler(@NonNull final LogHandler handler) {
+        if (handler == null) {
+            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            LOGGER.log(ERROR, "null handler added in '" + callerClass + "'");
+        } else {
+            handlers.add(handler);
+        }
     }
 
     @NonNull

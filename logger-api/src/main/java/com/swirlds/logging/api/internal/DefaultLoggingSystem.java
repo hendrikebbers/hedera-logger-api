@@ -1,13 +1,26 @@
 package com.swirlds.logging.api.internal;
 
+import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogListener;
+import com.swirlds.logging.api.extensions.handler.LogHandler;
+import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
+import com.swirlds.logging.api.extensions.shipper.LogShipper;
+import com.swirlds.logging.api.extensions.shipper.LogShipperFactory;
 import com.swirlds.logging.api.internal.configuration.LogConfiguration;
+import com.swirlds.logging.api.internal.util.EmergencyLogger;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.lang.System.Logger.Level;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.ServiceLoader.Provider;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class DefaultLoggingSystem {
+
+    private final static System.Logger LOGGER = EmergencyLogger.getInstance();
 
     private static class InstanceHolder {
         private static final DefaultLoggingSystem INSTANCE = new DefaultLoggingSystem();
@@ -18,13 +31,39 @@ public class DefaultLoggingSystem {
     private final LoggingSystem internalLoggingSystem;
 
     private DefaultLoggingSystem() {
-        this.internalLoggingSystem = new LoggingSystem(new LogConfiguration());
+        final Configuration configuration = new LogConfiguration();
+        this.internalLoggingSystem = new LoggingSystem(configuration);
+        installHandlers(configuration);
+        installProviders(configuration);
         INITIALIZED.set(true);
+    }
+
+    private void installHandlers(final Configuration configuration) {
+        final ServiceLoader<LogHandlerFactory> serviceLoader = ServiceLoader.load(LogHandlerFactory.class);
+        final List<LogHandler> handlers = serviceLoader.stream()
+                .map(Provider::get)
+                .map(factory -> factory.apply(configuration))
+                .filter(handler -> handler.isActive())
+                .collect(Collectors.toList());
+        handlers.forEach(h -> internalLoggingSystem.addHandler(h));
+        LOGGER.log(Level.DEBUG, handlers.size() + " logging handlers installed: " + handlers);
+    }
+
+    private void installProviders(final Configuration configuration) {
+        final ServiceLoader<LogShipperFactory> serviceLoader = ServiceLoader.load(LogShipperFactory.class);
+        final List<LogShipper> providers = serviceLoader.stream()
+                .map(ServiceLoader.Provider::get)
+                .map(factory -> factory.apply(configuration))
+                .filter(adapter -> adapter.isActive())
+                .collect(Collectors.toList());
+        providers.forEach(p -> p.install(internalLoggingSystem));
+        LOGGER.log(Level.DEBUG, providers.size() + " logging providers installed: " + providers);
     }
 
     public static DefaultLoggingSystem getInstance() {
         return InstanceHolder.INSTANCE;
     }
+
 
     @NonNull
     public Logger getLogger(@NonNull String loggerName) {

@@ -29,7 +29,7 @@ public class SystemEmergencyLogger implements System.Logger {
         } else if (Objects.equals(property.toUpperCase(), "ERROR")) {
             SUPPORTED_LEVEL = Level.ERROR;
         } else {
-            SUPPORTED_LEVEL = Level.DEBUG;
+            SUPPORTED_LEVEL = Level.TRACE;
         }
     }
 
