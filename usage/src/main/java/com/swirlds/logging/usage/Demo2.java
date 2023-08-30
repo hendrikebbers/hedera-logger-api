@@ -4,7 +4,9 @@ import com.swirlds.base.context.Context;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.Loggers;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.logging.log4j.MarkerManager;
 
 public class Demo2 {
 
@@ -126,8 +128,8 @@ public class Demo2 {
         logger.withContext("context", "value").warn("Hello world!");
         logger.withContext("context", "value").error("Hello world!");
 
-        Executors.newSingleThreadExecutor()
-                .submit(() -> {
+        final ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(() -> {
                     Context.getThreadLocalContext().put("transaction", "18");
 
                     logger.info("Hello world!");
@@ -141,6 +143,7 @@ public class Demo2 {
                     logger.withContext("context", "value").error("Hello world!");
                 })
                 .get();
+        executorService.shutdown();
 
         logger.info("Hello world!");
         logger.debug("Hello world!");
@@ -187,5 +190,43 @@ public class Demo2 {
         julLogger.log(java.util.logging.Level.FINE, "Hello {0}!", "jul");
         julLogger.log(java.util.logging.Level.FINER, "Hello {0}!", "jul");
         julLogger.log(java.util.logging.Level.FINEST, "Hello {0}!", "jul");
+
+        org.apache.logging.log4j.Logger log4jLogger = org.apache.logging.log4j.LogManager.getLogger(Demo2.class);
+
+        log4jLogger.error("Hello log4j!");
+        log4jLogger.warn("Hello log4j!");
+        log4jLogger.info("Hello log4j!");
+        log4jLogger.debug("Hello log4j!");
+        log4jLogger.trace("Hello log4j!");
+
+        log4jLogger.error("Hello log4j!", new RuntimeException("OH NO!"));
+        log4jLogger.warn("Hello log4j!", new RuntimeException("OH NO!"));
+        log4jLogger.info("Hello log4j!", new RuntimeException("OH NO!"));
+        log4jLogger.debug("Hello log4j!", new RuntimeException("OH NO!"));
+        log4jLogger.trace("Hello log4j!", new RuntimeException("OH NO!"));
+
+        log4jLogger.error("Hello {}!", "log4j");
+        log4jLogger.warn("Hello {}!", "log4j");
+        log4jLogger.info("Hello {}!", "log4j");
+        log4jLogger.debug("Hello {}!", "log4j");
+        log4jLogger.trace("Hello {}!", "log4j");
+
+        log4jLogger.error(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!");
+        log4jLogger.warn(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!");
+        log4jLogger.info(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!");
+        log4jLogger.debug(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!");
+        log4jLogger.trace(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!");
+
+        log4jLogger.error(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!", new RuntimeException("OH NO!"));
+        log4jLogger.warn(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!", new RuntimeException("OH NO!"));
+        log4jLogger.info(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!", new RuntimeException("OH NO!"));
+        log4jLogger.debug(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!", new RuntimeException("OH NO!"));
+        log4jLogger.trace(MarkerManager.getMarker("LOG4J-MARKER"), "Hello log4j!", new RuntimeException("OH NO!"));
+
+        log4jLogger.error(MarkerManager.getMarker("LOG4J-MARKER"), "Hello {}!", "log4j");
+        log4jLogger.warn(MarkerManager.getMarker("LOG4J-MARKER"), "Hello {}!", "log4j");
+        log4jLogger.info(MarkerManager.getMarker("LOG4J-MARKER"), "Hello {}!", "log4j");
+        log4jLogger.debug(MarkerManager.getMarker("LOG4J-MARKER"), "Hello {}!", "log4j");
+        log4jLogger.trace(MarkerManager.getMarker("LOG4J-MARKER"), "Hello {}!", "log4j");
     }
 }
