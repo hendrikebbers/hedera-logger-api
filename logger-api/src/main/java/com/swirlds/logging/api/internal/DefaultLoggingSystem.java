@@ -7,45 +7,41 @@ import com.swirlds.logging.api.internal.configuration.LogConfiguration;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DefaultLoggerSystem {
+public class DefaultLoggingSystem {
 
     private static class InstanceHolder {
-        private static final DefaultLoggerSystem INSTANCE = new DefaultLoggerSystem();
+        private static final DefaultLoggingSystem INSTANCE = new DefaultLoggingSystem();
     }
 
     private final static AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
-    private final LoggerManager loggerManager;
+    private final LoggingSystem internalLoggingSystem;
 
-    private DefaultLoggerSystem() {
-        this.loggerManager = new LoggerManager(new LogConfiguration());
+    private DefaultLoggingSystem() {
+        this.internalLoggingSystem = new LoggingSystem(new LogConfiguration());
         INITIALIZED.set(true);
     }
 
-    public static DefaultLoggerSystem getInstance() {
+    public static DefaultLoggingSystem getInstance() {
         return InstanceHolder.INSTANCE;
-    }
-
-    public LoggerManager getLoggerManager() {
-        return loggerManager;
     }
 
     @NonNull
     public Logger getLogger(@NonNull String loggerName) {
-        return loggerManager.getLogger(loggerName);
+        return internalLoggingSystem.getLogger(loggerName);
     }
 
     public void addListener(LogListener listener) {
-        loggerManager.addListener(listener);
+        internalLoggingSystem.addListener(listener);
     }
 
     public void removeListener(LogListener listener) {
-        loggerManager.addListener(listener);
+        internalLoggingSystem.addListener(listener);
     }
 
     @NonNull
     public Marker getMarker(@NonNull String name) {
-        return loggerManager.getMarker(name);
+        return internalLoggingSystem.getMarker(name);
     }
 
     public static boolean isInitialized() {

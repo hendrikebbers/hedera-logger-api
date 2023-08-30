@@ -17,7 +17,7 @@
 package com.swirlds.logging.api;
 
 
-import com.swirlds.logging.api.internal.DefaultLoggerSystem;
+import com.swirlds.logging.api.internal.DefaultLoggingSystem;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 
@@ -25,7 +25,7 @@ public class Loggers {
 
     @NonNull
     public static Logger getLogger(@NonNull String name) {
-        return DefaultLoggerSystem.getInstance().getLogger(name);
+        return DefaultLoggingSystem.getInstance().getLogger(name);
     }
 
     @NonNull
@@ -36,6 +36,6 @@ public class Loggers {
 
     @NonNull
     public static Marker getMarker(@NonNull String name) {
-        return DefaultLoggerSystem.getInstance().getMarker(name);
+        return DefaultLoggingSystem.getInstance().getMarker(name);
     }
 }

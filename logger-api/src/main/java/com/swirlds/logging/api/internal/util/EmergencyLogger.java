@@ -1,12 +1,13 @@
-package com.swirlds.logging.api.internal;
+package com.swirlds.logging.api.internal.util;
 
+import com.swirlds.logging.api.internal.LoggingSystem;
 import java.io.PrintStream;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class EmergencyLogger implements System.Logger {
 
-    private final static System.Logger innerLogger = System.getLogger(LoggerManager.class.getName());
+    private final static System.Logger innerLogger = System.getLogger(LoggingSystem.class.getName());
 
     private final static ThreadLocal<Boolean> recursionGuard = new ThreadLocal<>();
 

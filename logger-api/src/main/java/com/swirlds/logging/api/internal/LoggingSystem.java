@@ -32,9 +32,13 @@ import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 import com.swirlds.logging.api.extensions.shipper.LogShipper;
 import com.swirlds.logging.api.extensions.shipper.LogShipperFactory;
+import com.swirlds.logging.api.internal.util.EmergencyLogger;
+import com.swirlds.logging.api.internal.util.LoggingLevelConfig;
+import com.swirlds.logging.api.internal.util.MarkerImpl;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.lang.System.Logger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,12 +47,13 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class LoggerManager implements LogEventConsumer {
+public class LoggingSystem implements LogEventConsumer {
 
     private final static System.Logger LOGGER = EmergencyLogger.getInstance();
+
     public static final String UNDEFINED = "UNDEFINED";
 
     private final List<LogHandler> handlers;
@@ -56,12 +61,10 @@ public class LoggerManager implements LogEventConsumer {
     private final Map<String, LoggerImpl> loggers;
 
     private final List<LogListener> listeners;
-
-    private final AtomicBoolean hasListeners;
-
+    
     private final LoggingLevelConfig levelConfig;
 
-    public LoggerManager(@NonNull final Configuration configuration) {
+    public LoggingSystem(@NonNull final Configuration configuration) {
         Objects.requireNonNull(configuration, "configuration must not be null");
         LOGGER.log(TRACE, "LoggerManager initialization starts");
 
@@ -69,7 +72,6 @@ public class LoggerManager implements LogEventConsumer {
         this.loggers = new ConcurrentHashMap<>();
         this.handlers = new CopyOnWriteArrayList<>();
         this.listeners = new CopyOnWriteArrayList<>();
-        this.hasListeners = new AtomicBoolean(false);
 
         final ServiceLoader<LogHandlerFactory> handlerServiceLoader = ServiceLoader.load(LogHandlerFactory.class);
         handlerServiceLoader.stream()
@@ -151,32 +153,20 @@ public class LoggerManager implements LogEventConsumer {
             LOGGER.log(ERROR, "event is null in '" + callerClass + "'");
         } else {
             try {
-                LogEvent enrichedEvent = null;
-                for (final LogHandler handler : handlers) {
-                    if (handler.isEnabled(event.loggerName(), event.level())) {
-                        if (enrichedEvent == null) {
-                            final Map<String, String> context = new HashMap<>(event.context());
-                            context.putAll(GlobalContext.getContextMap());
-                            context.putAll(ThreadLocalContext.getContextMap());
-                            enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
-                                    Collections.unmodifiableMap(context));
-                        }
-                        handler.accept(enrichedEvent);
-                    }
-                }
-                if (hasListeners.get()) {
-                    if (enrichedEvent == null) {
-                        final Map<String, String> context = new HashMap<>(event.context());
-                        context.putAll(GlobalContext.getContextMap());
-                        context.putAll(ThreadLocalContext.getContextMap());
-                        enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
-                                Collections.unmodifiableMap(context));
-                    }
-                    for (final LogListener listener : listeners) {
-                        if (enrichedEvent.loggerName().startsWith(listener.getLoggerName())) {
-                            listener.accept(enrichedEvent);
-                        }
-                    }
+                final List<Consumer<LogEvent>> eventConsumers = new ArrayList<>();
+                handlers.stream()
+                        .filter(handler -> handler.isEnabled(event.loggerName(), event.level()))
+                        .forEach(handler -> eventConsumers.add(handler));
+                listeners.stream()
+                        .filter(listener -> event.loggerName().startsWith(listener.getLoggerName()))
+                        .forEach(listener -> eventConsumers.add(listener));
+                if (!eventConsumers.isEmpty()) {
+                    final Map<String, String> context = new HashMap<>(event.context());
+                    context.putAll(GlobalContext.getContextMap());
+                    context.putAll(ThreadLocalContext.getContextMap());
+                    final LogEvent enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
+                            Collections.unmodifiableMap(context));
+                    eventConsumers.forEach(consumer -> consumer.accept(enrichedEvent));
                 }
             } catch (final Throwable throwable) {
                 LOGGER.log(ERROR, "Exception in handling log event", throwable);
@@ -190,7 +180,6 @@ public class LoggerManager implements LogEventConsumer {
             LOGGER.log(ERROR, "listener is null in '" + callerClass + "'");
         } else {
             listeners.add(listener);
-            hasListeners.set(true);
             LOGGER.log(Logger.Level.DEBUG,
                     "Logging Listener added! This should only be done in unit tests since it can slow down the system.");
         }
@@ -202,7 +191,6 @@ public class LoggerManager implements LogEventConsumer {
             LOGGER.log(ERROR, "listener is null in '" + callerClass + "'");
         } else {
             listeners.remove(listener);
-            hasListeners.set(!listeners.isEmpty());
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.swirlds.logging.test.api;
 
 import com.swirlds.logging.api.extensions.LogListener;
-import com.swirlds.logging.api.internal.DefaultLoggerSystem;
+import com.swirlds.logging.api.internal.DefaultLoggingSystem;
 import com.swirlds.logging.test.api.internal.LoggerMirrorImpl;
 
 public class LoggerTestSupport {
@@ -12,13 +12,13 @@ public class LoggerTestSupport {
 
     public static LoggerMirror createMirror(String name) {
         LoggerMirrorImpl mirror = new LoggerMirrorImpl(name);
-        DefaultLoggerSystem.getInstance().addListener(mirror);
+        DefaultLoggingSystem.getInstance().addListener(mirror);
         return mirror;
     }
 
     public static void disposeMirror(LoggerMirror mirror) {
         if (mirror instanceof LogListener loggerMirror) {
-            DefaultLoggerSystem.getInstance().removeListener(loggerMirror);
+            DefaultLoggingSystem.getInstance().removeListener(loggerMirror);
         }
     }
 }

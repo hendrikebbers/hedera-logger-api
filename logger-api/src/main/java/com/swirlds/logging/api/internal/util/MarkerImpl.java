@@ -15,7 +15,7 @@
  *
  */
 
-package com.swirlds.logging.api.internal;
+package com.swirlds.logging.api.internal.util;
 
 import com.swirlds.logging.api.Marker;
 import edu.umd.cs.findbugs.annotations.NonNull;

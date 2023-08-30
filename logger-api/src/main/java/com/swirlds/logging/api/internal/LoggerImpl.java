@@ -22,6 +22,7 @@ import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.Loggers;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.internal.format.MessageFormatter;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -36,17 +37,18 @@ public class LoggerImpl implements Logger {
 
     private Map<String, String> context;
 
-    private final LoggerManager loggerManager;
+    private final LogEventConsumer logEventConsumer;
 
-    protected LoggerImpl(String name, final Marker marker, Map<String, String> context, LoggerManager loggerManager) {
+    protected LoggerImpl(String name, final Marker marker, Map<String, String> context,
+            LogEventConsumer logEventConsumer) {
         this.name = name;
         this.marker = marker;
         this.context = Collections.unmodifiableMap(context);
-        this.loggerManager = loggerManager;
+        this.logEventConsumer = logEventConsumer;
     }
 
-    protected LoggerImpl(String name, LoggerManager loggerManager) {
-        this(name, null, Map.of(), loggerManager);
+    protected LoggerImpl(String name, LogEventConsumer logEventConsumer) {
+        this(name, null, Map.of(), logEventConsumer);
     }
 
     public String getName() {
@@ -107,7 +109,7 @@ public class LoggerImpl implements Logger {
     }
 
     protected Logger withMarkerAndContext(final Marker marker, final Map<String, String> context) {
-        return new LoggerImpl(getName(), marker, context, loggerManager);
+        return new LoggerImpl(getName(), marker, context, logEventConsumer);
     }
 
     @Override
@@ -131,7 +133,7 @@ public class LoggerImpl implements Logger {
 
     @Override
     public boolean isEnabled(Level level) {
-        return loggerManager.isEnabled(getName(), level);
+        return logEventConsumer.isEnabled(getName(), level);
     }
 
     public void logImpl(Level level, String message, final Throwable throwable) {
@@ -140,7 +142,7 @@ public class LoggerImpl implements Logger {
             Marker marker = getMarker();
             LogEvent logEvent = new LogEvent(message, LocalDateTime.now(), threadName, getName(), level, marker,
                     getContext(), throwable);
-            loggerManager.accept(logEvent);
+            logEventConsumer.accept(logEvent);
         }
     }
 }

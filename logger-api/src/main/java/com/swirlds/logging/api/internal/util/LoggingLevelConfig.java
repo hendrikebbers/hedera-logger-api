@@ -1,4 +1,4 @@
-package com.swirlds.logging.api.internal;
+package com.swirlds.logging.api.internal.util;
 
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Level;
