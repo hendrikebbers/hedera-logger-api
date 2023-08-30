@@ -19,6 +19,7 @@ package com.swirlds.logging.api.extensions;
 
 import java.util.function.Consumer;
 
+@Deprecated
 public interface LogListener extends Consumer<LogEvent> {
 
     String getLoggerName();

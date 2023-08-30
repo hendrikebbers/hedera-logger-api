@@ -3,11 +3,12 @@ package com.swirlds.logging.api.internal;
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.Marker;
+import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
-import com.swirlds.logging.api.extensions.shipper.LogShipper;
-import com.swirlds.logging.api.extensions.shipper.LogShipperFactory;
+import com.swirlds.logging.api.extensions.provider.LogProvider;
+import com.swirlds.logging.api.extensions.provider.LogProviderFactory;
 import com.swirlds.logging.api.internal.configuration.LogConfiguration;
 import com.swirlds.logging.api.internal.util.EmergencyLogger;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -35,6 +36,12 @@ public class DefaultLoggingSystem {
         this.internalLoggingSystem = new LoggingSystem(configuration);
         installHandlers(configuration);
         installProviders(configuration);
+
+        EmergencyLogger.getInstance()
+                .getLoggedEvents()
+                .stream()
+                .map(event -> LogEvent.createCopyWithDifferentName(event, "EMERGENCY-LOGGER-QUEUE"))
+                .forEach(internalLoggingSystem::accept);
         INITIALIZED.set(true);
     }
 
@@ -50,8 +57,8 @@ public class DefaultLoggingSystem {
     }
 
     private void installProviders(final Configuration configuration) {
-        final ServiceLoader<LogShipperFactory> serviceLoader = ServiceLoader.load(LogShipperFactory.class);
-        final List<LogShipper> providers = serviceLoader.stream()
+        final ServiceLoader<LogProviderFactory> serviceLoader = ServiceLoader.load(LogProviderFactory.class);
+        final List<LogProvider> providers = serviceLoader.stream()
                 .map(ServiceLoader.Provider::get)
                 .map(factory -> factory.apply(configuration))
                 .filter(adapter -> adapter.isActive())
@@ -63,7 +70,6 @@ public class DefaultLoggingSystem {
     public static DefaultLoggingSystem getInstance() {
         return InstanceHolder.INSTANCE;
     }
-
 
     @NonNull
     public Logger getLogger(@NonNull String loggerName) {

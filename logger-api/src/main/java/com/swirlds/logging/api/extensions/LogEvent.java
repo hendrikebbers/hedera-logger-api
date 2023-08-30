@@ -45,4 +45,10 @@ public record LogEvent(String message,
         return new LogEvent(logEvent.message, logEvent.timestamp, logEvent.threadName, logEvent.loggerName,
                 logEvent.level, logEvent.marker, context, logEvent.throwable);
     }
+
+    public static LogEvent createCopyWithDifferentName(LogEvent logEvent,
+            String loggerName) {
+        return new LogEvent(logEvent.message, logEvent.timestamp, logEvent.threadName, loggerName,
+                logEvent.level, logEvent.marker, logEvent.context, logEvent.throwable);
+    }
 }
