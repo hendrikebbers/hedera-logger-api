@@ -17,6 +17,7 @@
 
 package com.swirlds.logging.api.internal;
 
+import static java.lang.System.Logger.Level.ERROR;
 import static java.lang.System.Logger.Level.TRACE;
 
 import com.swirlds.base.context.internal.GlobalContext;
@@ -32,6 +33,7 @@ import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 import com.swirlds.logging.api.extensions.shipper.LogShipper;
 import com.swirlds.logging.api.extensions.shipper.LogShipperFactory;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.lang.System.Logger;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,7 +48,8 @@ import java.util.stream.Collectors;
 
 public class LoggerManager implements LogEventConsumer {
 
-    private final static System.Logger LOGGER = System.getLogger(LoggerManager.class.getName());
+    private final static System.Logger LOGGER = EmergencyLogger.getInstance();
+    public static final String UNDEFINED = "UNDEFINED";
 
     private final List<LogHandler> handlers;
 
@@ -68,20 +71,19 @@ public class LoggerManager implements LogEventConsumer {
         this.listeners = new CopyOnWriteArrayList<>();
         this.hasListeners = new AtomicBoolean(false);
 
-        ServiceLoader<LogHandlerFactory> handlerServiceLoader = ServiceLoader.load(LogHandlerFactory.class);
+        final ServiceLoader<LogHandlerFactory> handlerServiceLoader = ServiceLoader.load(LogHandlerFactory.class);
         handlerServiceLoader.stream()
                 .map(ServiceLoader.Provider::get)
                 .map(factory -> factory.apply(configuration))
                 .filter(handler -> handler.isActive())
                 .forEach(handlers::add);
 
-        ServiceLoader<LogShipperFactory> adapterServiceLoader = ServiceLoader.load(LogShipperFactory.class);
-        List<LogShipper> providers = adapterServiceLoader.stream()
+        final ServiceLoader<LogShipperFactory> adapterServiceLoader = ServiceLoader.load(LogShipperFactory.class);
+        final List<LogShipper> providers = adapterServiceLoader.stream()
                 .map(ServiceLoader.Provider::get)
                 .map(factory -> factory.apply(configuration))
                 .filter(adapter -> adapter.isActive())
                 .collect(Collectors.toList());
-
         providers.forEach(adapter -> adapter.install(this));
 
         final String handlerMessage = "LoggerManager initialized with " + handlers.size()
@@ -100,21 +102,40 @@ public class LoggerManager implements LogEventConsumer {
     }
 
     @NonNull
-    public LoggerImpl getLogger(@NonNull String name) {
-        Objects.requireNonNull(name, "name must not be null");
+    public LoggerImpl getLogger(@NonNull final String name) {
+        if (name == null) {
+            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            LOGGER.log(ERROR, "Logger without name created in '" + callerClass + "'");
+            return loggers.computeIfAbsent(UNDEFINED, n -> new LoggerImpl(n, this));
+        }
         return loggers.computeIfAbsent(name, n -> new LoggerImpl(n, this));
     }
 
     @NonNull
-    public Marker getMarker(@NonNull String name) {
+    public Marker getMarker(@NonNull final String name) {
+        if (name == null) {
+            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            LOGGER.log(ERROR, "Marker without name created in '" + callerClass + "'");
+            return new MarkerImpl(UNDEFINED);
+        }
         return new MarkerImpl(name);
     }
 
-    public boolean isEnabled(@NonNull String name, @NonNull Level level) {
+    public boolean isEnabled(@NonNull final String name, @NonNull final Level level) {
+        if (name == null) {
+            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            LOGGER.log(ERROR, "level check without name called in '" + callerClass + "'");
+            return true;
+        }
+        if (level == null) {
+            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            LOGGER.log(ERROR, "level check without name called in '" + callerClass + "'");
+            return true;
+        }
         if (handlers.isEmpty()) {
             return levelConfig.isEnabled(name, level);
         } else {
-            boolean match = handlers.stream()
+            final boolean match = handlers.stream()
                     .anyMatch(handler -> handler.isEnabled(name, level));
             if (handlers.isEmpty() || match) {
                 return levelConfig.isEnabled(name, level);
@@ -124,46 +145,64 @@ public class LoggerManager implements LogEventConsumer {
     }
 
     @Override
-    public void accept(@NonNull LogEvent event) {
-        Objects.requireNonNull(event, "event must not be null");
-        LogEvent enrichedEvent = null;
-        for (LogHandler handler : handlers) {
-            if (handler.isEnabled(event.loggerName(), event.level())) {
-                if (enrichedEvent == null) {
-                    Map<String, String> context = new HashMap<>(event.context());
-                    context.putAll(GlobalContext.getContextMap());
-                    context.putAll(ThreadLocalContext.getContextMap());
-                    enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
-                            Collections.unmodifiableMap(context));
+    public void accept(@NonNull final LogEvent event) {
+        if (event == null) {
+            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            LOGGER.log(ERROR, "event is null in '" + callerClass + "'");
+        } else {
+            try {
+                LogEvent enrichedEvent = null;
+                for (final LogHandler handler : handlers) {
+                    if (handler.isEnabled(event.loggerName(), event.level())) {
+                        if (enrichedEvent == null) {
+                            final Map<String, String> context = new HashMap<>(event.context());
+                            context.putAll(GlobalContext.getContextMap());
+                            context.putAll(ThreadLocalContext.getContextMap());
+                            enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
+                                    Collections.unmodifiableMap(context));
+                        }
+                        handler.accept(enrichedEvent);
+                    }
                 }
-                handler.accept(enrichedEvent);
+                if (hasListeners.get()) {
+                    if (enrichedEvent == null) {
+                        final Map<String, String> context = new HashMap<>(event.context());
+                        context.putAll(GlobalContext.getContextMap());
+                        context.putAll(ThreadLocalContext.getContextMap());
+                        enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
+                                Collections.unmodifiableMap(context));
+                    }
+                    for (final LogListener listener : listeners) {
+                        if (enrichedEvent.loggerName().startsWith(listener.getLoggerName())) {
+                            listener.accept(enrichedEvent);
+                        }
+                    }
+                }
+            } catch (final Throwable throwable) {
+                LOGGER.log(ERROR, "Exception in handling log event", throwable);
             }
         }
-        if (hasListeners.get()) {
-            if (enrichedEvent == null) {
-                Map<String, String> context = new HashMap<>(event.context());
-                context.putAll(GlobalContext.getContextMap());
-                context.putAll(ThreadLocalContext.getContextMap());
-                enrichedEvent = LogEvent.createCopyWithDifferentContext(event, Collections.unmodifiableMap(context));
-            }
-            for (LogListener listener : listeners) {
-                if (enrichedEvent.loggerName().startsWith(listener.getLoggerName())) {
-                    listener.accept(enrichedEvent);
-                }
-            }
+    }
+
+    public void addListener(@NonNull final LogListener listener) {
+        if (listener == null) {
+            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            LOGGER.log(ERROR, "listener is null in '" + callerClass + "'");
+        } else {
+            listeners.add(listener);
+            hasListeners.set(true);
+            LOGGER.log(Logger.Level.DEBUG,
+                    "Logging Listener added! This should only be done in unit tests since it can slow down the system.");
         }
     }
 
-    public void addListener(@NonNull LogListener listener) {
-        Objects.requireNonNull(listener, "listener must not be null");
-        listeners.add(listener);
-        hasListeners.set(true);
+    public void removeListener(@NonNull final LogListener listener) {
+        if (listener == null) {
+            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            LOGGER.log(ERROR, "listener is null in '" + callerClass + "'");
+        } else {
+            listeners.remove(listener);
+            hasListeners.set(!listeners.isEmpty());
+        }
     }
-
-    public void removeListener(@NonNull LogListener listener) {
-        Objects.requireNonNull(listener, "listener must not be null");
-        listeners.remove(listener);
-        hasListeners.set(!listeners.isEmpty());
-    }
-
 }
