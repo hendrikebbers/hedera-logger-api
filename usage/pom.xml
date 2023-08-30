@@ -32,13 +32,13 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>logger-jul-adapter</artifactId>
+      <artifactId>logger-jul-shipper</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>logger-system-adapter</artifactId>
+      <artifactId>logger-system-shipper</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>

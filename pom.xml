@@ -22,8 +22,8 @@
     <module>logger-console-handler</module>
     <module>logger-noop-handler</module>
     <module>logger-log4j-handler</module>
-    <module>logger-jul-adapter</module>
-    <module>logger-system-adapter</module>
+    <module>logger-jul-shipper</module>
+    <module>logger-system-shipper</module>
     <module>logger-log4j-adapter</module>
     <module>logger-test-support</module>
     <module>usage</module>

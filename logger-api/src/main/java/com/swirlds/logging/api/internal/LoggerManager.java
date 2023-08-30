@@ -29,8 +29,8 @@ import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
-import com.swirlds.logging.api.extensions.provider.LogProvider;
-import com.swirlds.logging.api.extensions.provider.LogProviderFactory;
+import com.swirlds.logging.api.extensions.shipper.LogShipper;
+import com.swirlds.logging.api.extensions.shipper.LogShipperFactory;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -75,8 +75,8 @@ public class LoggerManager implements LogEventConsumer {
                 .filter(handler -> handler.isActive())
                 .forEach(handlers::add);
 
-        ServiceLoader<LogProviderFactory> adapterServiceLoader = ServiceLoader.load(LogProviderFactory.class);
-        List<LogProvider> providers = adapterServiceLoader.stream()
+        ServiceLoader<LogShipperFactory> adapterServiceLoader = ServiceLoader.load(LogShipperFactory.class);
+        List<LogShipper> providers = adapterServiceLoader.stream()
                 .map(ServiceLoader.Provider::get)
                 .map(factory -> factory.apply(configuration))
                 .filter(adapter -> adapter.isActive())
