@@ -20,6 +20,35 @@ public class LoggerImplTest {
     }
 
     @Test
+    void testSimpleLogger() {
+        //given
+        LoggerImpl logger = new LoggerImpl("test-name", DUMMY_CONSUMER);
+
+        //when
+        final String name = logger.getName();
+        final boolean traceEnabled = logger.isTraceEnabled();
+        final boolean debugEnabled = logger.isDebugEnabled();
+        final boolean infoEnabled = logger.isInfoEnabled();
+        final boolean warnEnabled = logger.isWarnEnabled();
+        final boolean errorEnabled = logger.isErrorEnabled();
+        final Marker marker = logger.getMarker();
+        final Map<String, String> context = logger.getContext();
+
+        //then
+        Assertions.assertEquals("test-name", name);
+        Assertions.assertTrue(traceEnabled);
+        Assertions.assertTrue(debugEnabled);
+        Assertions.assertTrue(infoEnabled);
+        Assertions.assertTrue(warnEnabled);
+        Assertions.assertTrue(errorEnabled);
+        Assertions.assertNull(marker);
+        Assertions.assertNotNull(context);
+        Assertions.assertTrue(context.isEmpty());
+
+        LoggerApiSpecTest.testSpec(logger);
+    }
+
+    @Test
     void testNullLogEventConsumer() {
         //given
         LoggerImpl logger = new LoggerImpl("test-name", null);
