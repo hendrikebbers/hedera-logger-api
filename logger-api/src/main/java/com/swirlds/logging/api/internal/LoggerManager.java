@@ -30,6 +30,7 @@ import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 import com.swirlds.logging.api.extensions.provider.LogProvider;
+import com.swirlds.logging.api.extensions.provider.LogProviderFactory;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -70,22 +71,23 @@ public class LoggerManager implements LogEventConsumer {
         ServiceLoader<LogHandlerFactory> handlerServiceLoader = ServiceLoader.load(LogHandlerFactory.class);
         handlerServiceLoader.stream()
                 .map(ServiceLoader.Provider::get)
-                .map(factory -> factory.create(configuration))
+                .map(factory -> factory.apply(configuration))
                 .filter(handler -> handler.isActive())
                 .forEach(handlers::add);
 
-        ServiceLoader<LogProvider> adapterServiceLoader = ServiceLoader.load(LogProvider.class);
-        List<LogProvider> adapters = adapterServiceLoader.stream()
+        ServiceLoader<LogProviderFactory> adapterServiceLoader = ServiceLoader.load(LogProviderFactory.class);
+        List<LogProvider> providers = adapterServiceLoader.stream()
                 .map(ServiceLoader.Provider::get)
-                .filter(adapter -> adapter.isActive(configuration))
+                .map(factory -> factory.apply(configuration))
+                .filter(adapter -> adapter.isActive())
                 .collect(Collectors.toList());
 
-        adapters.forEach(adapter -> adapter.install(this));
+        providers.forEach(adapter -> adapter.install(this));
 
         final String handlerMessage = "LoggerManager initialized with " + handlers.size()
                 + " handlers: " + handlers;
-        final String adapterMessage = "LoggerManager installed with " + adapters.size()
-                + " adapters: " + adapters;
+        final String adapterMessage = "LoggerManager installed with " + providers.size()
+                + " providers: " + providers;
         LOGGER.log(TRACE, handlerMessage);
         LOGGER.log(TRACE, adapterMessage);
         handlers.forEach(handler -> {

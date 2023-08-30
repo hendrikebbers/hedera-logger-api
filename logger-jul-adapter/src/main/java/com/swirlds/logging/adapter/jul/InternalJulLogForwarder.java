@@ -9,11 +9,11 @@ import java.util.ResourceBundle;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
-public class JulHandler extends Handler {
+public class InternalJulLogForwarder extends Handler {
 
     private final LogEventConsumer logEventConsumer;
 
-    public JulHandler(LogEventConsumer logEventConsumer) {
+    public InternalJulLogForwarder(LogEventConsumer logEventConsumer) {
         this.logEventConsumer = Objects.requireNonNull(logEventConsumer, "logEventConsumer must not be null");
     }
 

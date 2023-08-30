@@ -7,7 +7,7 @@ import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 public class ConsoleHandlerFactory implements LogHandlerFactory {
 
     @Override
-    public LogHandler create(Configuration configuration) {
+    public LogHandler apply(Configuration configuration) {
         return new ConsoleHandler(configuration);
     }
 }

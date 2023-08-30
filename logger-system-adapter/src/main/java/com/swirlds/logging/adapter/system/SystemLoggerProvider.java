@@ -6,12 +6,18 @@ import com.swirlds.logging.api.extensions.provider.LogProvider;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class SystemLoggerAdapter implements LogProvider {
+public class SystemLoggerProvider implements LogProvider {
 
     private static AtomicReference<LogEventConsumer> logEventConsumer = new AtomicReference<>();
 
+    private final Configuration configuration;
+
+    public SystemLoggerProvider(Configuration configuration) {
+        this.configuration = Objects.requireNonNull(configuration, "configuration must not be null");
+    }
+
     @Override
-    public boolean isActive(Configuration configuration) {
+    public boolean isActive() {
         return true;
     }
 

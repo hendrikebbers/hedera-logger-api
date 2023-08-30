@@ -8,7 +8,7 @@ public class SystemLoggerFinderImpl extends LoggerFinder {
 
     @Override
     public Logger getLogger(String name, Module module) {
-        final LogEventConsumer consumer = SystemLoggerAdapter.getLogEventConsumer();
+        final LogEventConsumer consumer = SystemLoggerProvider.getLogEventConsumer();
         if (consumer == null) {
             return new SystemEmergencyLogger(name);
         }

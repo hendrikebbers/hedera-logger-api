@@ -1,5 +1,5 @@
 import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
-import com.swirlds.logging.api.extensions.provider.LogProvider;
+import com.swirlds.logging.api.extensions.provider.LogProviderFactory;
 
 module com.swirlds.logging.api {
     exports com.swirlds.logging.api;
@@ -10,7 +10,7 @@ module com.swirlds.logging.api {
     exports com.swirlds.logging.api.internal to com.swirlds.logging.test.api;
 
     uses LogHandlerFactory;
-    uses LogProvider;
+    uses LogProviderFactory;
 
     requires transitive com.swirlds.base;
     requires com.swirlds.config;

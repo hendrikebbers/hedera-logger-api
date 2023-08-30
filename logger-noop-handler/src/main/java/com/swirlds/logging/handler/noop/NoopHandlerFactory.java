@@ -7,7 +7,7 @@ import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 public class NoopHandlerFactory implements LogHandlerFactory {
 
     @Override
-    public LogHandler create(Configuration configuration) {
+    public LogHandler apply(Configuration configuration) {
         return new NoopHandler(configuration);
     }
 }

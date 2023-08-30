@@ -42,7 +42,7 @@ public class SystemEmergencyLogger implements System.Logger {
 
     @Override
     public String getName() {
-        final LogEventConsumer logEventConsumer = SystemLoggerAdapter.getLogEventConsumer();
+        final LogEventConsumer logEventConsumer = SystemLoggerProvider.getLogEventConsumer();
         if (logEventConsumer != null) {
             return name;
         }
@@ -52,7 +52,7 @@ public class SystemEmergencyLogger implements System.Logger {
     @Override
     public boolean isLoggable(Level level) {
         Objects.requireNonNull(level, "level must not be null");
-        final LogEventConsumer logEventConsumer = SystemLoggerAdapter.getLogEventConsumer();
+        final LogEventConsumer logEventConsumer = SystemLoggerProvider.getLogEventConsumer();
         if (logEventConsumer != null) {
             return logEventConsumer.isEnabled(name, SystemLoggerConverter.convertFromSystemLogger(level));
         }
@@ -68,7 +68,7 @@ public class SystemEmergencyLogger implements System.Logger {
             } else {
                 message = msg;
             }
-            final LogEventConsumer logEventConsumer = SystemLoggerAdapter.getLogEventConsumer();
+            final LogEventConsumer logEventConsumer = SystemLoggerProvider.getLogEventConsumer();
             if (logEventConsumer != null) {
                 logEventConsumer.accept(
                         new LogEvent(msg, name, SystemLoggerConverter.convertFromSystemLogger(level), thrown));
