@@ -19,6 +19,7 @@
   <modules>
     <module>base</module>
     <module>logger-api</module>
+    <module>logger-api-benchmark</module>
     <module>logger-console-handler</module>
     <module>logger-noop-handler</module>
     <module>logger-log4j-handler</module>

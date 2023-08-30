@@ -17,6 +17,7 @@
 
 package com.swirlds.logging.api.internal;
 
+import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 import static java.lang.System.Logger.Level.ERROR;
 import static java.lang.System.Logger.Level.TRACE;
 
@@ -70,7 +71,7 @@ public class LoggingSystem implements LogEventConsumer {
 
     public void addHandler(@NonNull final LogHandler handler) {
         if (handler == null) {
-            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
             LOGGER.log(ERROR, "null handler added in '" + callerClass + "'");
         } else {
             handlers.add(handler);
@@ -80,7 +81,7 @@ public class LoggingSystem implements LogEventConsumer {
     @NonNull
     public LoggerImpl getLogger(@NonNull final String name) {
         if (name == null) {
-            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
             LOGGER.log(ERROR, "Logger without name created in '" + callerClass + "'");
             return loggers.computeIfAbsent(UNDEFINED, n -> new LoggerImpl(n, this));
         }
@@ -90,7 +91,7 @@ public class LoggingSystem implements LogEventConsumer {
     @NonNull
     public Marker getMarker(@NonNull final String name) {
         if (name == null) {
-            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
             LOGGER.log(ERROR, "Marker without name created in '" + callerClass + "'");
             return new MarkerImpl(UNDEFINED);
         }
@@ -99,12 +100,12 @@ public class LoggingSystem implements LogEventConsumer {
 
     public boolean isEnabled(@NonNull final String name, @NonNull final Level level) {
         if (name == null) {
-            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
             LOGGER.log(ERROR, "level check without name called in '" + callerClass + "'");
             return true;
         }
         if (level == null) {
-            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
             LOGGER.log(ERROR, "level check without name called in '" + callerClass + "'");
             return true;
         }
@@ -123,7 +124,7 @@ public class LoggingSystem implements LogEventConsumer {
     @Override
     public void accept(@NonNull final LogEvent event) {
         if (event == null) {
-            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
             LOGGER.log(ERROR, "event is null in '" + callerClass + "'");
         } else {
             try {
@@ -150,7 +151,7 @@ public class LoggingSystem implements LogEventConsumer {
 
     public void addListener(@NonNull final LogListener listener) {
         if (listener == null) {
-            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
             LOGGER.log(ERROR, "listener is null in '" + callerClass + "'");
         } else {
             listeners.add(listener);
@@ -161,7 +162,7 @@ public class LoggingSystem implements LogEventConsumer {
 
     public void removeListener(@NonNull final LogListener listener) {
         if (listener == null) {
-            final Class<?> callerClass = StackWalker.getInstance().getCallerClass();
+            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
             LOGGER.log(ERROR, "listener is null in '" + callerClass + "'");
         } else {
             listeners.remove(listener);

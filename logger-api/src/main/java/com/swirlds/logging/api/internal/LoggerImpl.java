@@ -24,6 +24,8 @@ import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.internal.format.MessageFormatter;
+import com.swirlds.logging.api.internal.util.EmergencyLogger;
+import com.swirlds.logging.api.internal.util.SystemLoggerConverterUtils;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,10 +43,31 @@ public class LoggerImpl implements Logger {
 
     protected LoggerImpl(String name, final Marker marker, Map<String, String> context,
             LogEventConsumer logEventConsumer) {
-        this.name = name;
+        if (name == null) {
+            this.name = "";
+        } else {
+            this.name = name;
+        }
         this.marker = marker;
         this.context = Collections.unmodifiableMap(context);
-        this.logEventConsumer = logEventConsumer;
+        if (logEventConsumer == null) {
+            this.logEventConsumer = new LogEventConsumer() {
+                @Override
+                public void accept(LogEvent event) {
+                    EmergencyLogger.getInstance()
+                            .log(SystemLoggerConverterUtils.convertToSystemLogger(event.level()), event.message(),
+                                    event.throwable());
+                }
+
+                @Override
+                public boolean isEnabled(String name, Level level) {
+                    return EmergencyLogger.getInstance()
+                            .isLoggable(SystemLoggerConverterUtils.convertToSystemLogger(level));
+                }
+            };
+        } else {
+            this.logEventConsumer = logEventConsumer;
+        }
     }
 
     protected LoggerImpl(String name, LogEventConsumer logEventConsumer) {
@@ -67,7 +90,6 @@ public class LoggerImpl implements Logger {
     public void log(Level level, String message) {
         logImpl(level, message, null);
     }
-
 
     @Override
     public void log(Level level, String message, Throwable throwable) {
@@ -114,21 +136,33 @@ public class LoggerImpl implements Logger {
 
     @Override
     public Logger withMarker(String markerName) {
-        return withMarkerAndContext(Loggers.getMarker(markerName), context);
+        if (markerName == null) {
+            return this;
+        } else {
+            return withMarkerAndContext(Loggers.getMarker(markerName), context);
+        }
     }
 
     @Override
     public Logger withContext(String key, String value) {
-        Map<String, String> newContext = new HashMap<>(context);
-        newContext.put(key, value);
-        return withMarkerAndContext(marker, newContext);
+        if (key != null) {
+            Map<String, String> newContext = new HashMap<>(context);
+            newContext.put(key, value);
+            return withMarkerAndContext(marker, newContext);
+        } else {
+            return this;
+        }
     }
 
     @Override
     public Logger withContext(String key, String... values) {
-        Map<String, String> newContext = new HashMap<>(context);
-        newContext.put(key, String.join(",", values));
-        return withMarkerAndContext(marker, newContext);
+        if (key != null) {
+            Map<String, String> newContext = new HashMap<>(context);
+            newContext.put(key, String.join(",", values));
+            return withMarkerAndContext(marker, newContext);
+        } else {
+            return this;
+        }
     }
 
     @Override
