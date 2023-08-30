@@ -1,8 +1,8 @@
-package com.swirlds.logging.api.extensions;
+package com.swirlds.logging.api.internal;
 
 import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.Marker;
-import com.swirlds.logging.api.internal.LoggerManager;
+import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.internal.configuration.LogConfiguration;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.concurrent.atomic.AtomicBoolean;

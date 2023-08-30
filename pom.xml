@@ -24,6 +24,7 @@
     <module>logger-log4j-handler</module>
     <module>logger-jul-adapter</module>
     <module>logger-system-adapter</module>
+    <module>logger-log4j-adapter</module>
     <module>logger-test-support</module>
     <module>usage</module>
   </modules>

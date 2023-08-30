@@ -1,11 +1,12 @@
 package com.swirlds.logging.adapter.system;
 
-import com.swirlds.logging.api.extensions.DefaultLoggerSystem;
+import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.LogEventConsumer;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-public class EmergencyLogger implements System.Logger {
+public class SystemEmergencyLogger implements System.Logger {
 
     private final static String LOGGER_NAME = "EMERGENCY-LOGGER";
 
@@ -35,14 +36,15 @@ public class EmergencyLogger implements System.Logger {
     private final String name;
 
 
-    public EmergencyLogger(String name) {
+    public SystemEmergencyLogger(String name) {
         this.name = name;
     }
 
     @Override
     public String getName() {
-        if (DefaultLoggerSystem.isInitialized()) {
-            return DefaultLoggerSystem.getInstance().getLogger(name).getName();
+        final LogEventConsumer logEventConsumer = SystemLoggerAdapter.getLogEventConsumer();
+        if (logEventConsumer != null) {
+            return name;
         }
         return LOGGER_NAME + ":" + name;
     }
@@ -50,9 +52,9 @@ public class EmergencyLogger implements System.Logger {
     @Override
     public boolean isLoggable(Level level) {
         Objects.requireNonNull(level, "level must not be null");
-        if (DefaultLoggerSystem.isInitialized()) {
-            return DefaultLoggerSystem.getInstance().getLogger(name)
-                    .isEnabled(SystemLoggerConverter.convertFromSystemLogger(level));
+        final LogEventConsumer logEventConsumer = SystemLoggerAdapter.getLogEventConsumer();
+        if (logEventConsumer != null) {
+            return logEventConsumer.isEnabled(name, SystemLoggerConverter.convertFromSystemLogger(level));
         }
         return SUPPORTED_LEVEL.getSeverity() <= level.getSeverity();
     }
@@ -66,9 +68,10 @@ public class EmergencyLogger implements System.Logger {
             } else {
                 message = msg;
             }
-            if (DefaultLoggerSystem.isInitialized()) {
-                DefaultLoggerSystem.getInstance().getLogger(name)
-                        .logImpl(SystemLoggerConverter.convertFromSystemLogger(level), msg, thrown);
+            final LogEventConsumer logEventConsumer = SystemLoggerAdapter.getLogEventConsumer();
+            if (logEventConsumer != null) {
+                logEventConsumer.accept(
+                        new LogEvent(msg, name, SystemLoggerConverter.convertFromSystemLogger(level), thrown));
             } else {
                 System.err.println("[" + LOGGER_NAME + ":" + level + ":" + name + "] " + message);
                 if (thrown != null) {

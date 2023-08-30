@@ -3,7 +3,7 @@ package com.swirlds.logging.handler.log4j;
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.api.extensions.LogHandler;
+import com.swirlds.logging.api.extensions.handler.LogHandler;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
 import org.apache.logging.log4j.core.appender.rolling.SizeBasedTriggeringPolicy;
@@ -36,7 +36,7 @@ public class Log4JHandler implements LogHandler {
                 .setLayout(layout)
                 .withAppend(true)
                 .withBufferSize(4000)
-                .withPolicy(SizeBasedTriggeringPolicy.createPolicy("1000"))
+                .withPolicy(SizeBasedTriggeringPolicy.createPolicy(null))
                 .withStrategy(rolloverStrategy)
                 .build();
     }
@@ -52,8 +52,8 @@ public class Log4JHandler implements LogHandler {
     }
 
     @Override
-    public void onLogEvent(LogEvent event) {
-        appender.append(Log4jConverter.convertToLog4J(event));
+    public void accept(LogEvent event) {
+        appender.append(new Log4JWrappedLogEvent(event));
     }
 
     @Override

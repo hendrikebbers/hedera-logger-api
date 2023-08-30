@@ -1,4 +1,4 @@
-import com.swirlds.logging.api.extensions.LogHandlerFactory;
+import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 
 module com.swirlds.logging.handler.noop {
     requires com.swirlds.logging.api;

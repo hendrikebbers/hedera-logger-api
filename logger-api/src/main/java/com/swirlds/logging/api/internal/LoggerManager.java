@@ -24,11 +24,12 @@ import com.swirlds.base.context.internal.ThreadLocalContext;
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
-import com.swirlds.logging.api.extensions.LogAdapter;
 import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.api.extensions.LogHandler;
-import com.swirlds.logging.api.extensions.LogHandlerFactory;
+import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.LogListener;
+import com.swirlds.logging.api.extensions.handler.LogHandler;
+import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
+import com.swirlds.logging.api.extensions.provider.LogProvider;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -42,7 +43,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-public class LoggerManager {
+public class LoggerManager implements LogEventConsumer {
 
     private final static System.Logger LOGGER = System.getLogger(LoggerManager.class.getName());
 
@@ -73,13 +74,13 @@ public class LoggerManager {
                 .filter(handler -> handler.isActive())
                 .forEach(handlers::add);
 
-        ServiceLoader<LogAdapter> adapterServiceLoader = ServiceLoader.load(LogAdapter.class);
-        List<LogAdapter> adapters = adapterServiceLoader.stream()
+        ServiceLoader<LogProvider> adapterServiceLoader = ServiceLoader.load(LogProvider.class);
+        List<LogProvider> adapters = adapterServiceLoader.stream()
                 .map(ServiceLoader.Provider::get)
                 .filter(adapter -> adapter.isActive(configuration))
                 .collect(Collectors.toList());
 
-        adapters.forEach(adapter -> adapter.install());
+        adapters.forEach(adapter -> adapter.install(this));
 
         final String handlerMessage = "LoggerManager initialized with " + handlers.size()
                 + " handlers: " + handlers;
@@ -90,8 +91,8 @@ public class LoggerManager {
         handlers.forEach(handler -> {
             final LocalDateTime time = LocalDateTime.now();
             final String threadName = Thread.currentThread().getName();
-            handler.onLogEvent(new LogEvent(handlerMessage, time, threadName, "", Level.DEBUG, null, Map.of(), null));
-            handler.onLogEvent(new LogEvent(adapterMessage, time, threadName, "", Level.DEBUG, null, Map.of(), null));
+            handler.accept(new LogEvent(handlerMessage, time, threadName, "", Level.DEBUG, null, Map.of(), null));
+            handler.accept(new LogEvent(adapterMessage, time, threadName, "", Level.DEBUG, null, Map.of(), null));
         });
         LOGGER.log(TRACE, "LoggerManager initialization ends");
     }
@@ -120,7 +121,8 @@ public class LoggerManager {
         return false;
     }
 
-    public void onLogEvent(@NonNull LogEvent event) {
+    @Override
+    public void accept(@NonNull LogEvent event) {
         Objects.requireNonNull(event, "event must not be null");
         LogEvent enrichedEvent = null;
         for (LogHandler handler : handlers) {
@@ -132,7 +134,7 @@ public class LoggerManager {
                     enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
                             Collections.unmodifiableMap(context));
                 }
-                handler.onLogEvent(enrichedEvent);
+                handler.accept(enrichedEvent);
             }
         }
         if (hasListeners.get()) {
@@ -144,7 +146,7 @@ public class LoggerManager {
             }
             for (LogListener listener : listeners) {
                 if (enrichedEvent.loggerName().startsWith(listener.getLoggerName())) {
-                    listener.onLogEvent(enrichedEvent);
+                    listener.accept(enrichedEvent);
                 }
             }
         }

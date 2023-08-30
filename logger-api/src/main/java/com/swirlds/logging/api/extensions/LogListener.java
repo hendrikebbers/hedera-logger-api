@@ -17,10 +17,10 @@
 
 package com.swirlds.logging.api.extensions;
 
-public interface LogListener {
+import java.util.function.Consumer;
+
+public interface LogListener extends Consumer<LogEvent> {
 
     String getLoggerName();
-
-    void onLogEvent(LogEvent event);
 
 }

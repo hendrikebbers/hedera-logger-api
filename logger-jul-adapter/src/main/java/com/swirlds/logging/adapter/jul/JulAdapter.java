@@ -1,11 +1,12 @@
 package com.swirlds.logging.adapter.jul;
 
 import com.swirlds.config.api.Configuration;
-import com.swirlds.logging.api.extensions.LogAdapter;
+import com.swirlds.logging.api.extensions.LogEventConsumer;
+import com.swirlds.logging.api.extensions.provider.LogProvider;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 
-public class JulAdapter implements LogAdapter {
+public class JulAdapter implements LogProvider {
 
     @Override
     public boolean isActive(Configuration configuration) {
@@ -17,13 +18,13 @@ public class JulAdapter implements LogAdapter {
         return "Adapter for java.util.logging";
     }
 
-    public void install() {
+    public void install(LogEventConsumer logEventConsumer) {
         java.util.logging.Logger rootLogger = LogManager.getLogManager().getLogger("");
         Handler[] handlers = rootLogger.getHandlers();
         for (Handler handler : handlers) {
             rootLogger.removeHandler(handler);
         }
-        rootLogger.addHandler(new JulHandler());
+        rootLogger.addHandler(new JulHandler(logEventConsumer));
         rootLogger.setLevel(java.util.logging.Level.ALL);
     }
 }

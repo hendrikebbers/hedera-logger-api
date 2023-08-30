@@ -9,14 +9,14 @@
     <artifactId>hedera-logging</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-    <artifactId>logger-test-support</artifactId>
+  <artifactId>logger-test-support</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
-      <groupId>${groupId}</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>logger-api</artifactId>
-      <version>${version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

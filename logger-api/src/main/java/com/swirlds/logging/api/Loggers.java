@@ -17,7 +17,7 @@
 package com.swirlds.logging.api;
 
 
-import com.swirlds.logging.api.extensions.DefaultLoggerSystem;
+import com.swirlds.logging.api.internal.DefaultLoggerSystem;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 

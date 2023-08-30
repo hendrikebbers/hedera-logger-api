@@ -1,84 +1,74 @@
 package com.swirlds.logging.adapter.system;
 
-import com.swirlds.logging.api.Logger;
+import static com.swirlds.logging.adapter.system.SystemLoggerConverter.convertFromSystemLogger;
+
+import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.LogEventConsumer;
 import java.text.MessageFormat;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public class SystemLoggerWrapper implements System.Logger {
 
-    private final Logger innerLogger;
+    private final String name;
 
-    public SystemLoggerWrapper(final Logger innerLogger) {
-        this.innerLogger = innerLogger;
+    private final LogEventConsumer logEventConsumer;
+
+    public SystemLoggerWrapper(final String name, final LogEventConsumer logEventConsumer) {
+        this.name = name;
+        this.logEventConsumer = logEventConsumer;
     }
 
     @Override
     public String getName() {
-        return innerLogger.getName();
+        return name;
     }
 
     @Override
     public boolean isLoggable(Level level) {
-        switch (level) {
-            case ALL:
-                return true;
-            case TRACE:
-                return innerLogger.isEnabled(com.swirlds.logging.api.Level.TRACE);
-            case DEBUG:
-                return innerLogger.isEnabled(com.swirlds.logging.api.Level.DEBUG);
-            case INFO:
-                return innerLogger.isEnabled(com.swirlds.logging.api.Level.INFO);
-            case WARNING:
-                return innerLogger.isEnabled(com.swirlds.logging.api.Level.WARN);
-            case ERROR:
-                return innerLogger.isEnabled(com.swirlds.logging.api.Level.ERROR);
-            case OFF:
-                return false;
+        if (level == Level.ALL || level == Level.OFF) {
+            return false;
         }
-        return false;
+        return logEventConsumer.isEnabled(name, convertFromSystemLogger(level));
     }
 
     @Override
     public void log(Level level, ResourceBundle bundle, String msg, Throwable thrown) {
         if (isLoggable(level)) {
-            com.swirlds.logging.api.Level convertedLevel = SystemLoggerConverter.convertFromSystemLogger(level);
+            com.swirlds.logging.api.Level convertedLevel = convertFromSystemLogger(level);
             final String message;
             if (bundle != null) {
-                message = getString(bundle, msg);
+                message = translate(bundle, msg);
             } else {
                 message = msg;
             }
-            innerLogger.logImpl(convertedLevel, message, null);
+            LogEvent logEvent = new LogEvent(message, name, convertedLevel, thrown);
+            logEventConsumer.accept(logEvent);
         }
     }
 
     @Override
     public void log(Level level, ResourceBundle bundle, String format, Object... params) {
         if (isLoggable(level)) {
-            com.swirlds.logging.api.Level convertedLevel = SystemLoggerConverter.convertFromSystemLogger(level);
+            com.swirlds.logging.api.Level convertedLevel = convertFromSystemLogger(level);
             final String message;
             if (bundle != null) {
-                String translated = getString(bundle, format);
+                String translated = translate(bundle, format);
                 message = MessageFormat.format(translated, params);
             } else {
                 message = MessageFormat.format(format, params);
-                ;
             }
-            innerLogger.logImpl(convertedLevel, message, null);
+            LogEvent logEvent = new LogEvent(message, name, convertedLevel);
+            logEventConsumer.accept(logEvent);
         }
     }
 
-    private static String getString(ResourceBundle bundle, String key) {
+    private static String translate(ResourceBundle bundle, String key) {
         if (bundle == null || key == null) {
             return key;
         }
         try {
             return bundle.getString(key);
-        } catch (MissingResourceException x) {
-            // Emulate what java.util.logging Formatters do
-            // We don't want unchecked exception to propagate up to
-            // the caller's code.
+        } catch (Exception x) {
             return key;
         }
     }

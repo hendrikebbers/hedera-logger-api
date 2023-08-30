@@ -1,7 +1,7 @@
 package com.swirlds.logging.test.api;
 
-import com.swirlds.logging.api.extensions.DefaultLoggerSystem;
 import com.swirlds.logging.api.extensions.LogListener;
+import com.swirlds.logging.api.internal.DefaultLoggerSystem;
 import com.swirlds.logging.test.api.internal.LoggerMirrorImpl;
 
 public class LoggerTestSupport {

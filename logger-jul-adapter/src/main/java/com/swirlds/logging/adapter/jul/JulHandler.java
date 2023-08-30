@@ -1,32 +1,65 @@
 package com.swirlds.logging.adapter.jul;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.Logger;
-import com.swirlds.logging.api.extensions.DefaultLoggerSystem;
+import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.LogEventConsumer;
 import java.text.MessageFormat;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 public class JulHandler extends Handler {
 
+    private final LogEventConsumer logEventConsumer;
+
+    public JulHandler(LogEventConsumer logEventConsumer) {
+        this.logEventConsumer = Objects.requireNonNull(logEventConsumer, "logEventConsumer must not be null");
+    }
+
     @Override
     public void publish(LogRecord record) {
         Level level = convert(record.getLevel());
-        final String loggerName = record.getLoggerName();
-        Logger logger = DefaultLoggerSystem.getInstance().getLogger(loggerName);
-        if (logger.isEnabled(level)) {
+        final String name = record.getLoggerName();
+        if (logEventConsumer.isEnabled(name, level)) {
             String message = record.getMessage();
             final Object[] parameters = record.getParameters();
             if (message == null) {
-                logger.logImpl(level, "", record.getThrown());
+                logEventConsumer.accept(new LogEvent("", name, level, record.getThrown()));
             } else {
                 if (parameters == null || parameters.length == 0) {
-                    logger.logImpl(level, message, record.getThrown());
+                    final ResourceBundle resourceBundle = record.getResourceBundle();
+                    if (resourceBundle != null) {
+                        logEventConsumer.accept(
+                                new LogEvent(translate(resourceBundle, message), name, level, record.getThrown()));
+                    } else {
+                        logEventConsumer.accept(new LogEvent(message, name, level, record.getThrown()));
+                    }
                 } else {
-                    logger.logImpl(level, MessageFormat.format(message, parameters), record.getThrown());
+                    final ResourceBundle resourceBundle = record.getResourceBundle();
+                    if (resourceBundle != null) {
+                        logEventConsumer.accept(
+                                new LogEvent(MessageFormat.format(translate(resourceBundle, message), parameters), name,
+                                        level,
+                                        record.getThrown()));
+                    } else {
+                        logEventConsumer.accept(
+                                new LogEvent(MessageFormat.format(message, parameters), name, level,
+                                        record.getThrown()));
+                    }
                 }
             }
+        }
+    }
+
+    private static String translate(ResourceBundle bundle, String key) {
+        if (bundle == null || key == null) {
+            return key;
+        }
+        try {
+            return bundle.getString(key);
+        } catch (Exception x) {
+            return key;
         }
     }
 

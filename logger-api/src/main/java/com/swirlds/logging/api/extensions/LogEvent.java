@@ -31,6 +31,15 @@ public record LogEvent(String message,
                        Map<String, String> context,
                        Throwable throwable) {
 
+    public LogEvent(String message, String loggerName, Level level) {
+        this(message, loggerName, level, null);
+    }
+
+    public LogEvent(String message, String loggerName, Level level, Throwable throwable) {
+        this(message, LocalDateTime.now(), Thread.currentThread().getName(), loggerName, level, null, Map.of(),
+                throwable);
+    }
+
     public static LogEvent createCopyWithDifferentContext(LogEvent logEvent,
             Map<String, String> context) {
         return new LogEvent(logEvent.message, logEvent.timestamp, logEvent.threadName, logEvent.loggerName,

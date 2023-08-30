@@ -140,7 +140,7 @@ public class LoggerImpl implements Logger {
             Marker marker = getMarker();
             LogEvent logEvent = new LogEvent(message, LocalDateTime.now(), threadName, getName(), level, marker,
                     getContext(), throwable);
-            loggerManager.onLogEvent(logEvent);
+            loggerManager.accept(logEvent);
         }
     }
 }

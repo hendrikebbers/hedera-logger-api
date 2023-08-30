@@ -1,4 +1,4 @@
-package com.swirlds.logging.api.extensions;
+package com.swirlds.logging.api.extensions.handler;
 
 import com.swirlds.config.api.Configuration;
 

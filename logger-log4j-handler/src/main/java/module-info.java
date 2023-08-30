@@ -1,3 +1,5 @@
+import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
+
 module com.swirlds.logging.handler.log4j {
     requires com.swirlds.logging.api;
     requires org.apache.logging.log4j;
@@ -5,5 +7,5 @@ module com.swirlds.logging.handler.log4j {
     requires com.swirlds.config;
     requires java.scripting; //Otherwise log4j throws an exception at startup
 
-    provides com.swirlds.logging.api.extensions.LogHandlerFactory with com.swirlds.logging.handler.log4j.Log4JHandlerFactory;
+    provides LogHandlerFactory with com.swirlds.logging.handler.log4j.Log4JHandlerFactory;
 }

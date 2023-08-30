@@ -42,7 +42,7 @@ public class LoggerMirrorImpl extends AbstractLoggerMirror implements LogListene
     }
 
     @Override
-    public void onLogEvent(LogEvent event) {
+    public void accept(LogEvent event) {
         events.add(event);
     }
 

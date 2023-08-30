@@ -4,7 +4,7 @@ import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.api.extensions.LogHandler;
+import com.swirlds.logging.api.extensions.handler.LogHandler;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +32,7 @@ public class ConsoleHandler implements LogHandler {
     }
 
     @Override
-    public void onLogEvent(LogEvent event) {
+    public void accept(LogEvent event) {
         String timeStamp = event.timestamp().format(formatter);
         String threadName = event.threadName();
         StringBuffer sb = new StringBuffer();
@@ -72,4 +72,5 @@ public class ConsoleHandler implements LogHandler {
     public boolean isEnabled(String name, Level level) {
         return true;
     }
+
 }
