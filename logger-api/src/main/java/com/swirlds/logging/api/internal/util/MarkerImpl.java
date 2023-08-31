@@ -49,4 +49,21 @@ public class MarkerImpl implements Marker {
     public Optional<Marker> getParent() {
         return Optional.ofNullable(parent);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MarkerImpl marker = (MarkerImpl) o;
+        return Objects.equals(name, marker.name) && Objects.equals(parent, marker.parent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, parent);
+    }
 }

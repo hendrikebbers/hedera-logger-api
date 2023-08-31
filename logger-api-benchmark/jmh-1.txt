@@ -1,0 +1,3 @@
+Benchmark                       Mode  Cnt       Score   Error  Units
+SimpleBenchmark.logLikeHell    thrpt    2    3917,258          ops/s
+SimpleBenchmark.simpleLogging  thrpt    2  209472,068          ops/s

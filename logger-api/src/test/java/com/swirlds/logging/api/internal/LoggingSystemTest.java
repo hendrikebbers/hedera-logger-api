@@ -1,10 +1,16 @@
 package com.swirlds.logging.api.internal;
 
+import com.swirlds.base.context.Context;
 import com.swirlds.logging.api.Level;
+import com.swirlds.logging.api.Loggers;
 import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.internal.util.EmergencyLogger;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +20,15 @@ public class LoggingSystemTest {
 
     @BeforeEach
     void setUp() {
+        Context.getGlobalContext().clear();
+        Context.getThreadLocalContext().clear();
+        EmergencyLogger.getInstance().publishLoggedEvents(); // This will clear the emergency logger
+    }
+
+    @AfterEach
+    void tearDown() {
+        Context.getGlobalContext().clear();
+        Context.getThreadLocalContext().clear();
         EmergencyLogger.getInstance().publishLoggedEvents(); // This will clear the emergency logger
     }
 
@@ -171,6 +186,36 @@ public class LoggingSystemTest {
         final List<LogEvent> loggedErrorEvents = getLoggedEvents();
 
         Assertions.assertEquals(4, loggedErrorEvents.size(), "There should be 6 ERROR events");
+    }
+
+    @Test
+    @DisplayName("Test that getMarker logs errors to emergency logger")
+    void testErrorsForMarker() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+
+        //when
+        loggingSystem.getMarker(null); // 1 logged error
+
+        final List<LogEvent> loggedErrorEvents = getLoggedEvents();
+
+        Assertions.assertEquals(1, loggedErrorEvents.size(), "There should be 1 ERROR event");
+    }
+
+    @Test
+    @DisplayName("Test that accept logs errors to emergency logger")
+    void testErrorsForAccept() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+
+        //when
+        loggingSystem.accept(null); // 1 logged error
+
+        final List<LogEvent> loggedErrorEvents = getLoggedEvents();
+
+        Assertions.assertEquals(1, loggedErrorEvents.size(), "There should be 1 ERROR event");
     }
 
     private List<LogEvent> getLoggedEvents() {
@@ -338,5 +383,236 @@ public class LoggingSystemTest {
         Assertions.assertEquals(1, loggedEvents.size());
         Assertions.assertEquals("error-message", loggedEvents.get(0).message());
         Assertions.assertEquals(Level.ERROR, loggedEvents.get(0).level());
+    }
+
+    @Test
+    @DisplayName("That that checks if simple log calls are forwarded correctly will all informations to the configured handler")
+    void testSimpleLoggingHandling() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+        final InMemoryHandler handler = new InMemoryHandler();
+        loggingSystem.addHandler(handler);
+        final LoggerImpl logger = loggingSystem.getLogger("test-logger");
+        final LocalDateTime startTime = LocalDateTime.now();
+
+        //when
+        logger.trace("trace-message"); //Should not be forwarded since INFO is configured as root level
+        logger.debug("debug-message"); //Should not be forwarded since INFO is configured as root level
+        logger.info("info-message");
+        logger.warn("warn-message");
+        logger.error("error-message");
+
+        //then
+        final List<LogEvent> loggedEvents = handler.getEvents();
+        Assertions.assertEquals(3, loggedEvents.size());
+
+        final LogEvent event1 = loggedEvents.get(0);
+        Assertions.assertEquals("info-message", event1.message());
+        Assertions.assertEquals(Level.INFO, event1.level());
+        Assertions.assertEquals(Map.of(), event1.context());
+        Assertions.assertEquals("test-logger", event1.loggerName());
+        Assertions.assertNull(event1.marker());
+        Assertions.assertEquals(Thread.currentThread().getName(), event1.threadName());
+        Assertions.assertNull(event1.throwable());
+        Assertions.assertTrue(event1.timestamp().isAfter(startTime));
+        Assertions.assertTrue(event1.timestamp().isBefore(LocalDateTime.now()));
+
+        final LogEvent event2 = loggedEvents.get(1);
+        Assertions.assertEquals("warn-message", event2.message());
+        Assertions.assertEquals(Level.WARN, event2.level());
+        Assertions.assertEquals(Map.of(), event2.context());
+        Assertions.assertEquals("test-logger", event2.loggerName());
+        Assertions.assertNull(event2.marker());
+        Assertions.assertEquals(Thread.currentThread().getName(), event2.threadName());
+        Assertions.assertNull(event2.throwable());
+        Assertions.assertTrue(event2.timestamp().isAfter(startTime));
+        Assertions.assertTrue(event2.timestamp().isBefore(LocalDateTime.now()));
+
+        final LogEvent event3 = loggedEvents.get(2);
+        Assertions.assertEquals("error-message", event3.message());
+        Assertions.assertEquals(Level.ERROR, event3.level());
+        Assertions.assertEquals(Map.of(), event3.context());
+        Assertions.assertEquals("test-logger", event3.loggerName());
+        Assertions.assertNull(event3.marker());
+        Assertions.assertEquals(Thread.currentThread().getName(), event3.threadName());
+        Assertions.assertNull(event3.throwable());
+        Assertions.assertTrue(event3.timestamp().isAfter(startTime));
+        Assertions.assertTrue(event3.timestamp().isBefore(LocalDateTime.now()));
+
+        Assertions.assertTrue(event1.timestamp().isBefore(event2.timestamp()));
+        Assertions.assertTrue(event2.timestamp().isBefore(event3.timestamp()));
+    }
+
+    @Test
+    @DisplayName("That that accept passes events to the configured handler")
+    void testAcceptHandling() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+        final InMemoryHandler handler = new InMemoryHandler();
+        loggingSystem.addHandler(handler);
+        final LocalDateTime startTime = LocalDateTime.now();
+        LogEvent event1 = new LogEvent("info-message", "test-logger", Level.INFO);
+        LogEvent event2 = new LogEvent("trace-message", "test-logger",
+                Level.TRACE); //should not be forwarded since INFO is configured as root level
+        LogEvent event3 = new LogEvent("error-message", "test-logger", Level.ERROR);
+        LogEvent event4 = new LogEvent("info-message", "test-logger", Level.INFO);
+
+        //when
+        loggingSystem.accept(event1);
+        loggingSystem.accept(event2);
+        loggingSystem.accept(event3);
+        loggingSystem.accept(event4);
+
+        //then
+        final List<LogEvent> loggedEvents = handler.getEvents();
+        Assertions.assertEquals(3, loggedEvents.size());
+        Assertions.assertEquals(event1, loggedEvents.get(0));
+        Assertions.assertEquals(event3, loggedEvents.get(1));
+        Assertions.assertEquals(event4, loggedEvents.get(2));
+    }
+
+    @Test
+    @DisplayName("That that checks if complex log calls are forwarded correctly with all informations to the configured handler")
+    void testComplexLoggingHandling() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+        final InMemoryHandler handler = new InMemoryHandler();
+        loggingSystem.addHandler(handler);
+        final LoggerImpl logger = loggingSystem.getLogger("test-logger");
+        final LocalDateTime startTime = LocalDateTime.now();
+
+        //when
+        Context.getGlobalContext().put("global", "global-value");
+        logger.withMarker("TRACE_MARKER")
+                .withContext("level", "trace")
+                .withContext("context", "unit-test")
+                .trace("trace-message {}", new RuntimeException("trace-error"),
+                        "ARG"); //Should not be forwarded since INFO is configured as root level
+
+        try (final AutoCloseable closeable = Context.getThreadLocalContext()
+                .put("thread-local", "thread-local-value")) {
+            logger.withMarker("INFO_MARKER")
+                    .withContext("level", "info")
+                    .withContext("context", "unit-test")
+                    .info("info-message {}", new RuntimeException("info-error"),
+                            "ARG");
+        } catch (final Exception e) {
+            Assertions.fail();
+        }
+
+        Context.getGlobalContext().remove("global");
+
+        logger.withMarker("INFO_MARKER")
+                .withContext("level", "info")
+                .withContext("context", "unit-test")
+                .info("info-message2 {}", new RuntimeException("info-error2"),
+                        "ARG2");
+
+        //then
+        final List<LogEvent> loggedEvents = handler.getEvents();
+        Assertions.assertEquals(2, loggedEvents.size());
+
+        final LogEvent event1 = loggedEvents.get(0);
+        Assertions.assertEquals("info-message ARG", event1.message());
+        Assertions.assertEquals(Level.INFO, event1.level());
+        Assertions.assertEquals(
+                Map.of("context", "unit-test", "global", "global-value", "thread-local", "thread-local-value", "level",
+                        "info"), event1.context());
+        Assertions.assertEquals("test-logger", event1.loggerName());
+        Assertions.assertEquals(Loggers.getMarker("INFO_MARKER"), event1.marker());
+        Assertions.assertEquals(Thread.currentThread().getName(), event1.threadName());
+        Assertions.assertNotNull(event1.throwable());
+        Assertions.assertEquals("info-error", event1.throwable().getMessage());
+        Assertions.assertEquals(RuntimeException.class, event1.throwable().getClass());
+        Assertions.assertTrue(event1.timestamp().isAfter(startTime));
+        Assertions.assertTrue(event1.timestamp().isBefore(LocalDateTime.now()));
+
+        final LogEvent event2 = loggedEvents.get(1);
+        Assertions.assertEquals("info-message2 ARG2", event2.message());
+        Assertions.assertEquals(Level.INFO, event2.level());
+        Assertions.assertEquals(
+                Map.of("context", "unit-test", "level", "info"), event2.context());
+        Assertions.assertEquals("test-logger", event2.loggerName());
+        Assertions.assertEquals(Loggers.getMarker("INFO_MARKER"), event2.marker());
+        Assertions.assertEquals(Thread.currentThread().getName(), event2.threadName());
+        Assertions.assertNotNull(event2.throwable());
+        Assertions.assertEquals("info-error2", event2.throwable().getMessage());
+        Assertions.assertEquals(RuntimeException.class, event2.throwable().getClass());
+        Assertions.assertTrue(event2.timestamp().isAfter(startTime));
+        Assertions.assertTrue(event2.timestamp().isBefore(LocalDateTime.now()));
+
+        Assertions.assertTrue(event1.timestamp().isBefore(event2.timestamp()));
+    }
+
+    @Test
+    @DisplayName("That that accept passes complex log calls correctly with all informations to the configured handler")
+    void testAcceptComnplexHandling() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+        final InMemoryHandler handler = new InMemoryHandler();
+        loggingSystem.addHandler(handler);
+
+        LogEvent event1 = new LogEvent("message", LocalDateTime.now(), Thread.currentThread().getName(), "test-logger",
+                Level.INFO, Loggers.getMarker("INFO_MARKER"), Map.of("context", "unit-test", "level", "info"),
+                new RuntimeException("error"));
+
+        LogEvent event2 = new LogEvent("trace-message", "test-logger",
+                Level.TRACE); //should not be forwarded since INFO is configured as root level
+        LogEvent event3 = new LogEvent("error-message", "test-logger", Level.ERROR);
+        LogEvent event4 = new LogEvent("message", LocalDateTime.now(), Thread.currentThread().getName(), "test-logger",
+                Level.INFO, Loggers.getMarker("INFO_MARKER"), Map.of("context", "unit-test"),
+                new RuntimeException("error"));
+
+        //when
+        loggingSystem.accept(event1);
+        Context.getGlobalContext().put("new-global", "new-global-value");
+        loggingSystem.accept(event2);
+        loggingSystem.accept(event3);
+        loggingSystem.accept(event4);
+
+        //then
+        final List<LogEvent> loggedEvents = handler.getEvents();
+        Assertions.assertEquals(3, loggedEvents.size());
+        Assertions.assertEquals(event1, loggedEvents.get(0));
+        Assertions.assertEquals(
+                LogEvent.createCopyWithDifferentContext(event3, Map.of("new-global", "new-global-value")),
+                loggedEvents.get(1));
+        Assertions.assertEquals(LogEvent.createCopyWithDifferentContext(event4,
+                Map.of("context", "unit-test", "new-global", "new-global-value")), loggedEvents.get(2));
+    }
+
+    @Test
+    @DisplayName("Test that any exception in a handler will not be thrown but logged instead")
+    void testExceptionInHandler() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+        loggingSystem.addHandler(new LogHandler() {
+            @Override
+            public String getName() {
+                return "ExceptionThrowingHandler";
+            }
+
+            @Override
+            public boolean isActive() {
+                return true;
+            }
+
+            @Override
+            public void accept(LogEvent event) {
+                throw new RuntimeException("Exception in handler");
+            }
+        });
+
+        //when
+        loggingSystem.accept(new LogEvent("message", "logger", Level.INFO));
+
+        final List<LogEvent> loggedErrorEvents = getLoggedEvents();
+
+        Assertions.assertEquals(1, loggedErrorEvents.size(), "There should be 1 ERROR event");
     }
 }

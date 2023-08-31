@@ -131,32 +131,35 @@ public class LoggingSystem implements LogEventConsumer {
             final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
             EMERGENCY_LOGGER.log(ERROR, "event is null in '" + callerClass + "'");
         } else {
-            try {
-                final List<Consumer<LogEvent>> eventConsumers = new ArrayList<>();
-                if (handlers.isEmpty()) {
-                    if (isEnabled(event.loggerName(), event.level())) {
-                        eventConsumers.add(
-                                e -> EMERGENCY_LOGGER.log(SystemLoggerConverterUtils.convertToSystemLogger(e.level()),
-                                        e.message(), e.throwable()));
+            if (isEnabled(event.loggerName(), event.level())) {
+                try {
+                    final List<Consumer<LogEvent>> eventConsumers = new ArrayList<>();
+                    if (handlers.isEmpty()) {
+                        if (isEnabled(event.loggerName(), event.level())) {
+                            eventConsumers.add(
+                                    e -> EMERGENCY_LOGGER.log(
+                                            SystemLoggerConverterUtils.convertToSystemLogger(e.level()),
+                                            e.message(), e.throwable()));
+                        }
+                    } else {
+                        handlers.stream()
+                                .filter(handler -> handler.isEnabled(event.loggerName(), event.level()))
+                                .forEach(handler -> eventConsumers.add(handler));
                     }
-                } else {
-                    handlers.stream()
-                            .filter(handler -> handler.isEnabled(event.loggerName(), event.level()))
-                            .forEach(handler -> eventConsumers.add(handler));
+                    listeners.stream()
+                            .filter(listener -> event.loggerName().startsWith(listener.getLoggerName()))
+                            .forEach(listener -> eventConsumers.add(listener));
+                    if (!eventConsumers.isEmpty()) {
+                        final Map<String, String> context = new HashMap<>(event.context());
+                        context.putAll(GlobalContext.getContextMap());
+                        context.putAll(ThreadLocalContext.getContextMap());
+                        final LogEvent enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
+                                Collections.unmodifiableMap(context));
+                        eventConsumers.forEach(consumer -> consumer.accept(enrichedEvent));
+                    }
+                } catch (final Throwable throwable) {
+                    EMERGENCY_LOGGER.log(ERROR, "Exception in handling log event", throwable);
                 }
-                listeners.stream()
-                        .filter(listener -> event.loggerName().startsWith(listener.getLoggerName()))
-                        .forEach(listener -> eventConsumers.add(listener));
-                if (!eventConsumers.isEmpty()) {
-                    final Map<String, String> context = new HashMap<>(event.context());
-                    context.putAll(GlobalContext.getContextMap());
-                    context.putAll(ThreadLocalContext.getContextMap());
-                    final LogEvent enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
-                            Collections.unmodifiableMap(context));
-                    eventConsumers.forEach(consumer -> consumer.accept(enrichedEvent));
-                }
-            } catch (final Throwable throwable) {
-                EMERGENCY_LOGGER.log(ERROR, "Exception in handling log event", throwable);
             }
         }
     }

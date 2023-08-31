@@ -21,7 +21,7 @@ import com.swirlds.logging.api.internal.DefaultLoggingSystem;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 
-public class Loggers {
+public final class Loggers {
 
     @NonNull
     public static Logger getLogger(@NonNull String name) {
