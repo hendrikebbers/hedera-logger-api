@@ -66,15 +66,15 @@ public class LoggerImplTest {
         //then
         Assertions.assertEquals("test-name", name);
         Assertions.assertFalse(traceEnabled,
-                "Without a given consumer the fallback to jul should be used that logs on INFO by default");
-        Assertions.assertFalse(debugEnabled,
-                "Without a given consumer the fallback to jul should be used that logs on INFO by default");
+                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
+        Assertions.assertTrue(debugEnabled,
+                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
         Assertions.assertTrue(infoEnabled,
-                "Without a given consumer the fallback to jul should be used that logs on INFO by default");
+                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
         Assertions.assertTrue(warnEnabled,
-                "Without a given consumer the fallback to jul should be used that logs on INFO by default");
+                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
         Assertions.assertTrue(errorEnabled,
-                "Without a given consumer the fallback to jul should be used that logs on INFO by default");
+                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
         Assertions.assertNull(marker);
         Assertions.assertNotNull(context);
         Assertions.assertTrue(context.isEmpty());

@@ -41,7 +41,7 @@ public class LoggingLevelConfig {
     public boolean isEnabled(@NonNull String name, @NonNull Level level) {
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(level, "level must not be null");
-        final Level enabledLevel = levelCache.computeIfAbsent(name, n -> getConfiguredLevel(n));
+        final Level enabledLevel = levelCache.computeIfAbsent(name.trim(), n -> getConfiguredLevel(n));
         return enabledLevel.enabledLoggingOfLevel(level);
     }
 
@@ -49,7 +49,7 @@ public class LoggingLevelConfig {
     private Level getConfiguredLevel(@NonNull String name) {
         Objects.requireNonNull(name, "name must not be null");
         return levelConfigProperties.stream()
-                .filter(name::startsWith)
+                .filter(n -> name.trim().startsWith(n))
                 .reduce((a, b) -> {
                     if (a.length() > b.length()) {
                         return a;

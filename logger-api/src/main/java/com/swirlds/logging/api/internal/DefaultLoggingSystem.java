@@ -37,8 +37,10 @@ public class DefaultLoggingSystem {
         installHandlers(configuration);
         installProviders(configuration);
 
+        //TODO:  EmergencyLogger.setInnerLogger();
+
         EmergencyLogger.getInstance()
-                .getLoggedEvents()
+                .publishLoggedEvents()
                 .stream()
                 .map(event -> LogEvent.createCopyWithDifferentName(event, "EMERGENCY-LOGGER-QUEUE"))
                 .forEach(internalLoggingSystem::accept);

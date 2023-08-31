@@ -7,10 +7,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class EmergencyLogger implements System.Logger {
 
-    private final static System.Logger innerLogger = System.getLogger(EmergencyLogger.class.getName());
+    private final static AtomicReference<System.Logger> innerLoggerRef = new AtomicReference<>();
 
     private final static EmergencyLogger INSTANCE = new EmergencyLogger();
 
@@ -61,6 +62,7 @@ public class EmergencyLogger implements System.Logger {
                 if (level == null) {
                     return true;
                 }
+                final System.Logger innerLogger = innerLoggerRef.get();
                 if (innerLogger != null) {
                     return innerLogger.isLoggable(level);
                 }
@@ -80,8 +82,18 @@ public class EmergencyLogger implements System.Logger {
         } else {
             recursionGuard.set(true);
             try {
+                final System.Logger innerLogger = innerLoggerRef.get();
                 if (innerLogger != null) {
-                    innerLogger.log(level, bundle, msg, thrown);
+                    try {
+                        innerLogger.log(level, bundle, msg, thrown);
+                    } catch (final Exception e) {
+                        LogEvent logEvent = new LogEvent(msg, name, convertFromSystemLogger(level),
+                                thrown);
+                        handle(logEvent);
+                        final LogEvent logEventError = new LogEvent("ERROR IN INNER-LOGGER", name,
+                                com.swirlds.logging.api.Level.ERROR, e);
+                        handle(logEventError);
+                    }
                 } else {
                     LogEvent logEvent = new LogEvent(msg, name, convertFromSystemLogger(level),
                             thrown);
@@ -102,8 +114,18 @@ public class EmergencyLogger implements System.Logger {
         } else {
             recursionGuard.set(true);
             try {
+                final System.Logger innerLogger = innerLoggerRef.get();
                 if (innerLogger != null) {
-                    innerLogger.log(level, bundle, format, params);
+                    try {
+                        innerLogger.log(level, bundle, format, params);
+                    } catch (final Throwable e) {
+                        LogEvent logEvent = new LogEvent(format + " -> " + params, name,
+                                convertFromSystemLogger(level));
+                        handle(logEvent);
+                        final LogEvent logEventError = new LogEvent("ERROR IN INNER-LOGGER", name,
+                                com.swirlds.logging.api.Level.ERROR, e);
+                        handle(logEventError);
+                    }
                 } else {
                     LogEvent logEvent = new LogEvent(format + " -> " + params, name, convertFromSystemLogger(level));
                     handle(logEvent);
@@ -123,6 +145,9 @@ public class EmergencyLogger implements System.Logger {
                 Optional.ofNullable(logEvent.throwable())
                         .ifPresent(Throwable::printStackTrace);
             }
+            if (logEvents.remainingCapacity() == 0) {
+                logEvents.remove();
+            }
             logEvents.add(logEvent);
         }
     }
@@ -132,13 +157,13 @@ public class EmergencyLogger implements System.Logger {
             return com.swirlds.logging.api.Level.TRACE;
         }
         if (level == Level.DEBUG) {
-            return com.swirlds.logging.api.Level.TRACE;
+            return com.swirlds.logging.api.Level.DEBUG;
         }
         if (level == Level.INFO) {
-            return com.swirlds.logging.api.Level.TRACE;
+            return com.swirlds.logging.api.Level.INFO;
         }
         if (level == Level.WARNING) {
-            return com.swirlds.logging.api.Level.TRACE;
+            return com.swirlds.logging.api.Level.WARN;
         }
         return com.swirlds.logging.api.Level.ERROR;
     }
@@ -147,10 +172,13 @@ public class EmergencyLogger implements System.Logger {
         return INSTANCE;
     }
 
-    public List<LogEvent> getLoggedEvents() {
+    public List<LogEvent> publishLoggedEvents() {
         List<LogEvent> result = List.copyOf(logEvents);
         logEvents.clear();
         return result;
     }
 
+    public static void setInnerLogger(System.Logger logger) {
+        innerLoggerRef.set(logger);
+    }
 }

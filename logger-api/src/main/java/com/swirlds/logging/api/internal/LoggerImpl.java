@@ -33,6 +33,8 @@ import java.util.Map;
 
 public class LoggerImpl implements Logger {
 
+    private final static System.Logger EMERGENCY_LOGGER = EmergencyLogger.getInstance();
+
     private final String name;
 
     private final Marker marker;
@@ -44,6 +46,8 @@ public class LoggerImpl implements Logger {
     protected LoggerImpl(String name, final Marker marker, Map<String, String> context,
             LogEventConsumer logEventConsumer) {
         if (name == null) {
+            EMERGENCY_LOGGER.log(System.Logger.Level.ERROR,
+                    "Logger name is null, using root logger");
             this.name = "";
         } else {
             this.name = name;
@@ -51,18 +55,19 @@ public class LoggerImpl implements Logger {
         this.marker = marker;
         this.context = Collections.unmodifiableMap(context);
         if (logEventConsumer == null) {
+            EMERGENCY_LOGGER.log(System.Logger.Level.ERROR,
+                    "LogEventConsumer is null, using default emergency logger");
             this.logEventConsumer = new LogEventConsumer() {
                 @Override
                 public void accept(LogEvent event) {
-                    EmergencyLogger.getInstance()
-                            .log(SystemLoggerConverterUtils.convertToSystemLogger(event.level()), event.message(),
-                                    event.throwable());
+                    EMERGENCY_LOGGER.log(SystemLoggerConverterUtils.convertToSystemLogger(event.level()),
+                            event.message(),
+                            event.throwable());
                 }
 
                 @Override
                 public boolean isEnabled(String name, Level level) {
-                    return EmergencyLogger.getInstance()
-                            .isLoggable(SystemLoggerConverterUtils.convertToSystemLogger(level));
+                    return EMERGENCY_LOGGER.isLoggable(SystemLoggerConverterUtils.convertToSystemLogger(level));
                 }
             };
         } else {
