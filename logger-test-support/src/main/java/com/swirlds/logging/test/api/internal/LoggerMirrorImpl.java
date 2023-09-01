@@ -53,7 +53,7 @@ public class LoggerMirrorImpl extends AbstractLoggerMirror implements LogListene
 
     @Override
     protected LoggerMirror filter(Function<LogEvent, Boolean> filter) {
-        return new FilteredLoggerMirror(events, filter, () -> dispose());
+        return new FilteredLoggerMirror(events, filter, this::dispose);
     }
 
     @Override

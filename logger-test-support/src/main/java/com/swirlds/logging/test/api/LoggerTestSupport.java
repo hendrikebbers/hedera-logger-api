@@ -6,7 +6,7 @@ import com.swirlds.logging.test.api.internal.LoggerMirrorImpl;
 
 public class LoggerTestSupport {
 
-    public static LoggerMirror createMirror(Class cls) {
+    public static LoggerMirror createMirror(Class<?> cls) {
         return createMirror(cls.getName());
     }
 

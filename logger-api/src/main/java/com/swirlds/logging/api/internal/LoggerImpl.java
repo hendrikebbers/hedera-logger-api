@@ -39,7 +39,7 @@ public class LoggerImpl implements Logger {
 
     private final Marker marker;
 
-    private Map<String, String> context;
+    private final Map<String, String> context;
 
     private final LogEventConsumer logEventConsumer;
 

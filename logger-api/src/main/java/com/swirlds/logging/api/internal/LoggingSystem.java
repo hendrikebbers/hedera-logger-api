@@ -74,7 +74,7 @@ public class LoggingSystem implements LogEventConsumer {
         if (handler == null) {
             //TODO: What is faster? This call or creating an exception???
             final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(ERROR, "null handler added in '" + callerClass + "'");
+            EMERGENCY_LOGGER.log(ERROR, getClass().getName() + ":null handler added in '" + callerClass + "'");
         } else {
             handlers.add(handler);
         }
@@ -144,11 +144,11 @@ public class LoggingSystem implements LogEventConsumer {
                     } else {
                         handlers.stream()
                                 .filter(handler -> handler.isEnabled(event.loggerName(), event.level()))
-                                .forEach(handler -> eventConsumers.add(handler));
+                                .forEach(eventConsumers::add);
                     }
                     listeners.stream()
                             .filter(listener -> event.loggerName().startsWith(listener.getLoggerName()))
-                            .forEach(listener -> eventConsumers.add(listener));
+                            .forEach(eventConsumers::add);
                     if (!eventConsumers.isEmpty()) {
                         final Map<String, String> context = new HashMap<>(event.context());
                         context.putAll(GlobalContext.getContextMap());

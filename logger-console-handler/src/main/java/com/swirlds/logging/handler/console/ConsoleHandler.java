@@ -1,7 +1,6 @@
 package com.swirlds.logging.handler.console;
 
 import com.swirlds.config.api.Configuration;
-import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
@@ -63,14 +62,8 @@ public class ConsoleHandler implements LogHandler {
             sb.append(System.lineSeparator());
             final StringWriter sw = new StringWriter();
             event.throwable().printStackTrace(new PrintWriter(sw, true));
-            sb.append(sw.toString());
+            sb.append(sw);
         }
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
-
-    @Override
-    public boolean isEnabled(String name, Level level) {
-        return true;
-    }
-
 }

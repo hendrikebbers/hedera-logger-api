@@ -43,6 +43,7 @@ public class SimpleConfiguration implements Configuration {
         return Optional.ofNullable(properties.get(s)).orElse(s1);
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     @Override
     public <T> T getValue(@NonNull String s, @NonNull Class<T> aClass)

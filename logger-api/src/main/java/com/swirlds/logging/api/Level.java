@@ -16,18 +16,34 @@
 
 package com.swirlds.logging.api;
 
+import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
+
+import com.swirlds.logging.api.internal.util.EmergencyLogger;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.Objects;
 
 public enum Level {
-    ERROR,
-    WARN,
-    INFO,
-    DEBUG,
-    TRACE;
+    ERROR(10),
+    WARN(20),
+    INFO(30),
+    DEBUG(40),
+    TRACE(100);
+
+    private final static System.Logger EMERGENCY_LOGGER = EmergencyLogger.getInstance();
+
+    private final int levelOrdinal;
+
+    Level(int levelOrdinal) {
+        this.levelOrdinal = levelOrdinal;
+    }
 
     public boolean enabledLoggingOfLevel(@NonNull Level level) {
-        Objects.requireNonNull(level, "level must not be null");
-        return this.ordinal() >= level.ordinal();
+        if (level == null) {
+            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
+            EMERGENCY_LOGGER.log(
+                    System.Logger.Level.ERROR,
+                    getClass().getName() + ": level is null when called by '" + callerClass + "'");
+            return true;
+        }
+        return this.levelOrdinal >= level.levelOrdinal;
     }
 }

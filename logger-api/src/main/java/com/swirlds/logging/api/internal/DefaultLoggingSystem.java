@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 public class DefaultLoggingSystem {
 
@@ -52,9 +51,9 @@ public class DefaultLoggingSystem {
         final List<LogHandler> handlers = serviceLoader.stream()
                 .map(Provider::get)
                 .map(factory -> factory.apply(configuration))
-                .filter(handler -> handler.isActive())
-                .collect(Collectors.toList());
-        handlers.forEach(h -> internalLoggingSystem.addHandler(h));
+                .filter(LogHandler::isActive)
+                .toList();
+        handlers.forEach(internalLoggingSystem::addHandler);
         LOGGER.log(Level.DEBUG, handlers.size() + " logging handlers installed: " + handlers);
     }
 
@@ -63,8 +62,8 @@ public class DefaultLoggingSystem {
         final List<LogProvider> providers = serviceLoader.stream()
                 .map(ServiceLoader.Provider::get)
                 .map(factory -> factory.apply(configuration))
-                .filter(adapter -> adapter.isActive())
-                .collect(Collectors.toList());
+                .filter(LogProvider::isActive)
+                .toList();
         providers.forEach(p -> p.install(internalLoggingSystem));
         LOGGER.log(Level.DEBUG, providers.size() + " logging providers installed: " + providers);
     }
@@ -83,7 +82,7 @@ public class DefaultLoggingSystem {
     }
 
     public void removeListener(LogListener listener) {
-        internalLoggingSystem.addListener(listener);
+        internalLoggingSystem.removeListener(listener);
     }
 
     @NonNull

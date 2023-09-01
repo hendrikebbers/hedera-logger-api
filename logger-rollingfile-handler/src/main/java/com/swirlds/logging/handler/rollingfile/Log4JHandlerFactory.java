@@ -1,4 +1,4 @@
-package com.swirlds.logging.handler.log4j;
+package com.swirlds.logging.handler.rollingfile;
 
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.extensions.handler.LogHandler;

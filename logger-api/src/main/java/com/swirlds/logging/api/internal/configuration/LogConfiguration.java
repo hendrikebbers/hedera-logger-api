@@ -53,6 +53,7 @@ public class LogConfiguration implements Configuration {
         return Optional.ofNullable(values.get(s)).orElse(s1);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T getValue(String s, Class<T> aClass) throws NoSuchElementException, IllegalArgumentException {
         if (aClass == Boolean.class) {

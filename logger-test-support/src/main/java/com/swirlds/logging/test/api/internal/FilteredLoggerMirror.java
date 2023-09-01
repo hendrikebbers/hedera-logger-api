@@ -29,7 +29,7 @@ public class FilteredLoggerMirror extends AbstractLoggerMirror {
 
     private final List<LogEvent> list;
 
-    private Runnable disposeAction;
+    private final Runnable disposeAction;
 
     public FilteredLoggerMirror(final List<LogEvent> list, Function<LogEvent, Boolean> filter, Runnable disposeAction) {
         this.list = list;
@@ -39,19 +39,19 @@ public class FilteredLoggerMirror extends AbstractLoggerMirror {
 
     @Override
     protected List<LogEvent> getList() {
-        return list.stream().filter(e -> filter.apply(e)).toList();
+        return list.stream().filter(filter::apply).toList();
     }
 
     @Override
     protected LoggerMirror filter(Function<LogEvent, Boolean> filter) {
-        List liveList = new AbstractList() {
+        List<LogEvent> liveList = new AbstractList<>() {
             @Override
             public int size() {
                 return list.size();
             }
 
             @Override
-            public Object get(int index) {
+            public LogEvent get(int index) {
                 return list.get(index);
             }
         };

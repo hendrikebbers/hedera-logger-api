@@ -41,7 +41,7 @@ public class LoggingLevelConfig {
     public boolean isEnabled(@NonNull String name, @NonNull Level level) {
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(level, "level must not be null");
-        final Level enabledLevel = levelCache.computeIfAbsent(name.trim(), n -> getConfiguredLevel(n));
+        final Level enabledLevel = levelCache.computeIfAbsent(name.trim(), this::getConfiguredLevel);
         return enabledLevel.enabledLoggingOfLevel(level);
     }
 
@@ -64,7 +64,7 @@ public class LoggingLevelConfig {
                         return "logging.level." + n;
                     }
                 })
-                .map(n -> configuration.getValue(n))
+                .map(configuration::getValue)
                 .map(String::toUpperCase)
                 .map(Level::valueOf)
                 .orElse(Level.INFO);

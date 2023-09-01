@@ -31,8 +31,6 @@ import org.openjdk.jmh.infra.Blackhole;
 @Measurement(iterations = MEASUREMENT_ITERATIONS, time = MEASUREMENT_TIME_IN_SECONDS_PER_ITERATION)
 public class SimpleBenchmark {
 
-    private LoggingSystem loggingSystem;
-
     private Logger logger;
 
     private static final Throwable THROWABLE = new RuntimeException("OH NO!");
@@ -42,7 +40,7 @@ public class SimpleBenchmark {
         SimpleConfiguration configuration = new SimpleConfiguration();
         configuration.setProperty("logging.handler.console.enabled", "true");
         configuration.setProperty("logging.level", "TRACE");
-        loggingSystem = new LoggingSystem(configuration);
+        LoggingSystem loggingSystem = new LoggingSystem(configuration);
         loggingSystem.addHandler(new BlackholeHandler(blackhole));
         loggingSystem.addHandler(new ConsoleHandler(configuration));
         logger = loggingSystem.getLogger(SimpleBenchmark.class.getName());

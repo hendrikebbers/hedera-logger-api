@@ -22,7 +22,7 @@
     <module>logger-api-benchmark</module>
     <module>logger-console-handler</module>
     <module>logger-noop-handler</module>
-    <module>logger-log4j-handler</module>
+    <module>logger-rollingfile-handler</module>
     <module>logger-jul-provider</module>
     <module>logger-system-provider</module>
     <module>logger-log4j-provider</module>

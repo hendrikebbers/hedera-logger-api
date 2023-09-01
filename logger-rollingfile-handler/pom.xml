@@ -9,7 +9,7 @@
     <artifactId>hedera-logging</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>logger-log4j-handler</artifactId>
+  <artifactId>logger-rollingfile-handler</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <dependencies>

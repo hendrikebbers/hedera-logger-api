@@ -32,7 +32,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>logger-log4j-handler</artifactId>
+      <artifactId>logger-rollingfile-handler</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>

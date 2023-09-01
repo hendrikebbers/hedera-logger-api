@@ -4,6 +4,7 @@ import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Logger;
 import java.util.Arrays;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class LoggerApiSpecTest {
 
@@ -33,6 +34,69 @@ public class LoggerApiSpecTest {
     };
 
     private final static String LOG_ERROR_MESSAGE = "a log call must never throw an exception";
+
+    @Test
+    void testNullName() {
+        //given
+        LoggerImpl logger = new LoggerImpl(null, new DummyConsumer());
+
+        //then
+        testSpec(logger);
+    }
+
+    @Test
+    void testSimpleLogger() {
+        //given
+        LoggerImpl logger = new LoggerImpl("test-name", new DummyConsumer());
+
+        //then
+        testSpec(logger);
+    }
+
+    @Test
+    void testNullLogEventConsumer() {
+        //given
+        LoggerImpl logger = new LoggerImpl("test-name", null);
+
+        //then
+        testSpec(logger);
+    }
+
+    @Test
+    void testSpecWithDifferentLoggers() {
+        LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", new DummyConsumer()));
+        LoggerApiSpecTest.testSpec(new LoggerImpl(null, new DummyConsumer()));
+        LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", null));
+        LoggerApiSpecTest.testSpec(new LoggerImpl(null, null));
+    }
+
+    @Test
+    void testLoggingSystemWithoutHandler() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+
+        //then
+        testSpec(loggingSystem);
+    }
+
+    @Test
+    void testLoggingSystemWithHandler() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+        InMemoryHandler handler = new InMemoryHandler();
+        loggingSystem.addHandler(handler);
+
+        //then
+        testSpec(loggingSystem);
+    }
+
+    public static void testSpec(LoggingSystem system) {
+        LoggerApiSpecTest.testSpec(system.getLogger("test-name"));
+        LoggerApiSpecTest.testSpec(system.getLogger(null));
+    }
+
 
     public static void testSpec(Logger logger) {
         testLogger(logger);
@@ -85,9 +149,9 @@ public class LoggerApiSpecTest {
 
         testContext(logger);
 
-        Assertions.assertDoesNotThrow(() -> logger.getName(), LOG_ERROR_MESSAGE);
-        Assertions.assertDoesNotThrow(() -> logger.toString(), LOG_ERROR_MESSAGE);
-        Assertions.assertDoesNotThrow(() -> logger.hashCode(), LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(logger::getName, LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(logger::toString, LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(logger::hashCode, LOG_ERROR_MESSAGE);
     }
 
     private static void testMarker(Logger logger) {
@@ -234,11 +298,11 @@ public class LoggerApiSpecTest {
     }
 
     private static void testEnabledCall(Logger logger) {
-        Assertions.assertDoesNotThrow(() -> logger.isTraceEnabled(), LOG_ERROR_MESSAGE);
-        Assertions.assertDoesNotThrow(() -> logger.isDebugEnabled(), LOG_ERROR_MESSAGE);
-        Assertions.assertDoesNotThrow(() -> logger.isInfoEnabled(), LOG_ERROR_MESSAGE);
-        Assertions.assertDoesNotThrow(() -> logger.isWarnEnabled(), LOG_ERROR_MESSAGE);
-        Assertions.assertDoesNotThrow(() -> logger.isErrorEnabled(), LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(logger::isTraceEnabled, LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(logger::isDebugEnabled, LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(logger::isInfoEnabled, LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(logger::isWarnEnabled, LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(logger::isErrorEnabled, LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.isEnabled(Level.TRACE), LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.isEnabled(Level.DEBUG), LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.isEnabled(Level.INFO), LOG_ERROR_MESSAGE);

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class SystemLoggerProvider implements LogProvider {
 
-    private static AtomicReference<LogEventConsumer> logEventConsumer = new AtomicReference<>();
+    private static final AtomicReference<LogEventConsumer> logEventConsumer = new AtomicReference<>();
 
     private final Configuration configuration;
 

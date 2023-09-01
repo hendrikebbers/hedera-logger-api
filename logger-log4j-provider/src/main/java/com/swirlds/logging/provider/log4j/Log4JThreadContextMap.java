@@ -38,14 +38,14 @@ public class Log4JThreadContextMap implements ThreadContextMap {
 
     @Override
     public Map<String, String> getCopy() {
-        return new AbstractMap<String, String>() {
+        return new AbstractMap<>() {
 
             @Override
             public Set<Entry<String, String>> entrySet() {
-                return new AbstractSet<Entry<String, String>>() {
+                return new AbstractSet<>() {
                     @Override
                     public Iterator<Entry<String, String>> iterator() {
-                        return new Iterator<Entry<String, String>>() {
+                        return new Iterator<>() {
 
                             private final Iterator<Entry<String, String>> iterator = ThreadLocalContext.getContextMap()
                                     .entrySet().iterator();

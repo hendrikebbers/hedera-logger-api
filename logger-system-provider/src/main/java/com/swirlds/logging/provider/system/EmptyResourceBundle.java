@@ -14,7 +14,7 @@ public class EmptyResourceBundle extends ResourceBundle {
 
     @Override
     public Enumeration<String> getKeys() {
-        return new Enumeration<String>() {
+        return new Enumeration<>() {
             @Override
             public boolean hasMoreElements() {
                 return false;

@@ -1,7 +1,6 @@
-package com.swirlds.logging.handler.log4j;
+package com.swirlds.logging.handler.rollingfile;
 
 import com.swirlds.config.api.Configuration;
-import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
@@ -56,8 +55,4 @@ public class Log4JHandler implements LogHandler {
         appender.append(new Log4JWrappedLogEvent(event));
     }
 
-    @Override
-    public boolean isEnabled(String name, Level level) {
-        return true;
-    }
 }

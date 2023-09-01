@@ -1,8 +1,7 @@
-package com.swirlds.logging.handler.log4j;
+package com.swirlds.logging.handler.rollingfile;
 
 import com.swirlds.logging.api.extensions.LogEvent;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoField;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.ThreadContext.ContextStack;
@@ -82,7 +81,7 @@ public class Log4JWrappedLogEvent extends org.apache.logging.log4j.core.Abstract
 
             @Override
             public int getNanoOfSecond() {
-                return event.timestamp().get(ChronoField.NANO_OF_SECOND);
+                return event.timestamp().getNano();
             }
 
             @Override

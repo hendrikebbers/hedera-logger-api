@@ -1,7 +1,6 @@
 package com.swirlds.logging.handler.noop;
 
 import com.swirlds.config.api.Configuration;
-import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 
@@ -28,8 +27,4 @@ public class NoopHandler implements LogHandler {
         event.hashCode();
     }
 
-    @Override
-    public boolean isEnabled(String name, Level level) {
-        return true;
-    }
 }

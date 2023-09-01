@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Log4JLogProvider implements LogProvider {
 
-    private static AtomicReference<LogEventConsumer> logEventConsumer = new AtomicReference<>();
+    private static final AtomicReference<LogEventConsumer> logEventConsumer = new AtomicReference<>();
 
     public static LogEventConsumer getLogEventConsumer() {
         return logEventConsumer.get();

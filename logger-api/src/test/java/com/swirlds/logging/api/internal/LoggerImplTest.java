@@ -1,28 +1,16 @@
 package com.swirlds.logging.api.internal;
 
 import com.swirlds.logging.api.Marker;
-import com.swirlds.logging.api.extensions.LogEventConsumer;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class LoggerImplTest {
 
-    private final static LogEventConsumer DUMMY_CONSUMER = event -> {
-    };
-
-    @Test
-    void testSpecWithDifferentLoggers() {
-        LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", DUMMY_CONSUMER));
-        LoggerApiSpecTest.testSpec(new LoggerImpl(null, DUMMY_CONSUMER));
-        LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", null));
-        LoggerApiSpecTest.testSpec(new LoggerImpl(null, null));
-    }
-
     @Test
     void testSimpleLogger() {
         //given
-        LoggerImpl logger = new LoggerImpl("test-name", DUMMY_CONSUMER);
+        LoggerImpl logger = new LoggerImpl("test-name", new DummyConsumer());
 
         //when
         final String name = logger.getName();
@@ -44,8 +32,6 @@ public class LoggerImplTest {
         Assertions.assertNull(marker);
         Assertions.assertNotNull(context);
         Assertions.assertTrue(context.isEmpty());
-
-        LoggerApiSpecTest.testSpec(logger);
     }
 
     @Test
@@ -78,14 +64,12 @@ public class LoggerImplTest {
         Assertions.assertNull(marker);
         Assertions.assertNotNull(context);
         Assertions.assertTrue(context.isEmpty());
-
-        LoggerApiSpecTest.testSpec(logger);
     }
 
     @Test
     void testNullName() {
         //given
-        LoggerImpl logger = new LoggerImpl(null, DUMMY_CONSUMER);
+        LoggerImpl logger = new LoggerImpl(null, new DummyConsumer());
 
         //when
         final String name = logger.getName();
@@ -107,7 +91,5 @@ public class LoggerImplTest {
         Assertions.assertNull(marker);
         Assertions.assertNotNull(context);
         Assertions.assertTrue(context.isEmpty());
-
-        LoggerApiSpecTest.testSpec(logger);
     }
 }
