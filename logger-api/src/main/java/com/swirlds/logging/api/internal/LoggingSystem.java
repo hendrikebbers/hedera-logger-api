@@ -18,7 +18,6 @@
 package com.swirlds.logging.api.internal;
 
 import static java.lang.System.Logger.Level.ERROR;
-import static java.lang.System.Logger.Level.TRACE;
 
 import com.swirlds.base.context.internal.GlobalContext;
 import com.swirlds.base.context.internal.ThreadLocalContext;
@@ -28,7 +27,6 @@ import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
-import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.internal.level.LoggingLevelConfig;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -47,20 +45,16 @@ public class LoggingSystem implements LogEventConsumer {
 
     private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
-    public static final String UNDEFINED = "UNDEFINED";
-
     private final List<LogHandler> handlers;
 
     private final Map<String, LoggerImpl> loggers;
 
-    private final List<LogListener> listeners;
+    private final List<Consumer<LogEvent>> listeners;
 
     private final LoggingLevelConfig levelConfig;
 
     public LoggingSystem(@NonNull final Configuration configuration) {
         Objects.requireNonNull(configuration, "configuration must not be null");
-        EMERGENCY_LOGGER.log(TRACE, "Logging system initialization");
-
         this.levelConfig = new LoggingLevelConfig(configuration);
         this.loggers = new ConcurrentHashMap<>();
         this.handlers = new CopyOnWriteArrayList<>();
@@ -122,9 +116,7 @@ public class LoggingSystem implements LogEventConsumer {
                                 .filter(handler -> handler.isEnabled(event.loggerName(), event.level()))
                                 .forEach(eventConsumers::add);
                     }
-                    listeners.stream()
-                            .filter(listener -> event.loggerName().startsWith(listener.getLoggerName()))
-                            .forEach(eventConsumers::add);
+                    eventConsumers.addAll(listeners);
                     if (!eventConsumers.isEmpty()) {
                         final Map<String, String> context = new HashMap<>(event.context());
                         context.putAll(GlobalContext.getContextMap());
@@ -146,7 +138,7 @@ public class LoggingSystem implements LogEventConsumer {
         }
     }
 
-    public void addListener(@NonNull final LogListener listener) {
+    public void addListener(@NonNull final Consumer<LogEvent> listener) {
         if (listener == null) {
             EMERGENCY_LOGGER.logNPE("listener");
         } else {
@@ -156,7 +148,7 @@ public class LoggingSystem implements LogEventConsumer {
         }
     }
 
-    public void removeListener(@NonNull final LogListener listener) {
+    public void removeListener(@NonNull final Consumer<LogEvent> listener) {
         if (listener == null) {
             EMERGENCY_LOGGER.logNPE("listener");
         } else {

@@ -20,7 +20,6 @@
     <module>base</module>
     <module>logger-api</module>
     <module>logger-api-benchmark</module>
-    <module>logger-format-util</module>
     <module>logger-console-handler</module>
     <module>logger-rollingfile-handler</module>
     <module>logger-jul-provider</module>

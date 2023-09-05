@@ -17,33 +17,40 @@
 
 package com.swirlds.logging.test.api.internal;
 
-import com.swirlds.logging.api.Level;
+import static com.swirlds.logging.test.api.internal.LoggerTestSupport.disposeMirror;
+
 import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.test.api.LoggerMirror;
+import com.swirlds.logging.test.api.LoggingMirror;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class AbstractLoggerMirror implements LoggerMirror {
+public class LoggingMirrorImpl extends AbstractLoggingMirror implements Consumer<LogEvent> {
 
-    protected abstract LoggerMirror filter(Function<LogEvent, Boolean> filter);
+    private final List<LogEvent> events = new CopyOnWriteArrayList<>();
 
-    protected abstract List<LogEvent> getList();
-
-    @Override
-    public int getEventCount() {
-        return getList().size();
+    public LoggingMirrorImpl() {
     }
 
     @Override
-    public LoggerMirror filterByLevel(Level level) {
-        Function<LogEvent, Boolean> filter = event -> event.level().ordinal() >= level.ordinal();
-        return filter(filter);
+    public void accept(LogEvent event) {
+        events.add(event);
     }
 
     @Override
-    public LoggerMirror filterByContext(String key, String value) {
-        Function<LogEvent, Boolean> filter = event -> event.context().containsKey(key) && event.context().get(key)
-                .equals(value);
-        return filter(filter);
+    public void dispose() {
+        disposeMirror(this);
+    }
+
+    @Override
+    protected LoggingMirror filter(Function<LogEvent, Boolean> filter) {
+        return new FilteredLoggingMirror(events, filter, this::dispose);
+    }
+
+    @Override
+    public List<LogEvent> getEvents() {
+        return Collections.unmodifiableList(events);
     }
 }

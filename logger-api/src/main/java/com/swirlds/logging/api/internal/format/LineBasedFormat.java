@@ -1,4 +1,4 @@
-package com.swirlds.logging.format;
+package com.swirlds.logging.api.internal.format;
 
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.EmergencyLogger;

@@ -4,7 +4,9 @@ import com.swirlds.logging.api.extensions.LogEventConsumer;
 
 public interface LogHandler extends LogEventConsumer {
 
-    String getName();
+    default String getName() {
+        return getClass().getSimpleName();
+    }
 
     boolean isActive();
 

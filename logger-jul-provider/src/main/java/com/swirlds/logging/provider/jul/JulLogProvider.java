@@ -17,12 +17,12 @@ public class JulLogProvider implements LogProvider {
 
     @Override
     public boolean isActive() {
-        return configuration.getValue("logging.adapter.jul.enabled", Boolean.class, false);
+        return configuration.getValue("logging.provider.jul.enabled", Boolean.class, false);
     }
 
     @Override
     public String getName() {
-        return "Adapter for java.util.logging";
+        return "Provider for java.util.logging";
     }
 
     public void install(LogEventConsumer logEventConsumer) {

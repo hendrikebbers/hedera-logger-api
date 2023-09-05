@@ -1,22 +1,18 @@
-package com.swirlds.logging.test.api;
+package com.swirlds.logging.test.api.internal;
 
 import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.internal.DefaultLoggingSystem;
-import com.swirlds.logging.test.api.internal.LoggerMirrorImpl;
+import com.swirlds.logging.test.api.LoggingMirror;
 
 public class LoggerTestSupport {
 
-    public static LoggerMirror createMirror(Class<?> cls) {
-        return createMirror(cls.getName());
-    }
-
-    public static LoggerMirror createMirror(String name) {
-        LoggerMirrorImpl mirror = new LoggerMirrorImpl(name);
+    public static LoggingMirror createMirror() {
+        LoggingMirrorImpl mirror = new LoggingMirrorImpl();
         DefaultLoggingSystem.getInstance().addListener(mirror);
         return mirror;
     }
 
-    public static void disposeMirror(LoggerMirror mirror) {
+    public static void disposeMirror(LoggingMirror mirror) {
         if (mirror instanceof LogListener loggerMirror) {
             DefaultLoggingSystem.getInstance().removeListener(loggerMirror);
         }

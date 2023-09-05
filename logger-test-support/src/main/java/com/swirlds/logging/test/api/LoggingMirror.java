@@ -18,14 +18,35 @@
 package com.swirlds.logging.test.api;
 
 import com.swirlds.logging.api.Level;
+import com.swirlds.logging.api.extensions.LogEvent;
+import java.util.List;
 
-public interface LoggerMirror {
+public interface LoggingMirror extends AutoCloseable {
 
     int getEventCount();
 
+    @Override
+    default void close() throws Exception {
+        dispose();
+    }
+
     void dispose();
 
-    LoggerMirror filterByLevel(Level level);
+    LoggingMirror filterByLevel(Level level);
 
-    LoggerMirror filterByContext(String key, String value);
+    LoggingMirror filterByContext(String key, String value);
+
+    default LoggingMirror filterByCurrentThread() {
+        return filterByThread(Thread.currentThread().getName());
+    }
+
+    LoggingMirror filterByThread(String threadName);
+
+    default LoggingMirror filterByLogger(Class<?> clazz) {
+        return filterByLogger(clazz.getName());
+    }
+
+    LoggingMirror filterByLogger(String loggerName);
+
+    List<LogEvent> getEvents();
 }

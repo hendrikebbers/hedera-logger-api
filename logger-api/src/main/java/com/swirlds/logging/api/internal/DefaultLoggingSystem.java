@@ -5,7 +5,6 @@ import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 import com.swirlds.logging.api.extensions.provider.LogProvider;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class DefaultLoggingSystem {
 
@@ -78,11 +78,11 @@ public class DefaultLoggingSystem {
         return internalLoggingSystem.getLogger(loggerName);
     }
 
-    public void addListener(LogListener listener) {
+    public void addListener(Consumer<LogEvent> listener) {
         internalLoggingSystem.addListener(listener);
     }
 
-    public void removeListener(LogListener listener) {
+    public void removeListener(Consumer<LogEvent> listener) {
         internalLoggingSystem.removeListener(listener);
     }
 

@@ -1,7 +1,7 @@
 package com.swirlds.logging.adapter.system.test;
 
-import com.swirlds.logging.test.api.LoggerMirror;
-import com.swirlds.logging.test.api.LoggerTestSupport;
+import com.swirlds.logging.test.api.LoggingMirror;
+import com.swirlds.logging.test.api.internal.LoggerTestSupport;
 import java.lang.System.Logger.Level;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -10,16 +10,16 @@ import org.junit.jupiter.api.Test;
 
 public class SystemAdapterTest {
 
-    private LoggerMirror loggerMirror;
+    private LoggingMirror loggingMirror;
 
     @BeforeEach
     void setUp() {
-        loggerMirror = LoggerTestSupport.createMirror(SystemAdapterTest.class);
+        loggingMirror = LoggerTestSupport.createMirror(SystemAdapterTest.class);
     }
 
     @AfterEach
     void tearDown() {
-        loggerMirror.dispose();
+        loggingMirror.dispose();
     }
 
 
@@ -32,6 +32,6 @@ public class SystemAdapterTest {
         systemLogger.log(Level.INFO, "Hello World!");
 
         //then
-        Assertions.assertEquals(1, loggerMirror.getEventCount());
+        Assertions.assertEquals(1, loggingMirror.getEventCount());
     }
 }

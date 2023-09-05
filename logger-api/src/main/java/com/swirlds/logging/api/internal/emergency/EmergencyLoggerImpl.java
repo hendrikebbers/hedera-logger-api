@@ -2,8 +2,10 @@ package com.swirlds.logging.api.internal.emergency;
 
 import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.internal.format.LineBasedFormat;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.lang.System.Logger;
 import java.util.List;
 import java.util.Objects;
@@ -237,9 +239,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
             final PrintStream printStream = Optional.ofNullable(System.err)
                     .orElse(System.out);
             if (printStream != null) {
-                printStream.println(name + ": " + logEvent.message());
-                Optional.ofNullable(logEvent.throwable())
-                        .ifPresent(Throwable::printStackTrace);
+                new LineBasedFormat(new PrintWriter(printStream, true)).print(logEvent);
             }
             if (logEvents.remainingCapacity() == 0) {
                 logEvents.remove();

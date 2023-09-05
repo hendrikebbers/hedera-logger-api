@@ -18,12 +18,12 @@
 package com.swirlds.logging.test.api.internal;
 
 import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.test.api.LoggerMirror;
+import com.swirlds.logging.test.api.LoggingMirror;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Function;
 
-public class FilteredLoggerMirror extends AbstractLoggerMirror {
+public class FilteredLoggingMirror extends AbstractLoggingMirror {
 
     private final Function<LogEvent, Boolean> filter;
 
@@ -31,19 +31,20 @@ public class FilteredLoggerMirror extends AbstractLoggerMirror {
 
     private final Runnable disposeAction;
 
-    public FilteredLoggerMirror(final List<LogEvent> list, Function<LogEvent, Boolean> filter, Runnable disposeAction) {
+    public FilteredLoggingMirror(final List<LogEvent> list, Function<LogEvent, Boolean> filter,
+            Runnable disposeAction) {
         this.list = list;
         this.filter = filter;
         this.disposeAction = disposeAction;
     }
 
     @Override
-    protected List<LogEvent> getList() {
+    public List<LogEvent> getEvents() {
         return list.stream().filter(filter::apply).toList();
     }
 
     @Override
-    protected LoggerMirror filter(Function<LogEvent, Boolean> filter) {
+    protected LoggingMirror filter(Function<LogEvent, Boolean> filter) {
         List<LogEvent> liveList = new AbstractList<>() {
             @Override
             public int size() {
@@ -55,7 +56,7 @@ public class FilteredLoggerMirror extends AbstractLoggerMirror {
                 return list.get(index);
             }
         };
-        return new FilteredLoggerMirror(liveList, filter, disposeAction);
+        return new FilteredLoggingMirror(liveList, filter, disposeAction);
     }
 
     @Override
