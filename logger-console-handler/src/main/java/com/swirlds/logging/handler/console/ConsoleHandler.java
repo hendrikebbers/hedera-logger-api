@@ -2,8 +2,8 @@ package com.swirlds.logging.handler.console;
 
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.handler.AbstractSyncedHandler;
 import com.swirlds.logging.format.LineBasedFormat;
-import com.swirlds.logging.handler.synced.AbstractSyncedHandler;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.PrintWriter;
 

@@ -15,11 +15,6 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>logger-abstract-synced-handler</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>logger-format-util</artifactId>
       <version>${project.version}</version>
     </dependency>
