@@ -26,7 +26,7 @@ import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.internal.format.MessageFormatter;
 import com.swirlds.logging.api.internal.util.SystemLoggerConverterUtils;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -177,7 +177,8 @@ public class LoggerImpl implements Logger {
         if (isEnabled(level)) {
             String threadName = Thread.currentThread().getName();
             Marker marker = getMarker();
-            LogEvent logEvent = new LogEvent(message, LocalDateTime.now(), threadName, getName(), level, marker,
+            LogEvent logEvent = new LogEvent(message, Instant.now(), threadName, getName(), level,
+                    marker,
                     getContext(), throwable);
             logEventConsumer.accept(logEvent);
         }

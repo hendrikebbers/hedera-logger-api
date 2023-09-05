@@ -6,6 +6,7 @@ import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.internal.util.EmergencyLoggerImpl;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -379,7 +380,7 @@ public class LoggingSystemTest {
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
         final LoggerImpl logger = loggingSystem.getLogger("test-logger");
-        final LocalDateTime startTime = LocalDateTime.now();
+        final Instant startTime = Instant.now();
 
         //when
         logger.trace("trace-message"); //Should not be forwarded since INFO is configured as root level
@@ -401,7 +402,7 @@ public class LoggingSystemTest {
         Assertions.assertEquals(Thread.currentThread().getName(), event1.threadName());
         Assertions.assertNull(event1.throwable());
         Assertions.assertTrue(event1.timestamp().isAfter(startTime));
-        Assertions.assertTrue(event1.timestamp().isBefore(LocalDateTime.now()));
+        Assertions.assertTrue(event1.timestamp().isBefore(Instant.now()));
 
         final LogEvent event2 = loggedEvents.get(1);
         Assertions.assertEquals("warn-message", event2.message());
@@ -412,7 +413,7 @@ public class LoggingSystemTest {
         Assertions.assertEquals(Thread.currentThread().getName(), event2.threadName());
         Assertions.assertNull(event2.throwable());
         Assertions.assertTrue(event2.timestamp().isAfter(startTime));
-        Assertions.assertTrue(event2.timestamp().isBefore(LocalDateTime.now()));
+        Assertions.assertTrue(event2.timestamp().isBefore(Instant.now()));
 
         final LogEvent event3 = loggedEvents.get(2);
         Assertions.assertEquals("error-message", event3.message());
@@ -423,7 +424,7 @@ public class LoggingSystemTest {
         Assertions.assertEquals(Thread.currentThread().getName(), event3.threadName());
         Assertions.assertNull(event3.throwable());
         Assertions.assertTrue(event3.timestamp().isAfter(startTime));
-        Assertions.assertTrue(event3.timestamp().isBefore(LocalDateTime.now()));
+        Assertions.assertTrue(event3.timestamp().isBefore(Instant.now()));
 
         Assertions.assertTrue(event1.timestamp().isBefore(event2.timestamp()));
         Assertions.assertTrue(event2.timestamp().isBefore(event3.timestamp()));
@@ -467,7 +468,7 @@ public class LoggingSystemTest {
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
         final LoggerImpl logger = loggingSystem.getLogger("test-logger");
-        final LocalDateTime startTime = LocalDateTime.now();
+        final Instant startTime = Instant.now();
 
         //when
         Context.getGlobalContext().put("global", "global-value");
@@ -513,7 +514,7 @@ public class LoggingSystemTest {
         Assertions.assertEquals("info-error", event1.throwable().getMessage());
         Assertions.assertEquals(RuntimeException.class, event1.throwable().getClass());
         Assertions.assertTrue(event1.timestamp().isAfter(startTime));
-        Assertions.assertTrue(event1.timestamp().isBefore(LocalDateTime.now()));
+        Assertions.assertTrue(event1.timestamp().isBefore(Instant.now()));
 
         final LogEvent event2 = loggedEvents.get(1);
         Assertions.assertEquals("info-message2 ARG2", event2.message());
@@ -527,7 +528,7 @@ public class LoggingSystemTest {
         Assertions.assertEquals("info-error2", event2.throwable().getMessage());
         Assertions.assertEquals(RuntimeException.class, event2.throwable().getClass());
         Assertions.assertTrue(event2.timestamp().isAfter(startTime));
-        Assertions.assertTrue(event2.timestamp().isBefore(LocalDateTime.now()));
+        Assertions.assertTrue(event2.timestamp().isBefore(Instant.now()));
 
         Assertions.assertTrue(event1.timestamp().isBefore(event2.timestamp()));
     }
@@ -541,14 +542,16 @@ public class LoggingSystemTest {
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
 
-        LogEvent event1 = new LogEvent("message", LocalDateTime.now(), Thread.currentThread().getName(), "test-logger",
+        LogEvent event1 = new LogEvent("message", Instant.now(), Thread.currentThread().getName(),
+                "test-logger",
                 Level.INFO, new Marker("INFO_MARKER"), Map.of("context", "unit-test", "level", "info"),
                 new RuntimeException("error"));
 
         LogEvent event2 = new LogEvent("trace-message", "test-logger",
                 Level.TRACE); //should not be forwarded since INFO is configured as root level
         LogEvent event3 = new LogEvent("error-message", "test-logger", Level.ERROR);
-        LogEvent event4 = new LogEvent("message", LocalDateTime.now(), Thread.currentThread().getName(), "test-logger",
+        LogEvent event4 = new LogEvent("message", Instant.now(), Thread.currentThread().getName(),
+                "test-logger",
                 Level.INFO, new Marker("INFO_MARKER"), Map.of("context", "unit-test"),
                 new RuntimeException("error"));
 

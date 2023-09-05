@@ -4,7 +4,7 @@ import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 import java.lang.System.Logger;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
@@ -133,7 +133,7 @@ public class Log4JLogger extends AbstractLogger {
     @Override
     public void logMessage(String fqcn, Level level, Marker marker, Message message, Throwable t) {
         final LogEvent logEvent = new LogEvent(message.getFormattedMessage(),
-                LocalDateTime.now(),
+                Instant.now(),
                 Thread.currentThread().getName(),
                 name,
                 Log4jConverter.convertFromLog4J(level),

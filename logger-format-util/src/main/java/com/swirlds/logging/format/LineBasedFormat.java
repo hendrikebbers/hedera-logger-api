@@ -5,6 +5,7 @@ import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -27,7 +28,13 @@ public class LineBasedFormat {
         if (event == null) {
             EMERGENCY_LOGGER.logNPE("event");
         }
-        String timeStamp = event.timestamp().format(formatter);
+        final Instant instant = event.timestamp();
+        final String timeStamp;
+        if (instant == null) {
+            timeStamp = "------UNKNOWN------";
+        } else {
+            timeStamp = formatter.format(instant);
+        }
         String threadName = event.threadName();
         printWriter.print(timeStamp);
         printWriter.print(' ');

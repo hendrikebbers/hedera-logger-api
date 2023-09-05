@@ -19,11 +19,11 @@ package com.swirlds.logging.api.extensions;
 
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 public record LogEvent(String message,
-                       LocalDateTime timestamp,
+                       Instant timestamp,
                        String threadName,
                        String loggerName,
                        Level level,
@@ -36,7 +36,8 @@ public record LogEvent(String message,
     }
 
     public LogEvent(String message, String loggerName, Level level, Throwable throwable) {
-        this(message, LocalDateTime.now(), Thread.currentThread().getName(), loggerName, level, null, Map.of(),
+        this(message, Instant.now(), Thread.currentThread().getName(), loggerName, level, null,
+                Map.of(),
                 throwable);
     }
 

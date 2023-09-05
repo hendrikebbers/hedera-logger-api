@@ -1,12 +1,12 @@
 package com.swirlds.logging.handler.rollingfile;
 
 import com.swirlds.logging.api.extensions.LogEvent;
-import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.ThreadContext.ContextStack;
 import org.apache.logging.log4j.core.impl.ThrowableProxy;
 import org.apache.logging.log4j.core.time.Instant;
+import org.apache.logging.log4j.core.time.MutableInstant;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.util.ReadOnlyStringMap;
@@ -61,39 +61,14 @@ public class Log4JWrappedLogEvent extends org.apache.logging.log4j.core.Abstract
 
     @Override
     public long getTimeMillis() {
-        return TimeUnit.SECONDS.toMillis(event.timestamp().toEpochSecond(ZoneOffset.UTC));
+        return TimeUnit.SECONDS.toMillis(event.timestamp().toEpochMilli());
     }
 
     @Override
     public Instant getInstant() {
-        return new Instant() {
-
-            @Override
-            public void formatTo(StringBuilder buffer) {
-                buffer.append("MutableInstant[epochSecond=").append(getEpochSecond()).append(", nano=")
-                        .append(getNanoOfSecond()).append("]");
-            }
-
-            @Override
-            public long getEpochSecond() {
-                return event.timestamp().toEpochSecond(ZoneOffset.UTC);
-            }
-
-            @Override
-            public int getNanoOfSecond() {
-                return event.timestamp().getNano();
-            }
-
-            @Override
-            public long getEpochMillisecond() {
-                return 0;
-            }
-
-            @Override
-            public int getNanoOfMillisecond() {
-                return 0;
-            }
-        };
+        MutableInstant instant = new MutableInstant();
+        instant.initFromEpochMilli(event.timestamp().toEpochMilli(), event.timestamp().getNano());
+        return instant;
     }
 
     @Override
