@@ -2,10 +2,10 @@ package com.swirlds.logging.api.internal;
 
 import com.swirlds.base.context.Context;
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.Loggers;
+import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
-import com.swirlds.logging.api.internal.util.EmergencyLogger;
+import com.swirlds.logging.api.internal.util.EmergencyLoggerImpl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -22,14 +22,14 @@ public class LoggingSystemTest {
     void setUp() {
         Context.getGlobalContext().clear();
         Context.getThreadLocalContext().clear();
-        EmergencyLogger.getInstance().publishLoggedEvents(); // This will clear the emergency logger
+        EmergencyLoggerImpl.getInstance().publishLoggedEvents(); // This will clear the emergency logger
     }
 
     @AfterEach
     void tearDown() {
         Context.getGlobalContext().clear();
         Context.getThreadLocalContext().clear();
-        EmergencyLogger.getInstance().publishLoggedEvents(); // This will clear the emergency logger
+        EmergencyLoggerImpl.getInstance().publishLoggedEvents(); // This will clear the emergency logger
     }
 
     @Test
@@ -189,21 +189,6 @@ public class LoggingSystemTest {
     }
 
     @Test
-    @DisplayName("Test that getMarker logs errors to emergency logger")
-    void testErrorsForMarker() {
-        //given
-        final SimpleConfiguration configuration = new SimpleConfiguration();
-        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
-
-        //when
-        loggingSystem.getMarker(null); // 1 logged error
-
-        final List<LogEvent> loggedErrorEvents = getLoggedEvents();
-
-        Assertions.assertEquals(1, loggedErrorEvents.size(), "There should be 1 ERROR event");
-    }
-
-    @Test
     @DisplayName("Test that accept logs errors to emergency logger")
     void testErrorsForAccept() {
         //given
@@ -219,7 +204,7 @@ public class LoggingSystemTest {
     }
 
     private List<LogEvent> getLoggedEvents() {
-        return EmergencyLogger.getInstance().publishLoggedEvents()
+        return EmergencyLoggerImpl.getInstance().publishLoggedEvents()
                 .stream()
                 .filter(event -> event.level() == Level.ERROR)
                 .collect(Collectors.toList());
@@ -341,7 +326,7 @@ public class LoggingSystemTest {
         final SimpleConfiguration configuration = new SimpleConfiguration();
         final LoggingSystem loggingSystem = new LoggingSystem(configuration);
         final LoggerImpl logger = loggingSystem.getLogger("");
-        EmergencyLogger.getInstance().publishLoggedEvents(); // reset Emergency logger to remove the init logging
+        EmergencyLoggerImpl.getInstance().publishLoggedEvents(); // reset Emergency logger to remove the init logging
 
         //when
         logger.trace("trace-message"); // should not be logged since root logger is defined as INFO level
@@ -351,7 +336,7 @@ public class LoggingSystemTest {
         logger.error("error-message");
 
         //then
-        final List<LogEvent> loggedEvents = EmergencyLogger.getInstance().publishLoggedEvents();
+        final List<LogEvent> loggedEvents = EmergencyLoggerImpl.getInstance().publishLoggedEvents();
         Assertions.assertEquals(3, loggedEvents.size());
         Assertions.assertEquals("info-message", loggedEvents.get(0).message());
         Assertions.assertEquals(Level.INFO, loggedEvents.get(0).level());
@@ -369,7 +354,7 @@ public class LoggingSystemTest {
         configuration.setProperty("logging.level.test", "ERROR");
         final LoggingSystem loggingSystem = new LoggingSystem(configuration);
         final LoggerImpl logger = loggingSystem.getLogger("test");
-        EmergencyLogger.getInstance().publishLoggedEvents(); // reset Emergency logger to remove the init logging
+        EmergencyLoggerImpl.getInstance().publishLoggedEvents(); // reset Emergency logger to remove the init logging
 
         //when
         logger.trace("trace-message"); // should not be logged since logger is defined as ERROR level
@@ -379,7 +364,7 @@ public class LoggingSystemTest {
         logger.error("error-message");
 
         //then
-        final List<LogEvent> loggedEvents = EmergencyLogger.getInstance().publishLoggedEvents();
+        final List<LogEvent> loggedEvents = EmergencyLoggerImpl.getInstance().publishLoggedEvents();
         Assertions.assertEquals(1, loggedEvents.size());
         Assertions.assertEquals("error-message", loggedEvents.get(0).message());
         Assertions.assertEquals(Level.ERROR, loggedEvents.get(0).level());
@@ -522,7 +507,7 @@ public class LoggingSystemTest {
                 Map.of("context", "unit-test", "global", "global-value", "thread-local", "thread-local-value", "level",
                         "info"), event1.context());
         Assertions.assertEquals("test-logger", event1.loggerName());
-        Assertions.assertEquals(Loggers.getMarker("INFO_MARKER"), event1.marker());
+        Assertions.assertEquals(new Marker("INFO_MARKER"), event1.marker());
         Assertions.assertEquals(Thread.currentThread().getName(), event1.threadName());
         Assertions.assertNotNull(event1.throwable());
         Assertions.assertEquals("info-error", event1.throwable().getMessage());
@@ -536,7 +521,7 @@ public class LoggingSystemTest {
         Assertions.assertEquals(
                 Map.of("context", "unit-test", "level", "info"), event2.context());
         Assertions.assertEquals("test-logger", event2.loggerName());
-        Assertions.assertEquals(Loggers.getMarker("INFO_MARKER"), event2.marker());
+        Assertions.assertEquals(new Marker("INFO_MARKER"), event2.marker());
         Assertions.assertEquals(Thread.currentThread().getName(), event2.threadName());
         Assertions.assertNotNull(event2.throwable());
         Assertions.assertEquals("info-error2", event2.throwable().getMessage());
@@ -557,14 +542,14 @@ public class LoggingSystemTest {
         loggingSystem.addHandler(handler);
 
         LogEvent event1 = new LogEvent("message", LocalDateTime.now(), Thread.currentThread().getName(), "test-logger",
-                Level.INFO, Loggers.getMarker("INFO_MARKER"), Map.of("context", "unit-test", "level", "info"),
+                Level.INFO, new Marker("INFO_MARKER"), Map.of("context", "unit-test", "level", "info"),
                 new RuntimeException("error"));
 
         LogEvent event2 = new LogEvent("trace-message", "test-logger",
                 Level.TRACE); //should not be forwarded since INFO is configured as root level
         LogEvent event3 = new LogEvent("error-message", "test-logger", Level.ERROR);
         LogEvent event4 = new LogEvent("message", LocalDateTime.now(), Thread.currentThread().getName(), "test-logger",
-                Level.INFO, Loggers.getMarker("INFO_MARKER"), Map.of("context", "unit-test"),
+                Level.INFO, new Marker("INFO_MARKER"), Map.of("context", "unit-test"),
                 new RuntimeException("error"));
 
         //when

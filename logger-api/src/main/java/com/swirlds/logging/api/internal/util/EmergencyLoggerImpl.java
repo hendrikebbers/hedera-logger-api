@@ -1,5 +1,6 @@
 package com.swirlds.logging.api.internal.util;
 
+import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.LogEvent;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.PrintStream;
@@ -19,19 +20,19 @@ import java.util.function.Supplier;
  * <p>
  * The logger is defined as a singleton.
  */
-public class EmergencyLogger implements System.Logger {
+public class EmergencyLoggerImpl implements EmergencyLogger {
 
     /**
      * A reference to the inner logger that is used to log the messages. This reference can be set at runtime once the
-     * real logging system is available. The {@link EmergencyLogger} even tries to log a message (for example to
+     * real logging system is available. The {@link EmergencyLoggerImpl} even tries to log a message (for example to
      * {@link System#out}) when the inner logger is broken.
      */
     private final static AtomicReference<System.Logger> innerLoggerRef = new AtomicReference<>();
 
     /**
-     * The singleton instance of the {@link EmergencyLogger}.
+     * The singleton instance of the {@link EmergencyLoggerImpl}.
      */
-    private final static EmergencyLogger INSTANCE = new EmergencyLogger();
+    private final static EmergencyLoggerImpl INSTANCE = new EmergencyLoggerImpl();
 
     /**
      * The name of the logger.
@@ -60,9 +61,9 @@ public class EmergencyLogger implements System.Logger {
     private final ThreadLocal<Boolean> recursionGuard;
 
     /**
-     * The constructor of the {@link EmergencyLogger}.
+     * The constructor of the {@link EmergencyLoggerImpl}.
      */
-    private EmergencyLogger() {
+    private EmergencyLoggerImpl() {
         logEvents = new ArrayBlockingQueue<>(1000);
         recursionGuard = new ThreadLocal<>();
         supportedLevel = getSupportedLevelFromSystemProperties();
@@ -193,13 +194,34 @@ public class EmergencyLogger implements System.Logger {
 
     @Override
     public void log(Level level, ResourceBundle bundle, String format, Object... params) {
-        LogEvent fallbackLogEvent = new LogEvent(format + " -> " + params, name, convertFromSystemLogger(level));
+        final LogEvent fallbackLogEvent;
+        if (params == null || params.length == 0) {
+            fallbackLogEvent = new LogEvent(format, name, convertFromSystemLogger(level));
+        } else {
+            fallbackLogEvent = new LogEvent(format + " -> " + params, name, convertFromSystemLogger(level));
+        }
         callGuarded(fallbackLogEvent, () -> {
             final System.Logger innerLogger = innerLoggerRef.get();
             if (innerLogger != null) {
                 innerLogger.log(level, bundle, format, params);
             } else {
                 handle(fallbackLogEvent); //TODO: Create message instead of simple printing args
+            }
+        });
+    }
+
+
+    @Override
+    public void log(LogEvent event) {
+        if (event == null) {
+            logNPE("event");
+        }
+        callGuarded(event, () -> {
+            final System.Logger innerLogger = innerLoggerRef.get();
+            if (innerLogger != null) {
+                innerLogger.log(convertToSystemLogger(event.level()), null, event.message(), event.throwable());
+            } else {
+                handle(event);
             }
         });
     }
@@ -245,12 +267,26 @@ public class EmergencyLogger implements System.Logger {
         };
     }
 
+    private static Level convertToSystemLogger(@NonNull com.swirlds.logging.api.Level level) {
+        if (level == null) {
+            return Level.ERROR;
+        }
+        return switch (level) {
+            case TRACE -> Level.TRACE;
+            case DEBUG -> Level.DEBUG;
+            case INFO -> Level.INFO;
+            case WARN -> Level.WARNING;
+            default -> Level.ERROR;
+        };
+    }
+
+
     /**
      * Returns the singleton instance of the emergency logger.
      *
      * @return the singleton instance of the emergency logger
      */
-    public static EmergencyLogger getInstance() {
+    public static EmergencyLoggerImpl getInstance() {
         return INSTANCE;
     }
 
@@ -272,5 +308,11 @@ public class EmergencyLogger implements System.Logger {
      */
     public static void setInnerLogger(System.Logger logger) {
         innerLoggerRef.set(logger);
+    }
+
+    @Override
+    public void logNPE(@NonNull String nameOfNullParam) {
+        log(Level.ERROR, "Null parameter: " + nameOfNullParam,
+                new NullPointerException("Null parameter: " + nameOfNullParam));
     }
 }

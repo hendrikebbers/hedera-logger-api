@@ -17,13 +17,14 @@
 package com.swirlds.logging.api;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.Optional;
+import edu.umd.cs.findbugs.annotations.Nullable;
 
-public interface Marker {
+public record Marker(@NonNull String name, @Nullable Marker parent) {
 
-    @NonNull
-    String getName();
+    public Marker {
+    }
 
-    @NonNull
-    Optional<Marker> getParent();
+    public Marker(@NonNull String name) {
+        this(name, null);
+    }
 }

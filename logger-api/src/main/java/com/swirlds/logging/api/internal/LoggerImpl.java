@@ -19,12 +19,12 @@ package com.swirlds.logging.api.internal;
 
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Logger;
-import com.swirlds.logging.api.Loggers;
 import com.swirlds.logging.api.Marker;
+import com.swirlds.logging.api.extensions.EmergencyLogger;
+import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.internal.format.MessageFormatter;
-import com.swirlds.logging.api.internal.util.EmergencyLogger;
 import com.swirlds.logging.api.internal.util.SystemLoggerConverterUtils;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class LoggerImpl implements Logger {
 
-    private final static System.Logger EMERGENCY_LOGGER = EmergencyLogger.getInstance();
+    private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
     private final String name;
 
@@ -46,8 +46,7 @@ public class LoggerImpl implements Logger {
     protected LoggerImpl(String name, final Marker marker, Map<String, String> context,
             LogEventConsumer logEventConsumer) {
         if (name == null) {
-            EMERGENCY_LOGGER.log(System.Logger.Level.ERROR,
-                    "Logger name is null, using root logger");
+            EMERGENCY_LOGGER.logNPE("name");
             this.name = "";
         } else {
             this.name = name;
@@ -55,8 +54,7 @@ public class LoggerImpl implements Logger {
         this.marker = marker;
         this.context = Collections.unmodifiableMap(context);
         if (logEventConsumer == null) {
-            EMERGENCY_LOGGER.log(System.Logger.Level.ERROR,
-                    "LogEventConsumer is null, using default emergency logger");
+            EMERGENCY_LOGGER.logNPE("logEventConsumer");
             this.logEventConsumer = new LogEventConsumer() {
                 @Override
                 public void accept(LogEvent event) {
@@ -144,7 +142,7 @@ public class LoggerImpl implements Logger {
         if (markerName == null) {
             return this;
         } else {
-            return withMarkerAndContext(Loggers.getMarker(markerName), context);
+            return withMarkerAndContext(new Marker(markerName, marker), context);
         }
     }
 

@@ -2,7 +2,8 @@ package com.swirlds.logging.api.internal;
 
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Logger;
-import com.swirlds.logging.api.Marker;
+import com.swirlds.logging.api.extensions.EmergencyLogger;
+import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
@@ -10,7 +11,7 @@ import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 import com.swirlds.logging.api.extensions.provider.LogProvider;
 import com.swirlds.logging.api.extensions.provider.LogProviderFactory;
 import com.swirlds.logging.api.internal.configuration.LogConfiguration;
-import com.swirlds.logging.api.internal.util.EmergencyLogger;
+import com.swirlds.logging.api.internal.util.EmergencyLoggerImpl;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.lang.System.Logger.Level;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultLoggingSystem {
 
-    private final static System.Logger LOGGER = EmergencyLogger.getInstance();
+    private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
     private static class InstanceHolder {
         private static final DefaultLoggingSystem INSTANCE = new DefaultLoggingSystem();
@@ -38,7 +39,7 @@ public class DefaultLoggingSystem {
 
         //TODO:  EmergencyLogger.setInnerLogger();
 
-        EmergencyLogger.getInstance()
+        EmergencyLoggerImpl.getInstance()
                 .publishLoggedEvents()
                 .stream()
                 .map(event -> LogEvent.createCopyWithDifferentName(event, "EMERGENCY-LOGGER-QUEUE"))
@@ -54,7 +55,7 @@ public class DefaultLoggingSystem {
                 .filter(LogHandler::isActive)
                 .toList();
         handlers.forEach(internalLoggingSystem::addHandler);
-        LOGGER.log(Level.DEBUG, handlers.size() + " logging handlers installed: " + handlers);
+        EMERGENCY_LOGGER.log(Level.DEBUG, handlers.size() + " logging handlers installed: " + handlers);
     }
 
     private void installProviders(final Configuration configuration) {
@@ -65,7 +66,7 @@ public class DefaultLoggingSystem {
                 .filter(LogProvider::isActive)
                 .toList();
         providers.forEach(p -> p.install(internalLoggingSystem));
-        LOGGER.log(Level.DEBUG, providers.size() + " logging providers installed: " + providers);
+        EMERGENCY_LOGGER.log(Level.DEBUG, providers.size() + " logging providers installed: " + providers);
     }
 
     public static DefaultLoggingSystem getInstance() {
@@ -84,12 +85,7 @@ public class DefaultLoggingSystem {
     public void removeListener(LogListener listener) {
         internalLoggingSystem.removeListener(listener);
     }
-
-    @NonNull
-    public Marker getMarker(@NonNull String name) {
-        return internalLoggingSystem.getMarker(name);
-    }
-
+    
     public static boolean isInitialized() {
         return INITIALIZED.get();
     }

@@ -17,15 +17,14 @@
 package com.swirlds.logging.api;
 
 
-import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
-
+import com.swirlds.logging.api.extensions.EmergencyLogger;
+import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.internal.DefaultLoggingSystem;
-import com.swirlds.logging.api.internal.util.EmergencyLogger;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 public final class Loggers {
 
-    private final static System.Logger EMERGENCY_LOGGER = EmergencyLogger.getInstance();
+    private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
     @NonNull
     public static Logger getLogger(@NonNull String name) {
@@ -35,18 +34,10 @@ public final class Loggers {
     @NonNull
     public static Logger getLogger(@NonNull Class<?> clazz) {
         if (clazz == null) {
-            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(
-                    System.Logger.Level.ERROR,
-                    Loggers.class.getName() + ": clazz is null when called by '" + callerClass
-                            + "'. Will use root logger instead.");
+            EMERGENCY_LOGGER.logNPE("clazz");
             return getLogger("");
         }
         return getLogger(clazz.getName());
     }
 
-    @NonNull
-    public static Marker getMarker(@NonNull String name) {
-        return DefaultLoggingSystem.getInstance().getMarker(name);
-    }
 }

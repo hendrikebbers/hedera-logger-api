@@ -9,18 +9,13 @@
     <artifactId>hedera-logging</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>logger-console-handler</artifactId>
+  <artifactId>logger-format-util</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>logger-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>logger-format-util</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

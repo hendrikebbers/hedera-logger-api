@@ -50,6 +50,11 @@ public class Demo2 {
         logger.withMarker("LOGGING_DEMO").warn("Hello world!", new RuntimeException("OH NO!"));
         logger.withMarker("LOGGING_DEMO").error("Hello world!", new RuntimeException("OH NO!"));
 
+        logger.withMarker("DEMO").withMarker("LOGGING_DEMO").info("Hello world!");
+        logger.withMarker("DEMO").withMarker("LOGGING_DEMO").debug("Hello world!");
+        logger.withMarker("DEMO").withMarker("LOGGING_DEMO").warn("Hello world!");
+        logger.withMarker("DEMO").withMarker("LOGGING_DEMO").error("Hello world!");
+
         logger.withContext("context", "value").info("Hello world!");
         logger.withContext("context", "value").debug("Hello world!");
         logger.withContext("context", "value").warn("Hello world!");

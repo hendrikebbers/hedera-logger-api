@@ -17,7 +17,6 @@
 
 package com.swirlds.logging.api.internal;
 
-import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 import static java.lang.System.Logger.Level.ERROR;
 import static java.lang.System.Logger.Level.TRACE;
 
@@ -25,15 +24,13 @@ import com.swirlds.base.context.internal.GlobalContext;
 import com.swirlds.base.context.internal.ThreadLocalContext;
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.Marker;
+import com.swirlds.logging.api.extensions.EmergencyLogger;
+import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
-import com.swirlds.logging.api.internal.util.EmergencyLogger;
 import com.swirlds.logging.api.internal.util.LoggingLevelConfig;
-import com.swirlds.logging.api.internal.util.MarkerImpl;
-import com.swirlds.logging.api.internal.util.SystemLoggerConverterUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.lang.System.Logger;
 import java.util.ArrayList;
@@ -48,7 +45,7 @@ import java.util.function.Consumer;
 
 public class LoggingSystem implements LogEventConsumer {
 
-    private final static System.Logger EMERGENCY_LOGGER = EmergencyLogger.getInstance();
+    private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
     public static final String UNDEFINED = "UNDEFINED";
 
@@ -72,9 +69,7 @@ public class LoggingSystem implements LogEventConsumer {
 
     public void addHandler(@NonNull final LogHandler handler) {
         if (handler == null) {
-            //TODO: What is faster? This call or creating an exception???
-            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(ERROR, getClass().getName() + ":null handler added in '" + callerClass + "'");
+            EMERGENCY_LOGGER.logNPE("handler");
         } else {
             handlers.add(handler);
         }
@@ -83,34 +78,19 @@ public class LoggingSystem implements LogEventConsumer {
     @NonNull
     public LoggerImpl getLogger(@NonNull final String name) {
         if (name == null) {
-            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(ERROR,
-                    "Logger without name created in '" + callerClass + "'. Will return root logger");
+            EMERGENCY_LOGGER.logNPE("name");
             return loggers.computeIfAbsent("", n -> new LoggerImpl(n, this));
         }
         return loggers.computeIfAbsent(name.trim(), n -> new LoggerImpl(n, this));
     }
 
-    @NonNull
-    public Marker getMarker(@NonNull final String name) {
-        if (name == null) {
-            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(ERROR, "Marker without name created in '" + callerClass + "'");
-            return new MarkerImpl(UNDEFINED);
-        }
-        return new MarkerImpl(name);
-    }
-
     public boolean isEnabled(@NonNull final String name, @NonNull final Level level) {
         if (name == null) {
-            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(ERROR,
-                    "level check without name called in '" + callerClass + "'. Will use root logger");
+            EMERGENCY_LOGGER.logNPE("name");
             return isEnabled("", level);
         }
         if (level == null) {
-            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(ERROR, "level check without name called in '" + callerClass + "'");
+            EMERGENCY_LOGGER.logNPE("level");
             return true;
         }
         if (handlers.isEmpty()) {
@@ -128,18 +108,14 @@ public class LoggingSystem implements LogEventConsumer {
     @Override
     public void accept(@NonNull final LogEvent event) {
         if (event == null) {
-            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(ERROR, "event is null in '" + callerClass + "'");
+            EMERGENCY_LOGGER.logNPE("event");
         } else {
             if (isEnabled(event.loggerName(), event.level())) {
                 try {
                     final List<Consumer<LogEvent>> eventConsumers = new ArrayList<>();
                     if (handlers.isEmpty()) {
                         if (isEnabled(event.loggerName(), event.level())) {
-                            eventConsumers.add(
-                                    e -> EMERGENCY_LOGGER.log(
-                                            SystemLoggerConverterUtils.convertToSystemLogger(e.level()),
-                                            e.message(), e.throwable()));
+                            eventConsumers.add(e -> EMERGENCY_LOGGER.log(event));
                         }
                     } else {
                         handlers.stream()
@@ -155,7 +131,13 @@ public class LoggingSystem implements LogEventConsumer {
                         context.putAll(ThreadLocalContext.getContextMap());
                         final LogEvent enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
                                 Collections.unmodifiableMap(context));
-                        eventConsumers.forEach(consumer -> consumer.accept(enrichedEvent));
+                        eventConsumers.forEach(consumer -> {
+                            try {
+                                consumer.accept(enrichedEvent);
+                            } catch (final Throwable throwable) {
+                                EMERGENCY_LOGGER.log(ERROR, "Exception in handling log event by consumer", throwable);
+                            }
+                        });
                     }
                 } catch (final Throwable throwable) {
                     EMERGENCY_LOGGER.log(ERROR, "Exception in handling log event", throwable);
@@ -166,8 +148,7 @@ public class LoggingSystem implements LogEventConsumer {
 
     public void addListener(@NonNull final LogListener listener) {
         if (listener == null) {
-            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(ERROR, "listener is null in '" + callerClass + "'");
+            EMERGENCY_LOGGER.logNPE("listener");
         } else {
             listeners.add(listener);
             EMERGENCY_LOGGER.log(Logger.Level.DEBUG,
@@ -177,10 +158,13 @@ public class LoggingSystem implements LogEventConsumer {
 
     public void removeListener(@NonNull final LogListener listener) {
         if (listener == null) {
-            final Class<?> callerClass = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-            EMERGENCY_LOGGER.log(ERROR, "listener is null in '" + callerClass + "'");
+            EMERGENCY_LOGGER.logNPE("listener");
         } else {
             listeners.remove(listener);
         }
+    }
+
+    public void stopAndFinalize() {
+        handlers.forEach(LogHandler::stopAndFinalize);
     }
 }
