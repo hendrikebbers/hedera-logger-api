@@ -1,6 +1,5 @@
 package com.swirlds.logging.api.extensions.handler;
 
-import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 
 public interface LogHandler extends LogEventConsumer {
@@ -13,8 +12,4 @@ public interface LogHandler extends LogEventConsumer {
 
     }
 
-    @Override
-    default boolean isEnabled(String name, Level level) {
-        return isActive();
-    }
 }
