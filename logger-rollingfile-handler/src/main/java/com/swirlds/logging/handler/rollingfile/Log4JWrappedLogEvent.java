@@ -66,8 +66,8 @@ public class Log4JWrappedLogEvent extends org.apache.logging.log4j.core.Abstract
 
     @Override
     public Instant getInstant() {
-        MutableInstant instant = new MutableInstant();
-        instant.initFromEpochMilli(event.timestamp().toEpochMilli(), event.timestamp().getNano());
+        final MutableInstant instant = new MutableInstant();
+        instant.initFromEpochMilli(event.timestamp().toEpochMilli(), 0);
         return instant;
     }
 

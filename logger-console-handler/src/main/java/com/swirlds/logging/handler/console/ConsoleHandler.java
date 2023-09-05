@@ -11,13 +11,22 @@ public class ConsoleHandler extends AbstractSyncedHandler {
 
     private final LineBasedFormat lineBasedFormat;
 
+    private final PrintWriter printWriter = new PrintWriter(System.out);
+
     public ConsoleHandler(@NonNull Configuration configuration) {
         super("console", configuration);
-        lineBasedFormat = new LineBasedFormat(new PrintWriter(System.out));
+        lineBasedFormat = new LineBasedFormat(printWriter);
     }
 
     @Override
     protected void handleSynced(@NonNull LogEvent event) {
         lineBasedFormat.print(event);
+        printWriter.flush();
+    }
+
+    @Override
+    protected void handleStopAndFinalize() {
+        super.handleStopAndFinalize();
+        printWriter.close();
     }
 }

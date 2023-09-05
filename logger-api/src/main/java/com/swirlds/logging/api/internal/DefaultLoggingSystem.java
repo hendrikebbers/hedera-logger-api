@@ -11,7 +11,7 @@ import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 import com.swirlds.logging.api.extensions.provider.LogProvider;
 import com.swirlds.logging.api.extensions.provider.LogProviderFactory;
 import com.swirlds.logging.api.internal.configuration.LogConfiguration;
-import com.swirlds.logging.api.internal.util.EmergencyLoggerImpl;
+import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.lang.System.Logger.Level;
 import java.util.List;

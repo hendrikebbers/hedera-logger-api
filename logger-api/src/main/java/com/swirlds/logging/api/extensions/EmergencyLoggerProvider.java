@@ -1,6 +1,6 @@
 package com.swirlds.logging.api.extensions;
 
-import com.swirlds.logging.api.internal.util.EmergencyLoggerImpl;
+import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 
 public class EmergencyLoggerProvider {
 

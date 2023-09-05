@@ -9,6 +9,8 @@ module com.swirlds.logging.api {
     exports com.swirlds.logging.api.extensions.handler to com.swirlds.logging.handler.console, com.swirlds.logging.handler.log4j, com.swirlds.logging.handler.noop, com.swirlds.logging.handler.rollingfile, com.swirlds.logging.handler.synced;
     exports com.swirlds.logging.api.internal to com.swirlds.logging.test.api;
     exports com.swirlds.logging.api.internal.util to com.swirlds.logging.test.api;
+    exports com.swirlds.logging.api.internal.level to com.swirlds.logging.test.api, com.swirlds.logging.handler.synced;
+    exports com.swirlds.logging.api.internal.emergency to com.swirlds.logging.test.api;
 
     uses LogHandlerFactory;
     uses LogProviderFactory;

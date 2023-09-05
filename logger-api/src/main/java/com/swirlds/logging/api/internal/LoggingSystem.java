@@ -30,7 +30,7 @@ import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.LogListener;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
-import com.swirlds.logging.api.internal.util.LoggingLevelConfig;
+import com.swirlds.logging.api.internal.level.LoggingLevelConfig;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.lang.System.Logger;
 import java.util.ArrayList;

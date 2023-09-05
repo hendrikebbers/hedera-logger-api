@@ -5,7 +5,7 @@ import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
-import com.swirlds.logging.api.internal.util.EmergencyLoggerImpl;
+import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;

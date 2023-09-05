@@ -5,7 +5,9 @@ import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import java.io.PrintWriter;
+import java.lang.System.Logger.Level;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -20,7 +22,7 @@ public class LineBasedFormat {
     private static final int MAX_PRINTED_STACK = 10;
 
     public LineBasedFormat(PrintWriter printWriter) {
-        this.formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        this.formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault());
         this.printWriter = printWriter;
     }
 
@@ -28,13 +30,7 @@ public class LineBasedFormat {
         if (event == null) {
             EMERGENCY_LOGGER.logNPE("event");
         }
-        final Instant instant = event.timestamp();
-        final String timeStamp;
-        if (instant == null) {
-            timeStamp = "------UNKNOWN------";
-        } else {
-            timeStamp = formatter.format(instant);
-        }
+        final String timeStamp = asString(event.timestamp());
         String threadName = event.threadName();
         printWriter.print(timeStamp);
         printWriter.print(' ');
@@ -67,7 +63,20 @@ public class LineBasedFormat {
         }
     }
 
-    public String asString(Marker marker) {
+    private String asString(Instant instant) {
+        if (instant == null) {
+            return "UNDEFINED";
+        } else {
+            try {
+                return formatter.format(instant);
+            } catch (final Throwable e) {
+                EMERGENCY_LOGGER.log(Level.ERROR, "Failed to format instant", e);
+                return "UNDEFINED";
+            }
+        }
+    }
+
+    private String asString(Marker marker) {
         if (marker == null) {
             return "null";
         } else {
