@@ -51,7 +51,7 @@ public class DefaultLoggingSystem {
         final ServiceLoader<LogHandlerFactory> serviceLoader = ServiceLoader.load(LogHandlerFactory.class);
         final List<LogHandler> handlers = serviceLoader.stream()
                 .map(Provider::get)
-                .map(factory -> factory.apply(configuration))
+                .map(factory -> factory.create(configuration))
                 .filter(LogHandler::isActive)
                 .toList();
         handlers.forEach(internalLoggingSystem::addHandler);
@@ -62,7 +62,7 @@ public class DefaultLoggingSystem {
         final ServiceLoader<LogProviderFactory> serviceLoader = ServiceLoader.load(LogProviderFactory.class);
         final List<LogProvider> providers = serviceLoader.stream()
                 .map(ServiceLoader.Provider::get)
-                .map(factory -> factory.apply(configuration))
+                .map(factory -> factory.create(configuration))
                 .filter(LogProvider::isActive)
                 .toList();
         providers.forEach(p -> p.install(internalLoggingSystem));
@@ -85,7 +85,7 @@ public class DefaultLoggingSystem {
     public void removeListener(LogListener listener) {
         internalLoggingSystem.removeListener(listener);
     }
-    
+
     public static boolean isInitialized() {
         return INITIALIZED.get();
     }

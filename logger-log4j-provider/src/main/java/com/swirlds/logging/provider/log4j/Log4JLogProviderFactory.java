@@ -7,7 +7,7 @@ import com.swirlds.logging.api.extensions.provider.LogProviderFactory;
 public class Log4JLogProviderFactory implements LogProviderFactory {
 
     @Override
-    public LogProvider apply(Configuration configuration) {
+    public LogProvider create(Configuration configuration) {
         return new Log4JLogProvider();
     }
 }

@@ -8,7 +8,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 public class ConsoleHandlerFactory implements LogHandlerFactory {
 
     @Override
-    public LogHandler apply(@NonNull Configuration configuration) {
+    public LogHandler create(@NonNull Configuration configuration) {
         return new ConsoleHandler(configuration);
     }
 }
