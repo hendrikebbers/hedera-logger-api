@@ -21,81 +21,104 @@ import com.swirlds.base.context.internal.ThreadLocalContext;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 
+/**
+ * A context is a key-value holder that can be used to store information of different parts of the code.
+ * <p>
+ * The context MUST NOT be used a collection to access data from different parts of the code. Based on that the
+ * interface does not provide any methods to access the data. Instead, the context is used to add information to the
+ * context that can be used by base systems like logging and metrics to enrich events of the base system "with a
+ * context".
+ */
 public interface Context {
 
-    AutoCloseable put(@NonNull String key, @Nullable String value);
+    /**
+     * Adds a key-value pair to the context.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return an {@link AutoCloseable} that can be used to remove the key-value pair from the context
+     */
+    AutoCloseable add(@NonNull String key, @Nullable String value);
 
-    AutoCloseable put(@NonNull String key, @Nullable String... values);
-
+    /**
+     * remove a key-value pair from the context.
+     *
+     * @param key the key to remove
+     */
     void remove(@NonNull String key);
 
-    void clear();
-
-    default AutoCloseable put(@NonNull String key, int value) {
-        return put(key, Integer.toString(value));
+    /**
+     * Adds a key-value pair to the context.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return an {@link AutoCloseable} that can be used to remove the key-value pair from the context
+     */
+    default AutoCloseable add(@NonNull String key, int value) {
+        return add(key, Integer.toString(value));
     }
 
-    default AutoCloseable put(@NonNull String key, int... values) {
-        String[] stringValues = new String[values.length];
-        for (int i = 0; i < values.length; i++) {
-            stringValues[i] = Integer.toString(values[i]);
-        }
-        return put(key, stringValues);
+    /**
+     * Adds a key-value pair to the context.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return an {@link AutoCloseable} that can be used to remove the key-value pair from the context
+     */
+    default AutoCloseable add(@NonNull String key, long value) {
+        return add(key, Long.toString(value));
     }
 
-    default AutoCloseable put(@NonNull String key, long value) {
-        return put(key, Long.toString(value));
+    /**
+     * Adds a key-value pair to the context.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return an {@link AutoCloseable} that can be used to remove the key-value pair from the context
+     */
+    default AutoCloseable add(@NonNull String key, float value) {
+        return add(key, Float.toString(value));
     }
 
-    default AutoCloseable put(@NonNull String key, long... values) {
-        String[] stringValues = new String[values.length];
-        for (int i = 0; i < values.length; i++) {
-            stringValues[i] = Long.toString(values[i]);
-        }
-        return put(key, stringValues);
+    /**
+     * Adds a key-value pair to the context.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return an {@link AutoCloseable} that can be used to remove the key-value pair from the context
+     */
+    default AutoCloseable add(@NonNull String key, double value) {
+        return add(key, Double.toString(value));
     }
 
-    default AutoCloseable put(@NonNull String key, float value) {
-        return put(key, Float.toString(value));
+    /**
+     * Adds a key-value pair to the context.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return an {@link AutoCloseable} that can be used to remove the key-value pair from the context
+     */
+    default AutoCloseable add(@NonNull String key, boolean value) {
+        return add(key, Boolean.toString(value));
     }
 
-    default AutoCloseable put(@NonNull String key, float... values) {
-        String[] stringValues = new String[values.length];
-        for (int i = 0; i < values.length; i++) {
-            stringValues[i] = Float.toString(values[i]);
-        }
-        return put(key, stringValues);
-    }
-
-    default AutoCloseable put(@NonNull String key, double value) {
-        return put(key, Double.toString(value));
-    }
-
-    default AutoCloseable put(@NonNull String key, double... values) {
-        String[] stringValues = new String[values.length];
-        for (int i = 0; i < values.length; i++) {
-            stringValues[i] = Double.toString(values[i]);
-        }
-        return put(key, stringValues);
-    }
-
-    default AutoCloseable put(@NonNull String key, boolean value) {
-        return put(key, Boolean.toString(value));
-    }
-
-    default AutoCloseable put(@NonNull String key, boolean... values) {
-        String[] stringValues = new String[values.length];
-        for (int i = 0; i < values.length; i++) {
-            stringValues[i] = Boolean.toString(values[i]);
-        }
-        return put(key, stringValues);
-    }
-
+    /**
+     * Returns the global context. The content of the global context is shared by all threads. The global context can be
+     * used to store global values like the node id or the ip address of the node.
+     *
+     * @return the global context
+     */
     @NonNull
     static Context getGlobalContext() {
         return GlobalContext.getInstance();
     }
 
+    /**
+     * Returns the thread local context. The content of the thread local context is only visible to the current thread.
+     * The thread local context can be used to store thread local values like the thread id or the thread name.
+     *
+     * @return the thread local context
+     */
     @NonNull
     static Context getThreadLocalContext() {
         return ThreadLocalContext.getInstance();

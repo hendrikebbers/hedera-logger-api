@@ -24,18 +24,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * The ThreadLocalContext is a {@link Context} implementation that defined as a singleton and is used to store
+ * information that is local to the current thread.
+ *
+ * @see GlobalContext
+ * @see Context
+ */
 public final class ThreadLocalContext implements Context {
 
     private static final ThreadLocalContext INSTANCE = new ThreadLocalContext();
 
     private final ThreadLocal<Map<String, String>> contextThreadLocal;
 
+    /**
+     * private constructor to prevent instantiation.
+     */
     private ThreadLocalContext() {
         this.contextThreadLocal = new ThreadLocal<>();
     }
 
     @Override
-    public AutoCloseable put(@NonNull String key, @Nullable String value) {
+    public AutoCloseable add(@NonNull String key, @Nullable String value) {
         Objects.requireNonNull(key, "key must not be null");
         Map<String, String> contextMap = contextThreadLocal.get();
         if (contextMap == null) {
@@ -47,11 +57,6 @@ public final class ThreadLocalContext implements Context {
     }
 
     @Override
-    public AutoCloseable put(@NonNull String key, @Nullable String... values) {
-        return put(key, String.join(",", values));
-    }
-
-    @Override
     public void remove(@NonNull String key) {
         Objects.requireNonNull(key, "key must not be null");
         Map<String, String> contextMap = contextThreadLocal.get();
@@ -60,7 +65,9 @@ public final class ThreadLocalContext implements Context {
         }
     }
 
-    @Override
+    /**
+     * Clears the context map for the current thread.
+     */
     public void clear() {
         Map<String, String> contextMap = contextThreadLocal.get();
         if (contextMap != null) {
@@ -68,11 +75,22 @@ public final class ThreadLocalContext implements Context {
         }
     }
 
+    /**
+     * Returns the singleton instance of the {@link ThreadLocalContext}.
+     *
+     * @return the singleton instance of the {@link ThreadLocalContext}
+     */
     @NonNull
     public static ThreadLocalContext getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * returns the content of the context of the current thread as an immutable map. This method should only be used by
+     * the base apis.
+     *
+     * @return the content of the context of the current thread as an immutable map
+     */
     @NonNull
     public static Map<String, String> getContextMap() {
         final Map<String, String> current = INSTANCE.contextThreadLocal.get();

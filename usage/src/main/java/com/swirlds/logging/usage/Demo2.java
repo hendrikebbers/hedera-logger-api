@@ -109,7 +109,7 @@ public class Demo2 {
                 .withContext("context", "value")
                 .error("Hello world!", new RuntimeException("OH NO!"));
 
-        Context.getGlobalContext().put("app", "demo");
+        Context.getGlobalContext().add("app", "demo");
 
         logger.info("Hello world!");
         logger.debug("Hello world!");
@@ -121,7 +121,7 @@ public class Demo2 {
         logger.withContext("context", "value").warn("Hello world!");
         logger.withContext("context", "value").error("Hello world!");
 
-        Context.getThreadLocalContext().put("transaction", "17");
+        Context.getThreadLocalContext().add("transaction", "17");
 
         logger.info("Hello world!");
         logger.debug("Hello world!");
@@ -135,7 +135,7 @@ public class Demo2 {
 
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(() -> {
-                    Context.getThreadLocalContext().put("transaction", "18");
+                    Context.getThreadLocalContext().add("transaction", "18");
 
                     logger.info("Hello world!");
                     logger.debug("Hello world!");

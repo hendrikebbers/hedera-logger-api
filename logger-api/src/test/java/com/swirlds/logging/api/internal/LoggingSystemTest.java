@@ -1,6 +1,8 @@
 package com.swirlds.logging.api.internal;
 
 import com.swirlds.base.context.Context;
+import com.swirlds.base.context.internal.GlobalContext;
+import com.swirlds.base.context.internal.ThreadLocalContext;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
@@ -21,15 +23,15 @@ public class LoggingSystemTest {
 
     @BeforeEach
     void setUp() {
-        Context.getGlobalContext().clear();
-        Context.getThreadLocalContext().clear();
+        GlobalContext.getInstance().clear();
+        ThreadLocalContext.getInstance().clear();
         EmergencyLoggerImpl.getInstance().publishLoggedEvents(); // This will clear the emergency logger
     }
 
     @AfterEach
     void tearDown() {
-        Context.getGlobalContext().clear();
-        Context.getThreadLocalContext().clear();
+        GlobalContext.getInstance().clear();
+        ThreadLocalContext.getInstance().clear();
         EmergencyLoggerImpl.getInstance().publishLoggedEvents(); // This will clear the emergency logger
     }
 
@@ -471,7 +473,7 @@ public class LoggingSystemTest {
         final Instant startTime = Instant.now();
 
         //when
-        Context.getGlobalContext().put("global", "global-value");
+        Context.getGlobalContext().add("global", "global-value");
         logger.withMarker("TRACE_MARKER")
                 .withContext("level", "trace")
                 .withContext("context", "unit-test")
@@ -479,7 +481,7 @@ public class LoggingSystemTest {
                         "ARG"); //Should not be forwarded since INFO is configured as root level
 
         try (final AutoCloseable closeable = Context.getThreadLocalContext()
-                .put("thread-local", "thread-local-value")) {
+                .add("thread-local", "thread-local-value")) {
             logger.withMarker("INFO_MARKER")
                     .withContext("level", "info")
                     .withContext("context", "unit-test")
@@ -557,7 +559,7 @@ public class LoggingSystemTest {
 
         //when
         loggingSystem.accept(event1);
-        Context.getGlobalContext().put("new-global", "new-global-value");
+        Context.getGlobalContext().add("new-global", "new-global-value");
         loggingSystem.accept(event2);
         loggingSystem.accept(event3);
         loggingSystem.accept(event4);

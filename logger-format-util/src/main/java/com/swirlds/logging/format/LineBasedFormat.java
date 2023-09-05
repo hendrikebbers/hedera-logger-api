@@ -19,8 +19,6 @@ public class LineBasedFormat {
 
     private final PrintWriter printWriter;
 
-    private static final int MAX_PRINTED_STACK = 10;
-
     public LineBasedFormat(PrintWriter printWriter) {
         this.formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault());
         this.printWriter = printWriter;

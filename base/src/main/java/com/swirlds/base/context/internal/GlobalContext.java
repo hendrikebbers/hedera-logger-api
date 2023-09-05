@@ -25,18 +25,28 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * The GlobalContext is a {@link Context} implementation that defined as a singleton and is used to store global
+ * information.
+ *
+ * @see ThreadLocalContext
+ * @see Context
+ */
 public final class GlobalContext implements Context {
 
     private static final GlobalContext INSTANCE = new GlobalContext();
 
     private final AtomicReference<Map<String, String>> contextMapRef;
 
+    /**
+     * private constructor to prevent instantiation.
+     */
     private GlobalContext() {
         contextMapRef = new AtomicReference<>(new HashMap<>());
     }
 
     @Override
-    public AutoCloseable put(@NonNull String key, @Nullable String value) {
+    public AutoCloseable add(@NonNull String key, @Nullable String value) {
         Objects.requireNonNull(key, "key must not be null");
         contextMapRef.getAndUpdate(map -> {
             Map<String, String> newMap = new HashMap<>(map);
@@ -44,11 +54,6 @@ public final class GlobalContext implements Context {
             return newMap;
         });
         return () -> remove(key);
-    }
-
-    @Override
-    public AutoCloseable put(@NonNull String key, @Nullable String... values) {
-        return put(key, String.join(",", values));
     }
 
     @Override
@@ -61,16 +66,28 @@ public final class GlobalContext implements Context {
         });
     }
 
-    @Override
+    /**
+     * Clears the context.
+     */
     public void clear() {
         contextMapRef.set(new HashMap<>());
     }
 
+    /**
+     * Returns the singleton instance of the {@link GlobalContext}.
+     *
+     * @return the singleton instance of the {@link GlobalContext}
+     */
     @NonNull
     public static GlobalContext getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * returns the content of the context as an immutable map. This method should only be used by the base apis.
+     *
+     * @return the content of the context as an immutable map
+     */
     @NonNull
     public static Map<String, String> getContextMap() {
         return Collections.unmodifiableMap(INSTANCE.contextMapRef.get());

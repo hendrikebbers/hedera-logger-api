@@ -13,7 +13,7 @@ public class Log4JThreadContextMap implements ThreadContextMap {
 
     @Override
     public void clear() {
-        Context.getThreadLocalContext().clear();
+        ThreadLocalContext.getInstance().clear();
     }
 
     @Override
@@ -23,7 +23,7 @@ public class Log4JThreadContextMap implements ThreadContextMap {
 
     @Override
     public void put(String key, String value) {
-        Context.getThreadLocalContext().put(key, value);
+        Context.getThreadLocalContext().add(key, value);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class Log4JThreadContextMap implements ThreadContextMap {
             @Override
             public String put(String key, String value) {
                 String old = ThreadLocalContext.getContextMap().get(key);
-                ThreadLocalContext.getInstance().put(key, value);
+                ThreadLocalContext.getInstance().add(key, value);
                 return old;
             }
         };
