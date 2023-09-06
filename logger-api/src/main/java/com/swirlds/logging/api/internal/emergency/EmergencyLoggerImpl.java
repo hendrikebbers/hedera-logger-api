@@ -183,34 +183,17 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
 
     @Override
     public void log(Level level, ResourceBundle bundle, String msg, Throwable thrown) {
-        LogEvent fallbackLogEvent = new LogEvent(msg, name, convertFromSystemLogger(level));
-        callGuarded(fallbackLogEvent, () -> {
-            final System.Logger innerLogger = innerLoggerRef.get();
-            if (innerLogger != null) {
-                innerLogger.log(level, bundle, msg, thrown);
-            } else {
-                final LogEvent logEvent = new LogEvent(msg, name, convertFromSystemLogger(level), thrown);
-                handle(logEvent);
-            }
-        });
+        final LogEvent logEvent = new LogEvent(msg, name, convertFromSystemLogger(level), thrown);
+        log(logEvent);
     }
 
     @Override
     public void log(Level level, ResourceBundle bundle, String format, Object... params) {
-        final LogEvent fallbackLogEvent;
         if (params == null || params.length == 0) {
-            fallbackLogEvent = new LogEvent(format, name, convertFromSystemLogger(level));
+            log(level, bundle, format, (Throwable) null);
         } else {
-            fallbackLogEvent = new LogEvent(format + " -> " + params, name, convertFromSystemLogger(level));
+            log(level, bundle, format + " -> " + params, (Throwable) null);
         }
-        callGuarded(fallbackLogEvent, () -> {
-            final System.Logger innerLogger = innerLoggerRef.get();
-            if (innerLogger != null) {
-                innerLogger.log(level, bundle, format, params);
-            } else {
-                handle(fallbackLogEvent); //TODO: Create message instead of simple printing args
-            }
-        });
     }
 
 
@@ -219,14 +202,16 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         if (event == null) {
             logNPE("event");
         }
-        callGuarded(event, () -> {
-            final System.Logger innerLogger = innerLoggerRef.get();
-            if (innerLogger != null) {
-                innerLogger.log(convertToSystemLogger(event.level()), null, event.message(), event.throwable());
-            } else {
-                handle(event);
-            }
-        });
+        if (isLoggable(convertToSystemLogger(event.level()))) {
+            callGuarded(event, () -> {
+                final System.Logger innerLogger = innerLoggerRef.get();
+                if (innerLogger != null) {
+                    innerLogger.log(convertToSystemLogger(event.level()), null, event.message(), event.throwable());
+                } else {
+                    handle(event);
+                }
+            });
+        }
     }
 
     /**
