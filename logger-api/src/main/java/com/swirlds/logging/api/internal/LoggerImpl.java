@@ -73,7 +73,7 @@ public class LoggerImpl implements Logger {
         }
     }
 
-    protected LoggerImpl(String name, LogEventConsumer logEventConsumer) {
+    public LoggerImpl(String name, LogEventConsumer logEventConsumer) {
         this(name, null, Map.of(), logEventConsumer);
     }
 
@@ -81,11 +81,11 @@ public class LoggerImpl implements Logger {
         return name;
     }
 
-    protected Marker getMarker() {
+    private Marker getMarker() {
         return marker;
     }
 
-    protected Map<String, String> getContext() {
+    private Map<String, String> getContext() {
         return context;
     }
 

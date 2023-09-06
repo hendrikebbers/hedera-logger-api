@@ -5,5 +5,5 @@ module com.swirlds.base {
     exports com.swirlds.base.context;
     exports com.swirlds.base.context.internal to com.swirlds.base.context.test,
             com.swirlds.logging.api,
-            com.swirlds.logging.provider.log4j;
+            com.swirlds.logging.provider.log4j, com.swirlds.base.testfixture;
 }

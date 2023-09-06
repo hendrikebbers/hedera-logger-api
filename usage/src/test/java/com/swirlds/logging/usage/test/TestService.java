@@ -1,27 +1,16 @@
 package com.swirlds.logging.usage.test;
 
-import com.swirlds.logging.test.api.LoggingMirror;
-import com.swirlds.logging.test.api.internal.LoggerTestSupport;
-import org.junit.jupiter.api.AfterEach;
+import com.swirlds.logging.api.testfixture.LoggingMirror;
+import com.swirlds.logging.api.testfixture.WithLoggingMirror;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@WithLoggingMirror
 public class TestService {
 
+    @Inject
     private LoggingMirror mirror;
-
-    @BeforeEach
-    void beforeEach() {
-        mirror = LoggerTestSupport.createMirror();
-    }
-
-    @AfterEach
-    void afterEach() {
-        if (mirror != null) {
-            LoggerTestSupport.disposeMirror(mirror);
-        }
-    }
 
     @Test
     void test() {

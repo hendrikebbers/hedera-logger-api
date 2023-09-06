@@ -55,7 +55,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>logger-test-support</artifactId>
+      <artifactId>logger-api-testfixture</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
