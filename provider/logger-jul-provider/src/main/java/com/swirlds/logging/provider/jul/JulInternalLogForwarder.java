@@ -1,68 +1,47 @@
 package com.swirlds.logging.provider.jul;
 
-import static com.swirlds.logging.provider.jul.JulConversionUtils.convertFromJul;
+import static com.swirlds.logging.provider.jul.JulUtils.convertFromJul;
 
 import com.swirlds.logging.api.Level;
+import com.swirlds.logging.api.extensions.EmergencyLogger;
+import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
-import java.text.MessageFormat;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
-public class JulInternalLogForwarder extends Handler {
+/**
+ * Forwards java.util.logging events to a {@link LogEventConsumer}. The class implements the {@link Handler} interface
+ * of java.util.logging and converts all {@link LogRecord} objects to {@link LogEvent} objects.
+ */
+public final class JulInternalLogForwarder extends Handler {
+
+    private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
     private final LogEventConsumer logEventConsumer;
 
-    public JulInternalLogForwarder(LogEventConsumer logEventConsumer) {
+    /**
+     * Creates a new instance.
+     *
+     * @param logEventConsumer
+     */
+    public JulInternalLogForwarder(@NonNull final LogEventConsumer logEventConsumer) {
         this.logEventConsumer = Objects.requireNonNull(logEventConsumer, "logEventConsumer must not be null");
     }
 
     @Override
-    public void publish(LogRecord record) {
-        Level level = convertFromJul(record.getLevel());
+    public void publish(@NonNull final LogRecord record) {
+        if (record == null) {
+            EMERGENCY_LOGGER.logNPE("record");
+            return;
+        }
+        final Level level = convertFromJul(record.getLevel());
         final String name = record.getLoggerName();
         if (logEventConsumer.isEnabled(name, level)) {
-            String message = record.getMessage();
-            final Object[] parameters = record.getParameters();
-            if (message == null) {
-                logEventConsumer.accept(new LogEvent("", name, level, record.getThrown()));
-            } else {
-                if (parameters == null || parameters.length == 0) {
-                    final ResourceBundle resourceBundle = record.getResourceBundle();
-                    if (resourceBundle != null) {
-                        logEventConsumer.accept(
-                                new LogEvent(translateOrKey(resourceBundle, message), name, level, record.getThrown()));
-                    } else {
-                        logEventConsumer.accept(new LogEvent(message, name, level, record.getThrown()));
-                    }
-                } else {
-                    final ResourceBundle resourceBundle = record.getResourceBundle();
-                    if (resourceBundle != null) {
-                        logEventConsumer.accept(
-                                new LogEvent(MessageFormat.format(translateOrKey(resourceBundle, message), parameters),
-                                        name,
-                                        level,
-                                        record.getThrown()));
-                    } else {
-                        logEventConsumer.accept(
-                                new LogEvent(MessageFormat.format(message, parameters), name, level,
-                                        record.getThrown()));
-                    }
-                }
-            }
-        }
-    }
-
-    private static String translateOrKey(ResourceBundle bundle, String key) {
-        if (bundle == null || key == null) {
-            return "";
-        }
-        try {
-            return bundle.getString(key);
-        } catch (Exception x) {
-            return key;
+            final String message = JulUtils.extractMessage(record);
+            logEventConsumer.accept(new LogEvent(message, name, level, record.getThrown()));
         }
     }
 

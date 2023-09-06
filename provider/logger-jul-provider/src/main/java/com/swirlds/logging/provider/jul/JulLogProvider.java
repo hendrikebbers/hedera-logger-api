@@ -3,15 +3,24 @@ package com.swirlds.logging.provider.jul;
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.provider.LogProvider;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 
+/**
+ * Implementation of {@link LogProvider} for java.util.logging.
+ */
 public class JulLogProvider implements LogProvider {
 
     private final Configuration configuration;
 
-    public JulLogProvider(Configuration configuration) {
+    /**
+     * Creates a new instance.
+     *
+     * @param configuration the configuration
+     */
+    public JulLogProvider(@NonNull final Configuration configuration) {
         this.configuration = Objects.requireNonNull(configuration, "configuration must not be null");
     }
 
@@ -25,7 +34,9 @@ public class JulLogProvider implements LogProvider {
         return "Provider for java.util.logging";
     }
 
-    public void install(LogEventConsumer logEventConsumer) {
+    @Override
+    public void install(@NonNull final LogEventConsumer logEventConsumer) {
+        Objects.requireNonNull(logEventConsumer, "logEventConsumer must not be null");
         java.util.logging.Logger rootLogger = LogManager.getLogManager().getLogger("");
         Handler[] handlers = rootLogger.getHandlers();
         for (Handler handler : handlers) {
