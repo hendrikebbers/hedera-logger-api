@@ -13,7 +13,7 @@ public class TestService {
 
     @BeforeEach
     void beforeEach() {
-        mirror = LoggerTestSupport.createMirror(Service.class);
+        mirror = LoggerTestSupport.createMirror();
     }
 
     @AfterEach

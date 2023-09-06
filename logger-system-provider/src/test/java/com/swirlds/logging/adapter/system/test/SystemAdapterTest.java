@@ -14,7 +14,7 @@ public class SystemAdapterTest {
 
     @BeforeEach
     void setUp() {
-        loggingMirror = LoggerTestSupport.createMirror(SystemAdapterTest.class);
+        loggingMirror = LoggerTestSupport.createMirror();
     }
 
     @AfterEach

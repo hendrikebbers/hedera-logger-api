@@ -170,6 +170,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
     public boolean isLoggable(Level level) {
         return callGuarded(() -> {
             if (level == null) {
+                getInstance().logNPE("level");
                 return true;
             }
             final System.Logger innerLogger = innerLoggerRef.get();
@@ -235,17 +236,19 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      * @param logEvent the log event that should be handled
      */
     private void handle(@NonNull final LogEvent logEvent) {
-        if (logEvent != null) {
-            final PrintStream printStream = Optional.ofNullable(System.err)
-                    .orElse(System.out);
-            if (printStream != null) {
-                new LineBasedFormat(new PrintWriter(printStream, true)).print(logEvent);
-            }
-            if (logEvents.remainingCapacity() == 0) {
-                logEvents.remove();
-            }
-            logEvents.add(logEvent);
+        if (logEvent == null) {
+            logNPE("logEvent");
+            return;
         }
+        final PrintStream printStream = Optional.ofNullable(System.err)
+                .orElse(System.out);
+        if (printStream != null) {
+            new LineBasedFormat(new PrintWriter(printStream, true)).print(logEvent);
+        }
+        if (logEvents.remainingCapacity() == 0) {
+            logEvents.remove();
+        }
+        logEvents.add(logEvent);
     }
 
     /**
@@ -256,6 +259,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      */
     private static com.swirlds.logging.api.Level convertFromSystemLogger(@NonNull Level level) {
         if (level == null) {
+            getInstance().logNPE("level");
             return com.swirlds.logging.api.Level.ERROR;
         }
         return switch (level) {
@@ -269,6 +273,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
 
     private static Level convertToSystemLogger(@NonNull com.swirlds.logging.api.Level level) {
         if (level == null) {
+            getInstance().logNPE("level");
             return Level.ERROR;
         }
         return switch (level) {
@@ -310,6 +315,11 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         innerLoggerRef.set(logger);
     }
 
+    /**
+     * Logs a null pointer exception with the given name of the null parameter.
+     *
+     * @param nameOfNullParam the name of the null parameter
+     */
     @Override
     public void logNPE(@NonNull String nameOfNullParam) {
         log(Level.ERROR, "Null parameter: " + nameOfNullParam,
