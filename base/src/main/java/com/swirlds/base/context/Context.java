@@ -19,7 +19,6 @@ package com.swirlds.base.context;
 import com.swirlds.base.context.internal.GlobalContext;
 import com.swirlds.base.context.internal.ThreadLocalContext;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
 
 /**
  * A context is a key-value holder that can be used to store information of different parts of the code.
@@ -37,11 +36,12 @@ public interface Context {
      * @param key   the key
      * @param value the value
      * @return an {@link AutoCloseable} that can be used to remove the key-value pair from the context
+     * @throws NullPointerException if the key or value is null
      */
-    AutoCloseable add(@NonNull String key, @Nullable String value);
+    AutoCloseable add(@NonNull String key, @NonNull String value);
 
     /**
-     * remove a key-value pair from the context.
+     * remove a key-value pair from the context if available.
      *
      * @param key the key to remove
      */

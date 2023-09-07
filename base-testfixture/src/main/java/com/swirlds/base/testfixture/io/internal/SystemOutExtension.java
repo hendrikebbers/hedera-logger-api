@@ -1,6 +1,7 @@
 package com.swirlds.base.testfixture.io.internal;
 
 import com.swirlds.base.testfixture.io.SystemOutProvider;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -12,11 +13,17 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 
+/**
+ * This class is used to inject a {@link SystemOutProvider} instance into a test and run the test in isolation.
+ */
 public class SystemOutExtension implements InvocationInterceptor {
 
     @Override
-    public void interceptTestMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext,
-            ExtensionContext extensionContext) throws Throwable {
+    public void interceptTestMethod(@NonNull final Invocation<Void> invocation,
+            @NonNull final ReflectiveInvocationContext<Method> invocationContext,
+            @NonNull final ExtensionContext extensionContext) throws Throwable {
+        Objects.requireNonNull(invocation, "invocation must not be null");
+        Objects.requireNonNull(extensionContext, "extensionContext must not be null");
         final PrintStream originalSystemOutPrintStream = System.out;
         try (final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             final SystemIoProvider provider = new SystemIoProvider(byteArrayOutputStream);

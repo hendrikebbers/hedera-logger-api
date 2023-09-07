@@ -1,6 +1,7 @@
 package com.swirlds.logging.api.internal;
 
 import com.swirlds.config.api.Configuration;
+import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
@@ -12,7 +13,6 @@ import com.swirlds.logging.api.extensions.provider.LogProviderFactory;
 import com.swirlds.logging.api.internal.configuration.LogConfiguration;
 import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.lang.System.Logger.Level;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;

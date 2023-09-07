@@ -7,6 +7,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+/**
+ * Implementation of {@link SystemOutProvider} and {@link SystemErrProvider}.
+ */
 public class SystemIoProvider implements SystemOutProvider, SystemErrProvider {
 
     private final ByteArrayOutputStream outputStream;
@@ -15,10 +18,18 @@ public class SystemIoProvider implements SystemOutProvider, SystemErrProvider {
 
     private boolean readAll = false;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param outputStream the output stream to read from
+     */
     public SystemIoProvider(@NonNull final ByteArrayOutputStream outputStream) {
         this.outputStream = Objects.requireNonNull(outputStream, "outputStream must not be null");
     }
 
+    /**
+     * Reads all lines from the output stream and stores them in the internal builder.
+     */
     private void readAll() {
         try {
             internalBuilder.setLength(0); // clear the builder

@@ -17,8 +17,6 @@
 
 package com.swirlds.logging.api.internal;
 
-import static java.lang.System.Logger.Level.ERROR;
-
 import com.swirlds.base.context.internal.GlobalContext;
 import com.swirlds.base.context.internal.ThreadLocalContext;
 import com.swirlds.config.api.Configuration;
@@ -30,7 +28,6 @@ import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.internal.level.LoggingLevelConfig;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.lang.System.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -127,12 +124,13 @@ public class LoggingSystem implements LogEventConsumer {
                             try {
                                 consumer.accept(enrichedEvent);
                             } catch (final Throwable throwable) {
-                                EMERGENCY_LOGGER.log(ERROR, "Exception in handling log event by consumer", throwable);
+                                EMERGENCY_LOGGER.log(Level.ERROR, "Exception in handling log event by consumer",
+                                        throwable);
                             }
                         });
                     }
                 } catch (final Throwable throwable) {
-                    EMERGENCY_LOGGER.log(ERROR, "Exception in handling log event", throwable);
+                    EMERGENCY_LOGGER.log(Level.ERROR, "Exception in handling log event", throwable);
                 }
             }
         }
@@ -143,7 +141,7 @@ public class LoggingSystem implements LogEventConsumer {
             EMERGENCY_LOGGER.logNPE("listener");
         } else {
             listeners.add(listener);
-            EMERGENCY_LOGGER.log(Logger.Level.DEBUG,
+            EMERGENCY_LOGGER.log(Level.WARN,
                     "Logging Listener added! This should only be done in unit tests since it can slow down the system.");
         }
     }

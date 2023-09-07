@@ -23,7 +23,7 @@ public class GlobalContextTest {
     }
 
     @Test
-    void testNullName() {
+    void testNullKeyOrValue() {
         //given
         GlobalContext context = GlobalContext.getInstance();
 
@@ -34,6 +34,9 @@ public class GlobalContextTest {
         Assertions.assertThrows(NullPointerException.class, () -> context.add(null, 1.0D));
         Assertions.assertThrows(NullPointerException.class, () -> context.add(null, 1.0F));
         Assertions.assertThrows(NullPointerException.class, () -> context.add(null, true));
+        Assertions.assertThrows(NullPointerException.class, () -> context.add("foo", null));
+        Assertions.assertThrows(NullPointerException.class, () -> context.add(null, null));
+
     }
 
     @Test
@@ -58,20 +61,6 @@ public class GlobalContextTest {
         Assertions.assertEquals("1.0", contextMap.get("key-double"));
         Assertions.assertEquals("1.0", contextMap.get("key-float"));
         Assertions.assertEquals("true", contextMap.get("key-boolean"));
-    }
-
-    @Test
-    void testAllPutNull() {
-        //given
-        GlobalContext context = GlobalContext.getInstance();
-
-        //when
-        context.add("key-string", null);
-
-        //then
-        final Map<String, String> contextMap = context.getContextMap();
-        Assertions.assertEquals(1, contextMap.size());
-        Assertions.assertEquals(null, contextMap.get("key-string"));
     }
 
     @Test

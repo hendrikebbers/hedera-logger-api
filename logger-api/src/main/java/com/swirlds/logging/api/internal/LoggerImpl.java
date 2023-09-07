@@ -58,14 +58,14 @@ public class LoggerImpl implements Logger {
             this.logEventConsumer = new LogEventConsumer() {
                 @Override
                 public void accept(LogEvent event) {
-                    EMERGENCY_LOGGER.log(SystemLoggerConverterUtils.convertToSystemLogger(event.level()),
+                    EMERGENCY_LOGGER.log(event.level(),
                             event.message(),
                             event.throwable());
                 }
 
                 @Override
                 public boolean isEnabled(String name, Level level) {
-                    return EMERGENCY_LOGGER.isLoggable(SystemLoggerConverterUtils.convertToSystemLogger(level));
+                    return EMERGENCY_LOGGER.isLoggable(level);
                 }
             };
         } else {

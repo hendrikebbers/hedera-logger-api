@@ -24,20 +24,10 @@ public record Marker(@NonNull String name, @Nullable Marker parent) {
 
     public Marker {
         Objects.requireNonNull(name, "name must not be null");
-        recursionCheck(parent);
     }
 
     public Marker(@NonNull String name) {
         this(name, null);
     }
 
-    public void recursionCheck(@Nullable Marker marker) {
-        if (marker == null || parent == null) {
-            return;
-        }
-        if (this.equals(marker)) {
-            throw new IllegalStateException("Marker " + name + " is a parent of itself");
-        }
-        recursionCheck(marker.parent());
-    }
 }

@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class SystemEmergencyLogger implements System.Logger {
-    
+
     private final String name;
 
 
@@ -28,7 +28,8 @@ public class SystemEmergencyLogger implements System.Logger {
         if (logEventConsumer != null) {
             return logEventConsumer.isEnabled(name, SystemLoggerConverterUtils.convertFromSystemLogger(level));
         }
-        return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(level);
+        return EmergencyLoggerProvider.getEmergencyLogger()
+                .isLoggable(SystemLoggerConverterUtils.convertFromSystemLogger(level));
     }
 
     @Override
@@ -45,7 +46,7 @@ public class SystemEmergencyLogger implements System.Logger {
                 logEventConsumer.accept(
                         new LogEvent(message, name, SystemLoggerConverterUtils.convertFromSystemLogger(level), thrown));
             } else {
-                EmergencyLoggerProvider.getEmergencyLogger().log(level, bundle, msg, thrown);
+                EmergencyLoggerProvider.getEmergencyLogger().log(SystemLoggerConverterUtils.convertFromSystemLogger(level), msg, thrown);
             }
         }
     }

@@ -1,22 +1,21 @@
 package com.swirlds.logging.api.internal.emergency;
 
+import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.internal.format.LineBasedFormat;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.lang.System.Logger;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
- * A {@link System.Logger} implementation that is used as a LAST RESORT when no other logger is available. It is
+ * A {@link EmergencyLogger} implementation that is used as a LAST RESORT when no other logger is available. It is
  * important that this logger does not depend on any other logger implementation and that it does not throw exceptions.
  * Next to that the logger should try to somehow log the message even in a broken system.
  * <p>
@@ -24,27 +23,18 @@ import java.util.function.Supplier;
  */
 public class EmergencyLoggerImpl implements EmergencyLogger {
 
-    /**
-     * A reference to the inner logger that is used to log the messages. This reference can be set at runtime once the
-     * real logging system is available. The {@link EmergencyLoggerImpl} even tries to log a message (for example to
-     * {@link System#out}) when the inner logger is broken.
-     */
-    private final static AtomicReference<System.Logger> innerLoggerRef = new AtomicReference<>();
+    private final static String EMERGENCY_LOGGER_NAME = "EMERGENCY-LOGGER";
 
-    /**
-     * The singleton instance of the {@link EmergencyLoggerImpl}.
-     */
-    private final static EmergencyLoggerImpl INSTANCE = new EmergencyLoggerImpl();
+    private final static String UNDEFINED_MESSAGE = "Undefined message";
 
-    /**
-     * The name of the logger.
-     */
-    private final static String name = "EMERGENCY-LOGGER";
+    private final static int LOG_EVENT_QUEUE_SIZE = 1000;
 
     /**
      * The name of the system property that defines the level of the logger.
      */
     private final static String LEVEL_PROPERTY_NAME = "com.swirlds.logging.emergency.level";
+
+    private final static EmergencyLoggerImpl INSTANCE = new EmergencyLoggerImpl();
 
     /**
      * The level that is supported by the logger.
@@ -62,11 +52,8 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      */
     private final ThreadLocal<Boolean> recursionGuard;
 
-    /**
-     * The constructor of the {@link EmergencyLoggerImpl}.
-     */
-    private EmergencyLoggerImpl() {
-        logEvents = new ArrayBlockingQueue<>(1000);
+    public EmergencyLoggerImpl() {
+        this.logEvents = new ArrayBlockingQueue<>(LOG_EVENT_QUEUE_SIZE);
         recursionGuard = new ThreadLocal<>();
         supportedLevel = getSupportedLevelFromSystemProperties();
     }
@@ -87,7 +74,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         } else if (Objects.equals(property.toUpperCase(), "INFO")) {
             return Level.INFO;
         } else if (Objects.equals(property.toUpperCase(), "WARN")) {
-            return Level.WARNING;
+            return Level.WARN;
         } else if (Objects.equals(property.toUpperCase(), "ERROR")) {
             return Level.ERROR;
         } else {
@@ -95,21 +82,43 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         }
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public void logNPE(@NonNull String nameOfNullParam) {
+        log(Level.ERROR, "Null parameter: " + nameOfNullParam,
+                new NullPointerException("Null parameter: " + nameOfNullParam));
     }
 
-    /**
-     * A method that is used to call any given {@link Supplier} in a guarded way. This includes exception handling and a
-     * recursion check.
-     *
-     * @param supplier the supplier that should be called
-     * @param <T>      the type of the result
-     * @return the result of the supplier
-     */
-    private <T> T callGuarded(@NonNull Supplier<T> supplier, @NonNull T fallbackValue) {
-        return callGuarded(null, fallbackValue, supplier);
+    public void log(@NonNull Level level, @NonNull String message) {
+        log(level, message, null);
+    }
+
+    public void log(@NonNull Level level, @NonNull String message, @Nullable Throwable thrown) {
+        if (level == null && message == null) {
+            log(new LogEvent(UNDEFINED_MESSAGE, EMERGENCY_LOGGER_NAME, Level.ERROR, thrown));
+        } else if (level == null) {
+            log(new LogEvent(message, EMERGENCY_LOGGER_NAME, Level.ERROR, thrown));
+        } else if (message == null) {
+            log(new LogEvent(UNDEFINED_MESSAGE, EMERGENCY_LOGGER_NAME, level, thrown));
+        } else {
+            log(new LogEvent(message, EMERGENCY_LOGGER_NAME, level, thrown));
+        }
+    }
+
+    @Override
+    public void log(@NonNull LogEvent event) {
+        if (event == null) {
+            logNPE("event");
+        }
+        if (isLoggable(event.level())) {
+            callGuarded(event, () -> handle(event));
+        }
+    }
+
+    @Override
+    public boolean isLoggable(@NonNull Level level) {
+        if (level == null) {
+            logNPE("level");
+        }
+        return callGuarded(null, true, () -> supportedLevel.enabledLoggingOfLevel(level));
     }
 
     /**
@@ -139,8 +148,8 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
             @NonNull final Supplier<T> supplier) {
         final Boolean guard = recursionGuard.get();
         if (guard != null && guard) {
-            final LogEvent logEvent = new LogEvent("Recursion in Emergency logger", name,
-                    com.swirlds.logging.api.Level.ERROR,
+            final LogEvent logEvent = new LogEvent("Recursion in Emergency logger", EMERGENCY_LOGGER_NAME,
+                    Level.ERROR,
                     new IllegalStateException("Recursion in Emergency logger"));
             handle(logEvent);
             if (fallbackLogEvent != null) {
@@ -152,8 +161,8 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
             try {
                 return supplier.get();
             } catch (final Throwable t) {
-                final LogEvent logEvent = new LogEvent("Error in Emergency logger", name,
-                        com.swirlds.logging.api.Level.ERROR,
+                final LogEvent logEvent = new LogEvent("Error in Emergency logger", EMERGENCY_LOGGER_NAME,
+                        Level.ERROR,
                         t);
                 handle(logEvent);
                 if (fallbackLogEvent != null) {
@@ -166,57 +175,8 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         }
     }
 
-    @Override
-    public boolean isLoggable(Level level) {
-        return callGuarded(() -> {
-            if (level == null) {
-                getInstance().logNPE("level");
-                return true;
-            }
-            final System.Logger innerLogger = innerLoggerRef.get();
-            if (innerLogger != null) {
-                return innerLogger.isLoggable(level);
-            }
-            return supportedLevel.getSeverity() <= level.getSeverity();
-        }, true);
-    }
-
-    @Override
-    public void log(Level level, ResourceBundle bundle, String msg, Throwable thrown) {
-        final LogEvent logEvent = new LogEvent(msg, name, convertFromSystemLogger(level), thrown);
-        log(logEvent);
-    }
-
-    @Override
-    public void log(Level level, ResourceBundle bundle, String format, Object... params) {
-        if (params == null || params.length == 0) {
-            log(level, bundle, format, (Throwable) null);
-        } else {
-            log(level, bundle, format + " -> " + params, (Throwable) null);
-        }
-    }
-
-
-    @Override
-    public void log(LogEvent event) {
-        if (event == null) {
-            logNPE("event");
-        }
-        if (isLoggable(convertToSystemLogger(event.level()))) {
-            callGuarded(event, () -> {
-                final System.Logger innerLogger = innerLoggerRef.get();
-                if (innerLogger != null) {
-                    innerLogger.log(convertToSystemLogger(event.level()), null, event.message(), event.throwable());
-                } else {
-                    handle(event);
-                }
-            });
-        }
-    }
-
     /**
-     * Handles the given log event by trying to print the message to the console and adding it to the queue. This is the
-     * default logging behavior if no inner logger is set (see {@link #setInnerLogger(Logger)}).
+     * Handles the given log event by trying to print the message to the console and adding it to the queue.
      *
      * @param logEvent the log event that should be handled
      */
@@ -237,50 +197,6 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
     }
 
     /**
-     * Converts the given {@link Level} to a {@link com.swirlds.logging.api.Level}.
-     *
-     * @param level the level that should be converted
-     * @return the converted level
-     */
-    private static com.swirlds.logging.api.Level convertFromSystemLogger(@NonNull Level level) {
-        if (level == null) {
-            getInstance().logNPE("level");
-            return com.swirlds.logging.api.Level.ERROR;
-        }
-        return switch (level) {
-            case TRACE -> com.swirlds.logging.api.Level.TRACE;
-            case DEBUG -> com.swirlds.logging.api.Level.DEBUG;
-            case INFO -> com.swirlds.logging.api.Level.INFO;
-            case WARNING -> com.swirlds.logging.api.Level.WARN;
-            default -> com.swirlds.logging.api.Level.ERROR;
-        };
-    }
-
-    private static Level convertToSystemLogger(@NonNull com.swirlds.logging.api.Level level) {
-        if (level == null) {
-            getInstance().logNPE("level");
-            return Level.ERROR;
-        }
-        return switch (level) {
-            case TRACE -> Level.TRACE;
-            case DEBUG -> Level.DEBUG;
-            case INFO -> Level.INFO;
-            case WARN -> Level.WARNING;
-            default -> Level.ERROR;
-        };
-    }
-
-
-    /**
-     * Returns the singleton instance of the emergency logger.
-     *
-     * @return the singleton instance of the emergency logger
-     */
-    public static EmergencyLoggerImpl getInstance() {
-        return INSTANCE;
-    }
-
-    /**
      * Returns the list of logged events and clears the list.
      *
      * @return the list of logged events
@@ -291,23 +207,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         return result;
     }
 
-    /**
-     * Sets the inner logger that should be used to log the messages.
-     *
-     * @param logger the inner logger that should be used to log the messages.
-     */
-    public static void setInnerLogger(System.Logger logger) {
-        innerLoggerRef.set(logger);
-    }
-
-    /**
-     * Logs a null pointer exception with the given name of the null parameter.
-     *
-     * @param nameOfNullParam the name of the null parameter
-     */
-    @Override
-    public void logNPE(@NonNull String nameOfNullParam) {
-        log(Level.ERROR, "Null parameter: " + nameOfNullParam,
-                new NullPointerException("Null parameter: " + nameOfNullParam));
+    public static EmergencyLoggerImpl getInstance() {
+        return INSTANCE;
     }
 }

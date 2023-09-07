@@ -18,7 +18,6 @@ package com.swirlds.base.context.internal;
 
 import com.swirlds.base.context.Context;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,8 +44,10 @@ public final class ThreadLocalContext implements Context {
     }
 
     @Override
-    public AutoCloseable add(@NonNull String key, @Nullable String value) {
+    public AutoCloseable add(@NonNull String key, @NonNull String value) {
         Objects.requireNonNull(key, "key must not be null");
+        Objects.requireNonNull(value, "value must not be null");
+
         Map<String, String> contextMap = contextThreadLocal.get();
         if (contextMap == null) {
             contextMap = new HashMap<>();

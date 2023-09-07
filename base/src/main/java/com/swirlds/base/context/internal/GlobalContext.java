@@ -18,12 +18,10 @@ package com.swirlds.base.context.internal;
 
 import com.swirlds.base.context.Context;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The GlobalContext is a {@link Context} implementation that defined as a singleton and is used to store global
@@ -36,41 +34,35 @@ public final class GlobalContext implements Context {
 
     private static final GlobalContext INSTANCE = new GlobalContext();
 
-    private final AtomicReference<Map<String, String>> contextMapRef;
+    private final Map<String, String> contextMap;
 
     /**
      * private constructor to prevent instantiation.
      */
     private GlobalContext() {
-        contextMapRef = new AtomicReference<>(new HashMap<>());
+        contextMap = new ConcurrentHashMap<>();
     }
 
     @Override
-    public AutoCloseable add(@NonNull String key, @Nullable String value) {
+    public AutoCloseable add(@NonNull String key, @NonNull String value) {
         Objects.requireNonNull(key, "key must not be null");
-        contextMapRef.getAndUpdate(map -> {
-            Map<String, String> newMap = new HashMap<>(map);
-            newMap.put(key, value);
-            return newMap;
-        });
+        Objects.requireNonNull(value, "value must not be null");
+
+        contextMap.put(key, value);
         return () -> remove(key);
     }
 
     @Override
     public void remove(@NonNull String key) {
         Objects.requireNonNull(key, "key must not be null");
-        contextMapRef.getAndUpdate(map -> {
-            Map<String, String> newMap = new HashMap<>(map);
-            newMap.remove(key);
-            return newMap;
-        });
+        contextMap.remove(key);
     }
 
     /**
      * Clears the context.
      */
     public void clear() {
-        contextMapRef.set(new HashMap<>());
+        contextMap.clear();
     }
 
     /**
@@ -90,6 +82,6 @@ public final class GlobalContext implements Context {
      */
     @NonNull
     public static Map<String, String> getContextMap() {
-        return Collections.unmodifiableMap(INSTANCE.contextMapRef.get());
+        return Collections.unmodifiableMap(INSTANCE.contextMap);
     }
 }

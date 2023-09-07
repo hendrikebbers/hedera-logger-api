@@ -1,11 +1,11 @@
 package com.swirlds.logging.api.internal.format;
 
+import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import java.io.PrintWriter;
-import java.lang.System.Logger.Level;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
