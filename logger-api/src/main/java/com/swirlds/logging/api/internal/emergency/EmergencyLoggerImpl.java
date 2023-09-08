@@ -1,8 +1,8 @@
 package com.swirlds.logging.api.internal.emergency;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.extensions.EmergencyLogger;
 import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.internal.format.LineBasedFormat;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -25,7 +25,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
 
     private final static String EMERGENCY_LOGGER_NAME = "EMERGENCY-LOGGER";
 
-    private final static String UNDEFINED_MESSAGE = "Undefined message";
+    private final static String UNDEFINED_MESSAGE = "UNDEFINED-MESSAGE";
 
     private final static int LOG_EVENT_QUEUE_SIZE = 1000;
 
@@ -52,7 +52,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      */
     private final ThreadLocal<Boolean> recursionGuard;
 
-    public EmergencyLoggerImpl() {
+    private EmergencyLoggerImpl() {
         this.logEvents = new ArrayBlockingQueue<>(LOG_EVENT_QUEUE_SIZE);
         recursionGuard = new ThreadLocal<>();
         supportedLevel = getSupportedLevelFromSystemProperties();
@@ -63,6 +63,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      *
      * @return the level based on a possible system property
      */
+    @NonNull
     private static Level getSupportedLevelFromSystemProperties() {
         final String property = System.getProperty(LEVEL_PROPERTY_NAME);
         if (property == null) {
@@ -82,15 +83,18 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         }
     }
 
+    @Override
     public void logNPE(@NonNull String nameOfNullParam) {
         log(Level.ERROR, "Null parameter: " + nameOfNullParam,
                 new NullPointerException("Null parameter: " + nameOfNullParam));
     }
 
+    @Override
     public void log(@NonNull Level level, @NonNull String message) {
         log(level, message, null);
     }
 
+    @Override
     public void log(@NonNull Level level, @NonNull String message, @Nullable Throwable thrown) {
         if (level == null && message == null) {
             log(new LogEvent(UNDEFINED_MESSAGE, EMERGENCY_LOGGER_NAME, Level.ERROR, thrown));
@@ -107,6 +111,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
     public void log(@NonNull LogEvent event) {
         if (event == null) {
             logNPE("event");
+            return;
         }
         if (isLoggable(event.level())) {
             callGuarded(event, () -> handle(event));
@@ -117,6 +122,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
     public boolean isLoggable(@NonNull Level level) {
         if (level == null) {
             logNPE("level");
+            return true;
         }
         return callGuarded(null, true, () -> supportedLevel.enabledLoggingOfLevel(level));
     }
@@ -140,11 +146,13 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      * recursion check. In case of a problem the method tries to at least log the given fallback log event.
      *
      * @param fallbackLogEvent the fallback log event that should be logged when the logger is broken.
+     * @param fallbackValue    the fallback value that should be returned when the logger is broken.
      * @param supplier         the supplier that should be called
      * @param <T>              the type of the result
      * @return the result of the supplier
      */
-    private <T> T callGuarded(@NonNull final LogEvent fallbackLogEvent, @NonNull T fallbackValue,
+    @Nullable
+    private <T> T callGuarded(@Nullable final LogEvent fallbackLogEvent, @Nullable T fallbackValue,
             @NonNull final Supplier<T> supplier) {
         final Boolean guard = recursionGuard.get();
         if (guard != null && guard) {
@@ -201,12 +209,14 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      *
      * @return the list of logged events
      */
+    @NonNull
     public List<LogEvent> publishLoggedEvents() {
         List<LogEvent> result = List.copyOf(logEvents);
         logEvents.clear();
         return result;
     }
 
+    @NonNull
     public static EmergencyLoggerImpl getInstance() {
         return INSTANCE;
     }

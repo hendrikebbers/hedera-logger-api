@@ -2,9 +2,9 @@ package com.swirlds.logging.api.internal.format;
 
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
-import com.swirlds.logging.api.extensions.EmergencyLogger;
-import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import java.io.PrintWriter;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -28,19 +28,17 @@ public class LineBasedFormat {
         if (event == null) {
             EMERGENCY_LOGGER.logNPE("event");
         }
-        final String timeStamp = asString(event.timestamp());
-        String threadName = event.threadName();
-        printWriter.print(timeStamp);
+        printWriter.print(asString(event.timestamp()));
         printWriter.print(' ');
-        printWriter.print(event.level());
+        printWriter.print(asString(event.level()));
         printWriter.print(' ');
         printWriter.print('[');
-        printWriter.print(threadName);
+        printWriter.print(asString(event.threadName(), "THREAD"));
         printWriter.print(']');
         printWriter.print(' ');
-        printWriter.print(event.loggerName());
+        printWriter.print(asString(event.loggerName(), "LOGGER"));
         printWriter.print(" - ");
-        printWriter.print(event.message());
+        printWriter.print(asString(event.message(), "MESSAGE"));
 
         Marker marker = event.marker();
         if (marker != null) {
@@ -61,15 +59,31 @@ public class LineBasedFormat {
         }
     }
 
+    private String asString(String str, String suffix) {
+        if (str == null) {
+            return "UNDEFINED-" + suffix;
+        } else {
+            return str;
+        }
+    }
+
+    private String asString(Level level) {
+        if (level == null) {
+            return "UNDEFINED";
+        } else {
+            return level.name();
+        }
+    }
+
     private String asString(Instant instant) {
         if (instant == null) {
-            return "UNDEFINED";
+            return "UNDEFINED-TIMESTAMP       ";
         } else {
             try {
                 return formatter.format(instant);
             } catch (final Throwable e) {
                 EMERGENCY_LOGGER.log(Level.ERROR, "Failed to format instant", e);
-                return "UNDEFINED";
+                return "BROKEN-TIMESTAMP          ";
             }
         }
     }

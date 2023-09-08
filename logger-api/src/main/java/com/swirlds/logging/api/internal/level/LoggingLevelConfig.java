@@ -2,8 +2,8 @@ package com.swirlds.logging.api.internal.level;
 
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.extensions.EmergencyLogger;
-import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import java.util.Map;

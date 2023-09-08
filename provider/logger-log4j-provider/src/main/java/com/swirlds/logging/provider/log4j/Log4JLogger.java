@@ -1,8 +1,8 @@
 package com.swirlds.logging.provider.log4j;
 
-import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import java.lang.System.Logger;
 import java.time.Instant;
 import java.util.Map;

@@ -2,13 +2,20 @@ package com.swirlds.logging.api.test;
 
 import com.swirlds.base.testfixture.io.SystemErrProvider;
 import com.swirlds.base.testfixture.io.WithSystemError;
+import com.swirlds.base.testfixture.io.WithSystemOut;
 import com.swirlds.logging.api.Level;
+import com.swirlds.logging.api.Marker;
+import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 import jakarta.inject.Inject;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @WithSystemError
+@WithSystemOut
 public class EmergencyLoggerTest {
 
     @Inject
@@ -60,4 +67,126 @@ public class EmergencyLoggerTest {
                 "Only ERROR, WARNING, INFO and DEBUG should be logged by default");
     }
 
+    @Test
+    void loggerMustBe100Solid() {
+        //given
+        EmergencyLoggerImpl emergencyLogger = EmergencyLoggerImpl.getInstance();
+        emergencyLogger.publishLoggedEvents(); //clear the queue
+
+        //when
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(Level.INFO, null));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null, "message"));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null, null));
+
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.logNPE(null));
+
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null, "message", new RuntimeException()));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(Level.INFO, null, new RuntimeException()));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(Level.INFO, "message", null));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null, null, null));
+
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.isLoggable(null));
+
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(null,
+                Instant.now(),
+                "threadName",
+                "loggerName",
+                Level.INFO,
+                new Marker("marker"),
+                Map.of(),
+                new RuntimeException())));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent("message",
+                null,
+                "threadName",
+                "loggerName",
+                Level.INFO,
+                new Marker("marker"),
+                Map.of(),
+                new RuntimeException())));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent("message",
+                Instant.now(),
+                null,
+                "loggerName",
+                Level.INFO,
+                new Marker("marker"),
+                Map.of(),
+                new RuntimeException())));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent("message",
+                Instant.now(),
+                "threadName",
+                null,
+                Level.INFO,
+                new Marker("marker"),
+                Map.of(),
+                new RuntimeException())));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent("message",
+                Instant.now(),
+                "threadName",
+                "loggerName",
+                null,
+                new Marker("marker"),
+                Map.of(),
+                new RuntimeException())));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent("message",
+                Instant.now(),
+                "threadName",
+                "loggerName",
+                Level.INFO,
+                null,
+                Map.of(),
+                new RuntimeException())));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent("message",
+                Instant.now(),
+                "threadName",
+                "loggerName",
+                Level.INFO,
+                new Marker("marker"),
+                null,
+                new RuntimeException())));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent("message",
+                Instant.now(),
+                "threadName",
+                "loggerName",
+                Level.INFO,
+                new Marker("marker"),
+                Map.of(),
+                null)));
+
+        //then
+        final List<String> allLines = systemErrProvider.getLines().toList();
+        final List<String> onlyBasicLines = systemErrProvider.getLines()
+                .filter(line -> !line.startsWith("\tat "))
+                .filter(line -> !line.startsWith("java.lang"))
+                .toList();
+        final List<String> onlyTrace = systemErrProvider.getLines()
+                .filter(line -> line.startsWith("\tat "))
+                .toList();
+        final List<String> onlyException = systemErrProvider.getLines()
+                .filter(line -> line.startsWith("java.lang"))
+                .toList();
+
+        Assertions.assertEquals(allLines.size(), onlyBasicLines.size() + onlyTrace.size() + onlyException.size());
+        Assertions.assertEquals(19, onlyBasicLines.size());
+        Assertions.assertEquals(13, onlyException.size());
+        Assertions.assertTrue(onlyException.get(0).startsWith("java.lang.NullPointerException"));
+        Assertions.assertTrue(onlyException.get(1).startsWith("java.lang.RuntimeException"));
+        Assertions.assertTrue(onlyException.get(2).startsWith("java.lang.RuntimeException"));
+        Assertions.assertTrue(onlyException.get(3).startsWith("java.lang.NullPointerException"));
+        Assertions.assertTrue(onlyException.get(4).startsWith("java.lang.NullPointerException"));
+        Assertions.assertTrue(onlyException.get(5).startsWith("java.lang.RuntimeException"));
+        Assertions.assertTrue(onlyException.get(6).startsWith("java.lang.RuntimeException"));
+        Assertions.assertTrue(onlyException.get(7).startsWith("java.lang.RuntimeException"));
+        Assertions.assertTrue(onlyException.get(8).startsWith("java.lang.RuntimeException"));
+        Assertions.assertTrue(onlyException.get(9).startsWith("java.lang.NullPointerException"));
+        Assertions.assertTrue(onlyException.get(10).startsWith("java.lang.RuntimeException"));
+        Assertions.assertTrue(onlyException.get(11).startsWith("java.lang.RuntimeException"));
+        Assertions.assertTrue(onlyException.get(12).startsWith("java.lang.RuntimeException"));
+
+        Assertions.assertTrue(onlyTrace.size() > 39);
+
+        final List<LogEvent> loggedEvents = emergencyLogger.publishLoggedEvents();
+
+        Assertions.assertEquals(19, loggedEvents.size());
+    }
 }

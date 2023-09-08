@@ -17,8 +17,8 @@
 package com.swirlds.logging.api;
 
 
-import com.swirlds.logging.api.extensions.EmergencyLogger;
-import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.internal.DefaultLoggingSystem;
 import edu.umd.cs.findbugs.annotations.NonNull;
 

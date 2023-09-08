@@ -1,4 +1,4 @@
-package com.swirlds.logging.api.extensions;
+package com.swirlds.logging.api.extensions.emergency;
 
 import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 

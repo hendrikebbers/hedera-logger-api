@@ -2,9 +2,9 @@ package com.swirlds.logging.api.extensions.handler;
 
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.extensions.EmergencyLogger;
-import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.internal.level.LoggingLevelConfig;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

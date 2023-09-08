@@ -1,8 +1,8 @@
 package com.swirlds.logging.provider.system;
 
-import com.swirlds.logging.api.extensions.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
+import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -46,7 +46,8 @@ public class SystemEmergencyLogger implements System.Logger {
                 logEventConsumer.accept(
                         new LogEvent(message, name, SystemLoggerConverterUtils.convertFromSystemLogger(level), thrown));
             } else {
-                EmergencyLoggerProvider.getEmergencyLogger().log(SystemLoggerConverterUtils.convertFromSystemLogger(level), msg, thrown);
+                EmergencyLoggerProvider.getEmergencyLogger()
+                        .log(SystemLoggerConverterUtils.convertFromSystemLogger(level), msg, thrown);
             }
         }
     }
