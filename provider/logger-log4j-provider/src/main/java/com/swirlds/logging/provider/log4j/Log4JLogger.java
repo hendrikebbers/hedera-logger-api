@@ -3,7 +3,6 @@ package com.swirlds.logging.provider.log4j;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
-import java.lang.System.Logger;
 import java.time.Instant;
 import java.util.Map;
 import org.apache.logging.log4j.Level;
@@ -113,18 +112,18 @@ public class Log4JLogger extends AbstractLogger {
         final LogEventConsumer logEventConsumer = Log4JLogProvider.getLogEventConsumer();
         if (logEventConsumer == null) {
             if (level.isMoreSpecificThan(Level.ERROR)) {
-                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(System.Logger.Level.ERROR);
+                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.ERROR);
             }
             if (level.isMoreSpecificThan(Level.WARN)) {
-                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(Logger.Level.WARNING);
+                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.WARN);
             }
             if (level.isMoreSpecificThan(Level.INFO)) {
-                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(Logger.Level.INFO);
+                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.INFO);
             }
             if (level.isMoreSpecificThan(Level.DEBUG)) {
-                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(Logger.Level.DEBUG);
+                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.DEBUG);
             }
-            return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(Logger.Level.TRACE);
+            return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.TRACE);
         }
         return logEventConsumer.isEnabled(name, Log4jConverter.convertFromLog4J(level));
     }
@@ -142,8 +141,8 @@ public class Log4JLogger extends AbstractLogger {
                 t);
         final LogEventConsumer logEventConsumer = Log4JLogProvider.getLogEventConsumer();
         if (logEventConsumer == null) {
-            System.Logger.Level systemLevel = Log4jConverter.convertFromLog4JToSystemLevel(level);
-            EmergencyLoggerProvider.getEmergencyLogger().log(systemLevel, logEvent.message(), logEvent.throwable());
+            EmergencyLoggerProvider.getEmergencyLogger()
+                    .log(Log4jConverter.convertFromLog4J(level), logEvent.message(), logEvent.throwable());
         } else {
             logEventConsumer.accept(logEvent);
         }
@@ -153,16 +152,16 @@ public class Log4JLogger extends AbstractLogger {
     public Level getLevel() {
         final LogEventConsumer logEventConsumer = Log4JLogProvider.getLogEventConsumer();
         if (logEventConsumer == null) {
-            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(Logger.Level.TRACE)) {
+            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.TRACE)) {
                 return Level.TRACE;
             }
-            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(Logger.Level.DEBUG)) {
+            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.DEBUG)) {
                 return Level.DEBUG;
             }
-            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(Logger.Level.INFO)) {
+            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.INFO)) {
                 return Level.INFO;
             }
-            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(Logger.Level.WARNING)) {
+            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.WARN)) {
                 return Level.WARN;
             }
             return Level.ERROR;
