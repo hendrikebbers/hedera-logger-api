@@ -126,8 +126,7 @@ public class Log4JLogger extends AbstractLogger {
         );
         final LogEventConsumer logEventConsumer = Log4JLogProvider.getLogEventConsumer();
         if (logEventConsumer == null) {
-            EmergencyLoggerProvider.getEmergencyLogger()
-                    .log(Log4jConverter.convertFromLog4J(level), logEvent.message(), logEvent.throwable());
+            EmergencyLoggerProvider.getEmergencyLogger().log(logEvent);
         } else {
             logEventConsumer.accept(logEvent);
         }

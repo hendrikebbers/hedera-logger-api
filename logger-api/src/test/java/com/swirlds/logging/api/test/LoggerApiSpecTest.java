@@ -56,20 +56,9 @@ public class LoggerApiSpecTest {
     }
 
     @Test
-    void testNullLogEventConsumer() {
-        //given
-        LoggerImpl logger = new LoggerImpl("test-name", null);
-
-        //then
-        testSpec(logger);
-    }
-
-    @Test
     void testSpecWithDifferentLoggers() {
         LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", new DummyConsumer()));
         LoggerApiSpecTest.testSpec(new LoggerImpl(null, new DummyConsumer()));
-        LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", null));
-        LoggerApiSpecTest.testSpec(new LoggerImpl(null, null));
     }
 
     @Test

@@ -335,11 +335,11 @@ public class LoggingSystemTest {
         //then
         final List<LogEvent> loggedEvents = EmergencyLoggerImpl.getInstance().publishLoggedEvents();
         Assertions.assertEquals(3, loggedEvents.size());
-        Assertions.assertEquals("info-message", loggedEvents.get(0).message());
+        Assertions.assertEquals("info-message", loggedEvents.get(0).message().getMessage());
         Assertions.assertEquals(Level.INFO, loggedEvents.get(0).level());
-        Assertions.assertEquals("warn-message", loggedEvents.get(1).message());
+        Assertions.assertEquals("warn-message", loggedEvents.get(1).message().getMessage());
         Assertions.assertEquals(Level.WARN, loggedEvents.get(1).level());
-        Assertions.assertEquals("error-message", loggedEvents.get(2).message());
+        Assertions.assertEquals("error-message", loggedEvents.get(2).message().getMessage());
         Assertions.assertEquals(Level.ERROR, loggedEvents.get(2).level());
     }
 
@@ -363,7 +363,7 @@ public class LoggingSystemTest {
         //then
         final List<LogEvent> loggedEvents = EmergencyLoggerImpl.getInstance().publishLoggedEvents();
         Assertions.assertEquals(1, loggedEvents.size());
-        Assertions.assertEquals("error-message", loggedEvents.get(0).message());
+        Assertions.assertEquals("error-message", loggedEvents.get(0).message().getMessage());
         Assertions.assertEquals(Level.ERROR, loggedEvents.get(0).level());
     }
 
@@ -390,7 +390,7 @@ public class LoggingSystemTest {
         Assertions.assertEquals(3, loggedEvents.size());
 
         final LogEvent event1 = loggedEvents.get(0);
-        Assertions.assertEquals("info-message", event1.message());
+        Assertions.assertEquals("info-message", event1.message().getMessage());
         Assertions.assertEquals(Level.INFO, event1.level());
         Assertions.assertEquals(Map.of(), event1.context());
         Assertions.assertEquals("test-logger", event1.loggerName());
@@ -401,7 +401,7 @@ public class LoggingSystemTest {
         Assertions.assertTrue(event1.timestamp().isBefore(Instant.now()));
 
         final LogEvent event2 = loggedEvents.get(1);
-        Assertions.assertEquals("warn-message", event2.message());
+        Assertions.assertEquals("warn-message", event2.message().getMessage());
         Assertions.assertEquals(Level.WARN, event2.level());
         Assertions.assertEquals(Map.of(), event2.context());
         Assertions.assertEquals("test-logger", event2.loggerName());
@@ -412,7 +412,7 @@ public class LoggingSystemTest {
         Assertions.assertTrue(event2.timestamp().isBefore(Instant.now()));
 
         final LogEvent event3 = loggedEvents.get(2);
-        Assertions.assertEquals("error-message", event3.message());
+        Assertions.assertEquals("error-message", event3.message().getMessage());
         Assertions.assertEquals(Level.ERROR, event3.level());
         Assertions.assertEquals(Map.of(), event3.context());
         Assertions.assertEquals("test-logger", event3.loggerName());
@@ -498,7 +498,7 @@ public class LoggingSystemTest {
         Assertions.assertEquals(2, loggedEvents.size());
 
         final LogEvent event1 = loggedEvents.get(0);
-        Assertions.assertEquals("info-message ARG", event1.message());
+        Assertions.assertEquals("info-message ARG", event1.message().getMessage());
         Assertions.assertEquals(Level.INFO, event1.level());
         Assertions.assertEquals(
                 Map.of("context", "unit-test", "global", "global-value", "thread-local", "thread-local-value", "level",
@@ -513,7 +513,7 @@ public class LoggingSystemTest {
         Assertions.assertTrue(event1.timestamp().isBefore(Instant.now()));
 
         final LogEvent event2 = loggedEvents.get(1);
-        Assertions.assertEquals("info-message2 ARG2", event2.message());
+        Assertions.assertEquals("info-message2 ARG2", event2.message().getMessage());
         Assertions.assertEquals(Level.INFO, event2.level());
         Assertions.assertEquals(
                 Map.of("context", "unit-test", "level", "info"), event2.context());

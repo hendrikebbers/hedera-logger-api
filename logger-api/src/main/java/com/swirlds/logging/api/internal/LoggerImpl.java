@@ -22,6 +22,7 @@ import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
+import com.swirlds.logging.api.extensions.SimpleLogMessage;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.internal.format.MessageFormatter;
@@ -182,7 +183,7 @@ public class LoggerImpl implements Logger {
         if (isEnabled(level)) {
             String threadName = Thread.currentThread().getName();
             Marker marker = getMarker();
-            LogEvent logEvent = new LogEvent(level, getName(), threadName, Instant.now(), message,
+            LogEvent logEvent = new LogEvent(level, getName(), threadName, Instant.now(), new SimpleLogMessage(message),
                     throwable, marker,
                     getContext());
             logEventConsumer.accept(logEvent);

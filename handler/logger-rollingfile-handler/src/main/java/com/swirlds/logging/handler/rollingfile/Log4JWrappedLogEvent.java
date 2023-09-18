@@ -56,7 +56,7 @@ public class Log4JWrappedLogEvent extends org.apache.logging.log4j.core.Abstract
 
     @Override
     public Message getMessage() {
-        return new SimpleMessage(event.message());
+        return new SimpleMessage(event.message().getMessage());
     }
 
     @Override

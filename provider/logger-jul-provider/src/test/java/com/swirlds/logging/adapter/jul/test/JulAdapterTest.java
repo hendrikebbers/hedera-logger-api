@@ -29,7 +29,7 @@ public class JulAdapterTest {
         //then
         Assertions.assertEquals(1, loggingMirror.getEventCount());
         LogEvent event = loggingMirror.getEvents().get(0);
-        Assertions.assertEquals("Hello World!", event.message());
+        Assertions.assertEquals("Hello World!", event.message().getMessage());
         Assertions.assertEquals(Level.INFO, event.level());
         Assertions.assertEquals(JulAdapterTest.class.getName(), event.loggerName());
         Assertions.assertEquals(Thread.currentThread().getName(), event.threadName());

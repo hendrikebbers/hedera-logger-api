@@ -3,6 +3,7 @@ package com.swirlds.logging.api.internal.format;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.LogMessage;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import java.io.PrintWriter;
@@ -38,7 +39,7 @@ public class LineBasedFormat {
         printWriter.print(' ');
         printWriter.print(asString(event.loggerName(), "LOGGER"));
         printWriter.print(" - ");
-        printWriter.print(asString(event.message(), "MESSAGE"));
+        printWriter.print(asString(event.message()));
 
         Marker marker = event.marker();
         if (marker != null) {
@@ -72,6 +73,19 @@ public class LineBasedFormat {
             return "UNDEFINED";
         } else {
             return level.name();
+        }
+    }
+
+    private String asString(LogMessage message) {
+        if (message == null) {
+            return "UNDEFINED-MESSAGE";
+        } else {
+            try {
+                return message.getMessage();
+            } catch (final Throwable e) {
+                EMERGENCY_LOGGER.log(Level.ERROR, "Failed to format message", e);
+                return "BROKEN-MESSAGE";
+            }
         }
     }
 

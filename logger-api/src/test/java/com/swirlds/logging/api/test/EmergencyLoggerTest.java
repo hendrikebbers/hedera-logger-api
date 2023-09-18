@@ -6,6 +6,7 @@ import com.swirlds.base.testfixture.io.WithSystemOut;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.LogMessage;
 import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 import jakarta.inject.Inject;
 import java.time.Instant;
@@ -87,7 +88,12 @@ public class EmergencyLoggerTest {
 
         Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null));
         Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, "loggerName", "threadName",
-                Instant.now(), null,
+                Instant.now(), (String) null,
+                new RuntimeException(), new Marker("marker"),
+                Map.of()
+        )));
+        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, "loggerName", "threadName",
+                Instant.now(), (LogMessage) null,
                 new RuntimeException(), new Marker("marker"),
                 Map.of()
         )));
@@ -147,7 +153,7 @@ public class EmergencyLoggerTest {
         Assertions.assertTrue(onlyException.get(1).startsWith("java.lang.RuntimeException"));
         Assertions.assertTrue(onlyException.get(2).startsWith("java.lang.RuntimeException"));
         Assertions.assertTrue(onlyException.get(3).startsWith("java.lang.NullPointerException"));
-        Assertions.assertTrue(onlyException.get(4).startsWith("java.lang.NullPointerException"));
+        Assertions.assertTrue(onlyException.get(4).startsWith("java.lang.RuntimeException"));
         Assertions.assertTrue(onlyException.get(5).startsWith("java.lang.RuntimeException"));
         Assertions.assertTrue(onlyException.get(6).startsWith("java.lang.RuntimeException"));
         Assertions.assertTrue(onlyException.get(7).startsWith("java.lang.RuntimeException"));

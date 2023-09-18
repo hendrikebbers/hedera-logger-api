@@ -22,17 +22,25 @@ import com.swirlds.logging.api.Marker;
 import java.time.Instant;
 import java.util.Map;
 
-public record LogEvent(Level level, String loggerName, String threadName, Instant timestamp, String message,
+public record LogEvent(Level level, String loggerName, String threadName, Instant timestamp, LogMessage message,
                        Throwable throwable, Marker marker,
                        Map<String, String> context
 ) {
+
+    public LogEvent(Level level, String loggerName, String threadName, Instant timestamp, String message,
+            Throwable throwable, Marker marker,
+            Map<String, String> context) {
+        this(level, loggerName, threadName, timestamp, new SimpleLogMessage(message), throwable, marker, context);
+    }
 
     public LogEvent(Level level, String loggerName, String message) {
         this(level, loggerName, message, null);
     }
 
+
     public LogEvent(Level level, String loggerName, String message, Throwable throwable) {
-        this(level, loggerName, Thread.currentThread().getName(), Instant.now(), message, throwable, null,
+        this(level, loggerName, Thread.currentThread().getName(), Instant.now(), new SimpleLogMessage(message),
+                throwable, null,
                 Map.of()
         );
     }

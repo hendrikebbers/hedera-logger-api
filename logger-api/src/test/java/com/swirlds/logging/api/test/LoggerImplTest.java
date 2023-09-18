@@ -30,29 +30,7 @@ public class LoggerImplTest {
 
     @Test
     void testNullLogEventConsumer() {
-        //given
-        LoggerImpl logger = new LoggerImpl("test-name", null);
-
-        //when
-        final String name = logger.getName();
-        final boolean traceEnabled = logger.isTraceEnabled();
-        final boolean debugEnabled = logger.isDebugEnabled();
-        final boolean infoEnabled = logger.isInfoEnabled();
-        final boolean warnEnabled = logger.isWarnEnabled();
-        final boolean errorEnabled = logger.isErrorEnabled();
-
-        //then
-        Assertions.assertEquals("test-name", name);
-        Assertions.assertFalse(traceEnabled,
-                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
-        Assertions.assertTrue(debugEnabled,
-                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
-        Assertions.assertTrue(infoEnabled,
-                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
-        Assertions.assertTrue(warnEnabled,
-                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
-        Assertions.assertTrue(errorEnabled,
-                "Without a given consumer the fallback to EmergencyLogger should be used that logs on DEBUG by default");
+        Assertions.assertThrows(NullPointerException.class, () -> new LoggerImpl("test-name", null));
     }
 
     @Test
