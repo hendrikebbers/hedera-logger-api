@@ -84,9 +84,7 @@ public class EmergencyLoggerTest {
         Assertions.assertDoesNotThrow(() -> emergencyLogger.log(Level.INFO, null, new RuntimeException()));
         Assertions.assertDoesNotThrow(() -> emergencyLogger.log(Level.INFO, "message", null));
         Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null, null, null));
-
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.isLoggable(null));
-
+        
         Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null));
         Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(null,
                 Instant.now(),

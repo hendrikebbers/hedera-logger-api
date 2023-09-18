@@ -41,6 +41,7 @@ import java.util.function.Consumer;
 public class LoggingSystem implements LogEventConsumer {
 
     private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
+    public static final String ROOT_LOGGER_NAME = "";
 
     private final List<LogHandler> handlers;
 
@@ -70,7 +71,7 @@ public class LoggingSystem implements LogEventConsumer {
     public LoggerImpl getLogger(@NonNull final String name) {
         if (name == null) {
             EMERGENCY_LOGGER.logNPE("name");
-            return loggers.computeIfAbsent("", n -> new LoggerImpl(n, this));
+            return loggers.computeIfAbsent(ROOT_LOGGER_NAME, n -> new LoggerImpl(n, this));
         }
         return loggers.computeIfAbsent(name.trim(), n -> new LoggerImpl(n, this));
     }
@@ -78,7 +79,7 @@ public class LoggingSystem implements LogEventConsumer {
     public boolean isEnabled(@NonNull final String name, @NonNull final Level level) {
         if (name == null) {
             EMERGENCY_LOGGER.logNPE("name");
-            return isEnabled("", level);
+            return isEnabled(ROOT_LOGGER_NAME, level);
         }
         if (level == null) {
             EMERGENCY_LOGGER.logNPE("level");

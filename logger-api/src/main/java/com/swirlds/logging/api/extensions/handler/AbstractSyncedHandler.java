@@ -52,14 +52,14 @@ public abstract class AbstractSyncedHandler implements LogHandler {
             if (stopped) {
                 EMERGENCY_LOGGER.log(event);
             } else {
-                handleSynced(event);
+                handleEvent(event);
             }
         } finally {
             writeLock.unlock();
         }
     }
 
-    protected abstract void handleSynced(LogEvent event);
+    protected abstract void handleEvent(LogEvent event);
 
     @Override
     public final void stopAndFinalize() {

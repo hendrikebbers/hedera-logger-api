@@ -111,19 +111,7 @@ public class Log4JLogger extends AbstractLogger {
     private boolean isEnabled(String name, Level level) {
         final LogEventConsumer logEventConsumer = Log4JLogProvider.getLogEventConsumer();
         if (logEventConsumer == null) {
-            if (level.isMoreSpecificThan(Level.ERROR)) {
-                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.ERROR);
-            }
-            if (level.isMoreSpecificThan(Level.WARN)) {
-                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.WARN);
-            }
-            if (level.isMoreSpecificThan(Level.INFO)) {
-                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.INFO);
-            }
-            if (level.isMoreSpecificThan(Level.DEBUG)) {
-                return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.DEBUG);
-            }
-            return EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.TRACE);
+            return true;
         }
         return logEventConsumer.isEnabled(name, Log4jConverter.convertFromLog4J(level));
     }
@@ -152,18 +140,6 @@ public class Log4JLogger extends AbstractLogger {
     public Level getLevel() {
         final LogEventConsumer logEventConsumer = Log4JLogProvider.getLogEventConsumer();
         if (logEventConsumer == null) {
-            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.TRACE)) {
-                return Level.TRACE;
-            }
-            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.DEBUG)) {
-                return Level.DEBUG;
-            }
-            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.INFO)) {
-                return Level.INFO;
-            }
-            if (EmergencyLoggerProvider.getEmergencyLogger().isLoggable(com.swirlds.logging.api.Level.WARN)) {
-                return Level.WARN;
-            }
             return Level.ERROR;
         }
         if (logEventConsumer.isEnabled(name, com.swirlds.logging.api.Level.TRACE)) {

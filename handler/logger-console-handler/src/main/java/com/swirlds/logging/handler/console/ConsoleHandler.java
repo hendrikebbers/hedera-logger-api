@@ -19,7 +19,7 @@ public class ConsoleHandler extends AbstractSyncedHandler {
     }
 
     @Override
-    protected void handleSynced(@NonNull LogEvent event) {
+    protected void handleEvent(@NonNull LogEvent event) {
         lineBasedFormat.print(event);
     }
 

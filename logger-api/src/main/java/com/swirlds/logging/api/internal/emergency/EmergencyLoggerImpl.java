@@ -90,11 +90,6 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
     }
 
     @Override
-    public void log(@NonNull Level level, @NonNull String message) {
-        log(level, message, null);
-    }
-
-    @Override
     public void log(@NonNull Level level, @NonNull String message, @Nullable Throwable thrown) {
         if (level == null && message == null) {
             log(new LogEvent(UNDEFINED_MESSAGE, EMERGENCY_LOGGER_NAME, Level.ERROR, thrown));
@@ -118,13 +113,18 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         }
     }
 
-    @Override
-    public boolean isLoggable(@NonNull Level level) {
+    /**
+     * Checks if the given level is loggable by the logger.
+     *
+     * @param level the level to check
+     * @return true if the level is loggable, false otherwise
+     */
+    private boolean isLoggable(@NonNull Level level) {
         if (level == null) {
             logNPE("level");
             return true;
         }
-        return callGuarded(null, true, () -> supportedLevel.enabledLoggingOfLevel(level));
+        return supportedLevel.enabledLoggingOfLevel(level);
     }
 
     /**

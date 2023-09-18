@@ -28,8 +28,7 @@ public class SystemEmergencyLogger implements System.Logger {
         if (logEventConsumer != null) {
             return logEventConsumer.isEnabled(name, SystemLoggerConverterUtils.convertFromSystemLogger(level));
         }
-        return EmergencyLoggerProvider.getEmergencyLogger()
-                .isLoggable(SystemLoggerConverterUtils.convertFromSystemLogger(level));
+        return true;
     }
 
     @Override

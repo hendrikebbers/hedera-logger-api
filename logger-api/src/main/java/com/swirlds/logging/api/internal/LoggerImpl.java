@@ -25,10 +25,13 @@ import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.internal.format.MessageFormatter;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class LoggerImpl implements Logger {
 
@@ -42,8 +45,17 @@ public class LoggerImpl implements Logger {
 
     private final LogEventConsumer logEventConsumer;
 
-    protected LoggerImpl(String name, final Marker marker, Map<String, String> context,
-            LogEventConsumer logEventConsumer) {
+    /**
+     * Creates a new instance of the logger.
+     *
+     * @param name             the name of the logger
+     * @param marker           the initial marker of the logger (if present)
+     * @param context          the initial context of the logger
+     * @param logEventConsumer the consumer that is used to consume the log events
+     * @throws NullPointerException if the logEventConsumer is null. For all other use cases fallbacks are implemented
+     */
+    protected LoggerImpl(@NonNull String name, @Nullable final Marker marker, @NonNull Map<String, String> context,
+            @NonNull LogEventConsumer logEventConsumer) {
         if (name == null) {
             EMERGENCY_LOGGER.logNPE("name");
             this.name = "";
@@ -51,27 +63,21 @@ public class LoggerImpl implements Logger {
             this.name = name;
         }
         this.marker = marker;
-        this.context = Collections.unmodifiableMap(context);
-        if (logEventConsumer == null) {
-            EMERGENCY_LOGGER.logNPE("logEventConsumer");
-            this.logEventConsumer = new LogEventConsumer() {
-                @Override
-                public void accept(LogEvent event) {
-                    EMERGENCY_LOGGER.log(event.level(),
-                            event.message(),
-                            event.throwable());
-                }
-
-                @Override
-                public boolean isEnabled(String name, Level level) {
-                    return EMERGENCY_LOGGER.isLoggable(level);
-                }
-            };
+        if (context == null) {
+            this.context = Collections.emptyMap();
         } else {
-            this.logEventConsumer = logEventConsumer;
+            this.context = Collections.unmodifiableMap(context);
         }
+        this.logEventConsumer = Objects.requireNonNull(logEventConsumer, "logEventConsumer must not be null");
     }
 
+    /**
+     * Creates a new instance of the logger.
+     *
+     * @param name             the name of the logger
+     * @param logEventConsumer the consumer that is used to consume the log events
+     * @throws NullPointerException if the logEventConsumer is null. For all other use cases fallbacks are implemented
+     */
     public LoggerImpl(String name, LogEventConsumer logEventConsumer) {
         this(name, null, Map.of(), logEventConsumer);
     }
