@@ -23,10 +23,19 @@ import java.util.function.Supplier;
  */
 public class EmergencyLoggerImpl implements EmergencyLogger {
 
+    /**
+     * The name of the emergency logger.
+     */
     private final static String EMERGENCY_LOGGER_NAME = "EMERGENCY-LOGGER";
 
+    /**
+     * The message that is used when the message is undefined.
+     */
     private final static String UNDEFINED_MESSAGE = "UNDEFINED-MESSAGE";
 
+    /**
+     * The size of the queue that is used to store the log events.
+     */
     private final static int LOG_EVENT_QUEUE_SIZE = 1000;
 
     /**
@@ -34,6 +43,9 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      */
     private final static String LEVEL_PROPERTY_NAME = "com.swirlds.logging.emergency.level";
 
+    /**
+     * The singleton instance of the logger.
+     */
     private final static EmergencyLoggerImpl INSTANCE = new EmergencyLoggerImpl();
 
     /**
@@ -52,6 +64,9 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      */
     private final ThreadLocal<Boolean> recursionGuard;
 
+    /**
+     * Creates the singleton instance of the logger.
+     */
     private EmergencyLoggerImpl() {
         this.logEvents = new ArrayBlockingQueue<>(LOG_EVENT_QUEUE_SIZE);
         recursionGuard = new ThreadLocal<>();
@@ -214,6 +229,11 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         return result;
     }
 
+    /**
+     * Returns the instance of the logger.
+     *
+     * @return the instance of the logger
+     */
     @NonNull
     public static EmergencyLoggerImpl getInstance() {
         return INSTANCE;

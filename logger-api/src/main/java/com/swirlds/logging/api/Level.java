@@ -20,6 +20,9 @@ import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
+/**
+ * The level of a log message
+ */
 public enum Level {
     ERROR(10),
     WARN(20),

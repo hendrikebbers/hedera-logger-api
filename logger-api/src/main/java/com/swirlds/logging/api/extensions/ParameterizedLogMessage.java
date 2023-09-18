@@ -9,6 +9,7 @@ package com.swirlds.logging.api.extensions;
  *
  * @param messagePattern the message pattern
  * @param args           the arguments
+ * @see LogMessage
  */
 public record ParameterizedLogMessage(String messagePattern, Object... args) implements LogMessage {
 

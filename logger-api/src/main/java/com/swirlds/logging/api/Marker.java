@@ -20,6 +20,13 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
 
+/**
+ * A marker is a named reference to a location / package / context in the code. It can be used to filter log messages at
+ * runtime
+ *
+ * @param name   the name of the marker
+ * @param parent the parent marker (if present)
+ */
 public record Marker(@NonNull String name, @Nullable Marker parent) {
 
     public Marker {
