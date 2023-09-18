@@ -2,10 +2,10 @@ package com.swirlds.logging.api.internal.format;
 
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
-import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.api.extensions.LogMessage;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
+import com.swirlds.logging.api.extensions.event.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogMessage;
 import java.io.PrintWriter;
 import java.time.Instant;
 import java.time.ZoneId;

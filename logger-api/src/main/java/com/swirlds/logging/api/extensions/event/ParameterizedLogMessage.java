@@ -1,4 +1,4 @@
-package com.swirlds.logging.api.extensions;
+package com.swirlds.logging.api.extensions.event;
 
 /**
  * A log message that can be parameterized with arguments. The arguments are inserted into the message at the positions

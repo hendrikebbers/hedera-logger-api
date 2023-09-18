@@ -1,7 +1,7 @@
 package com.swirlds.logging.handler.console;
 
 import com.swirlds.config.api.Configuration;
-import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.handler.AbstractSyncedHandler;
 import com.swirlds.logging.api.internal.format.LineBasedFormat;
 import edu.umd.cs.findbugs.annotations.NonNull;

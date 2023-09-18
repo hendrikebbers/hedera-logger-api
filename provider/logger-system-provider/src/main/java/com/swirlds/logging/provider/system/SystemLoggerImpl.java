@@ -2,8 +2,8 @@ package com.swirlds.logging.provider.system;
 
 import static com.swirlds.logging.provider.system.SystemLoggerConverterUtils.convertFromSystemLogger;
 
-import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.api.extensions.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEventConsumer;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 

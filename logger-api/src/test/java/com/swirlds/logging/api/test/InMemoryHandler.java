@@ -1,6 +1,6 @@
 package com.swirlds.logging.api.test;
 
-import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import java.util.Collections;
 import java.util.List;

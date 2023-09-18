@@ -1,6 +1,6 @@
 package com.swirlds.logging.provider.system;
 
-import com.swirlds.logging.api.extensions.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEventConsumer;
 import java.lang.System.Logger;
 import java.lang.System.LoggerFinder;
 

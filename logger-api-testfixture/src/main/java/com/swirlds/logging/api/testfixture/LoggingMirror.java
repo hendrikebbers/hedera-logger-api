@@ -18,7 +18,7 @@
 package com.swirlds.logging.api.testfixture;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import java.util.List;
 
 public interface LoggingMirror extends AutoCloseable {

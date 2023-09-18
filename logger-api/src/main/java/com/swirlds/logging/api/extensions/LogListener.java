@@ -17,6 +17,7 @@
 
 package com.swirlds.logging.api.extensions;
 
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import java.util.function.Consumer;
 
 @Deprecated

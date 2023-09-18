@@ -1,6 +1,6 @@
 package com.swirlds.logging.api.benchmark;
 
-import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import org.openjdk.jmh.infra.Blackhole;
 

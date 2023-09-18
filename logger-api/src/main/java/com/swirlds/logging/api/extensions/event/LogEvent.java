@@ -15,7 +15,7 @@
  *
  */
 
-package com.swirlds.logging.api.extensions;
+package com.swirlds.logging.api.extensions.event;
 
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
@@ -63,6 +63,13 @@ public record LogEvent(@NonNull Level level, @NonNull String loggerName, @NonNul
         );
     }
 
+    /**
+     * Creates a new {@link LogEvent} that has all parameters of the given logEvent but a different context.
+     *
+     * @param logEvent the logEvent that should be copied (excluding the context)
+     * @param context  the new context
+     * @return the new copy of the event
+     */
     public static LogEvent createCopyWithDifferentContext(@NonNull LogEvent logEvent,
             @NonNull Map<String, String> context) {
         return new LogEvent(logEvent.level, logEvent.loggerName, logEvent.threadName, logEvent.timestamp,
@@ -70,6 +77,13 @@ public record LogEvent(@NonNull Level level, @NonNull String loggerName, @NonNul
                 logEvent.throwable, logEvent.marker, context);
     }
 
+    /**
+     * Creates a new {@link LogEvent} that has all parameters of the given logEvent but a different loggerName.
+     *
+     * @param logEvent   the logEvent that should be copied (excluding the loggerName)
+     * @param loggerName the new logger name
+     * @return the new copy of the event
+     */
     public static LogEvent createCopyWithDifferentName(@NonNull LogEvent logEvent,
             @NonNull String loggerName) {
         return new LogEvent(logEvent.level, loggerName, logEvent.threadName, logEvent.timestamp, logEvent.message,

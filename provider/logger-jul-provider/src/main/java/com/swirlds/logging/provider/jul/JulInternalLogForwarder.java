@@ -3,10 +3,10 @@ package com.swirlds.logging.provider.jul;
 import static com.swirlds.logging.provider.jul.JulUtils.convertFromJul;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
+import com.swirlds.logging.api.extensions.event.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEventConsumer;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 import java.util.logging.Handler;

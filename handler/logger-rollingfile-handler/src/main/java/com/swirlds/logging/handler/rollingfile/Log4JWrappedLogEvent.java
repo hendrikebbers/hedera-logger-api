@@ -1,6 +1,6 @@
 package com.swirlds.logging.handler.rollingfile;
 
-import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.ThreadContext.ContextStack;

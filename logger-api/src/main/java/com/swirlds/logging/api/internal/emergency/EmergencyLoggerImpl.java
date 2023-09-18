@@ -1,8 +1,8 @@
 package com.swirlds.logging.api.internal.emergency;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.internal.format.LineBasedFormat;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;

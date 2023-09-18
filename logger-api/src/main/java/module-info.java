@@ -13,6 +13,7 @@ module com.swirlds.logging.api {
     exports com.swirlds.logging.api.internal.emergency to com.swirlds.logging.api.testfixture, com.swirlds.logging.api.test;
     exports com.swirlds.logging.api.internal.format;
     exports com.swirlds.logging.api.extensions.emergency;
+    exports com.swirlds.logging.api.extensions.event;
 
     uses LogHandlerFactory;
     uses LogProviderFactory;

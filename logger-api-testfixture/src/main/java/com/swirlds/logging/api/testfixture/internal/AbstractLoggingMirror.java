@@ -18,7 +18,7 @@
 package com.swirlds.logging.api.testfixture.internal;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.testfixture.LoggingMirror;
 import java.util.Objects;
 import java.util.function.Function;

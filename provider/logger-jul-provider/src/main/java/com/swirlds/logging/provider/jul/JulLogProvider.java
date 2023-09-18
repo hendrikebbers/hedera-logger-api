@@ -1,7 +1,7 @@
 package com.swirlds.logging.provider.jul;
 
 import com.swirlds.config.api.Configuration;
-import com.swirlds.logging.api.extensions.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEventConsumer;
 import com.swirlds.logging.api.extensions.provider.LogProvider;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;

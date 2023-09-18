@@ -1,4 +1,4 @@
-package com.swirlds.logging.api.extensions;
+package com.swirlds.logging.api.extensions.event;
 
 import com.swirlds.logging.api.Level;
 import edu.umd.cs.findbugs.annotations.NonNull;

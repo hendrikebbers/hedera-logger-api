@@ -4,7 +4,7 @@ import com.swirlds.base.context.Context;
 import com.swirlds.base.testfixture.context.WithContext;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Marker;
-import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.internal.LoggerImpl;
 import com.swirlds.logging.api.internal.LoggingSystem;

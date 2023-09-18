@@ -1,6 +1,6 @@
 package com.swirlds.logging.provider.log4j;
 
-import com.swirlds.logging.api.extensions.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEventConsumer;
 import com.swirlds.logging.api.extensions.provider.LogProvider;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;

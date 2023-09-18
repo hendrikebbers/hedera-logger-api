@@ -1,8 +1,8 @@
 package com.swirlds.logging.provider.system;
 
-import com.swirlds.logging.api.extensions.LogEvent;
-import com.swirlds.logging.api.extensions.LogEventConsumer;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
+import com.swirlds.logging.api.extensions.event.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEventConsumer;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.ResourceBundle;

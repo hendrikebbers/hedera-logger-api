@@ -1,7 +1,7 @@
 package com.swirlds.logging.adapter.jul.test;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.extensions.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.testfixture.LoggingMirror;
 import com.swirlds.logging.api.testfixture.WithLoggingMirror;
 import jakarta.inject.Inject;
