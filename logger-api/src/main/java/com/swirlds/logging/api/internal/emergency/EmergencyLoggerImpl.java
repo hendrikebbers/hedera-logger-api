@@ -92,13 +92,13 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
     @Override
     public void log(@NonNull Level level, @NonNull String message, @Nullable Throwable thrown) {
         if (level == null && message == null) {
-            log(new LogEvent(UNDEFINED_MESSAGE, EMERGENCY_LOGGER_NAME, Level.ERROR, thrown));
+            log(new LogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, UNDEFINED_MESSAGE, thrown));
         } else if (level == null) {
-            log(new LogEvent(message, EMERGENCY_LOGGER_NAME, Level.ERROR, thrown));
+            log(new LogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, message, thrown));
         } else if (message == null) {
-            log(new LogEvent(UNDEFINED_MESSAGE, EMERGENCY_LOGGER_NAME, level, thrown));
+            log(new LogEvent(level, EMERGENCY_LOGGER_NAME, UNDEFINED_MESSAGE, thrown));
         } else {
-            log(new LogEvent(message, EMERGENCY_LOGGER_NAME, level, thrown));
+            log(new LogEvent(level, EMERGENCY_LOGGER_NAME, message, thrown));
         }
     }
 
@@ -156,8 +156,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
             @NonNull final Supplier<T> supplier) {
         final Boolean guard = recursionGuard.get();
         if (guard != null && guard) {
-            final LogEvent logEvent = new LogEvent("Recursion in Emergency logger", EMERGENCY_LOGGER_NAME,
-                    Level.ERROR,
+            final LogEvent logEvent = new LogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, "Recursion in Emergency logger",
                     new IllegalStateException("Recursion in Emergency logger"));
             handle(logEvent);
             if (fallbackLogEvent != null) {
@@ -169,8 +168,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
             try {
                 return supplier.get();
             } catch (final Throwable t) {
-                final LogEvent logEvent = new LogEvent("Error in Emergency logger", EMERGENCY_LOGGER_NAME,
-                        Level.ERROR,
+                final LogEvent logEvent = new LogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, "Error in Emergency logger",
                         t);
                 handle(logEvent);
                 if (fallbackLogEvent != null) {

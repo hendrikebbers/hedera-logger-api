@@ -41,7 +41,7 @@ public class SystemLoggerImpl implements System.Logger {
             } else {
                 message = msg;
             }
-            LogEvent logEvent = new LogEvent(message, name, convertedLevel, thrown);
+            LogEvent logEvent = new LogEvent(convertedLevel, name, message, thrown);
             logEventConsumer.accept(logEvent);
         }
     }
@@ -57,7 +57,7 @@ public class SystemLoggerImpl implements System.Logger {
             } else {
                 message = MessageFormat.format(format, params);
             }
-            LogEvent logEvent = new LogEvent(message, name, convertedLevel);
+            LogEvent logEvent = new LogEvent(convertedLevel, name, message);
             logEventConsumer.accept(logEvent);
         }
     }

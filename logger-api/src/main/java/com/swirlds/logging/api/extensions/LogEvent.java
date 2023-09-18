@@ -27,11 +27,11 @@ public record LogEvent(Level level, String loggerName, String threadName, Instan
                        Map<String, String> context
 ) {
 
-    public LogEvent(String message, String loggerName, Level level) {
-        this(message, loggerName, level, null);
+    public LogEvent(Level level, String loggerName, String message) {
+        this(level, loggerName, message, null);
     }
 
-    public LogEvent(String message, String loggerName, Level level, Throwable throwable) {
+    public LogEvent(Level level, String loggerName, String message, Throwable throwable) {
         this(level, loggerName, Thread.currentThread().getName(), Instant.now(), message, throwable, null,
                 Map.of()
         );

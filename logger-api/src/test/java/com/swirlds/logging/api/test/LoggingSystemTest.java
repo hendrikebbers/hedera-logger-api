@@ -435,11 +435,11 @@ public class LoggingSystemTest {
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
         final LocalDateTime startTime = LocalDateTime.now();
-        LogEvent event1 = new LogEvent("info-message", "test-logger", Level.INFO);
-        LogEvent event2 = new LogEvent("trace-message", "test-logger",
-                Level.TRACE); //should not be forwarded since INFO is configured as root level
-        LogEvent event3 = new LogEvent("error-message", "test-logger", Level.ERROR);
-        LogEvent event4 = new LogEvent("info-message", "test-logger", Level.INFO);
+        LogEvent event1 = new LogEvent(Level.INFO, "test-logger", "info-message");
+        LogEvent event2 = new LogEvent(Level.TRACE, "test-logger", "trace-message"
+        ); //should not be forwarded since INFO is configured as root level
+        LogEvent event3 = new LogEvent(Level.ERROR, "test-logger", "error-message");
+        LogEvent event4 = new LogEvent(Level.INFO, "test-logger", "info-message");
 
         //when
         loggingSystem.accept(event1);
@@ -544,9 +544,9 @@ public class LoggingSystemTest {
                 Map.of("context", "unit-test", "level", "info")
         );
 
-        LogEvent event2 = new LogEvent("trace-message", "test-logger",
-                Level.TRACE); //should not be forwarded since INFO is configured as root level
-        LogEvent event3 = new LogEvent("error-message", "test-logger", Level.ERROR);
+        LogEvent event2 = new LogEvent(Level.TRACE, "test-logger", "trace-message"
+        ); //should not be forwarded since INFO is configured as root level
+        LogEvent event3 = new LogEvent(Level.ERROR, "test-logger", "error-message");
         LogEvent event4 = new LogEvent(Level.INFO, "test-logger", Thread.currentThread().getName(), Instant.now(),
                 "message",
                 new RuntimeException("error"), new Marker("INFO_MARKER"), Map.of("context", "unit-test")
@@ -594,7 +594,7 @@ public class LoggingSystemTest {
         });
 
         //when
-        loggingSystem.accept(new LogEvent("message", "logger", Level.INFO));
+        loggingSystem.accept(new LogEvent(Level.INFO, "logger", "message"));
 
         final List<LogEvent> loggedErrorEvents = getLoggedEvents();
 

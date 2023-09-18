@@ -41,7 +41,7 @@ public final class JulInternalLogForwarder extends Handler {
         final String name = record.getLoggerName();
         if (logEventConsumer.isEnabled(name, level)) {
             final String message = JulUtils.extractMessage(record);
-            logEventConsumer.accept(new LogEvent(message, name, level, record.getThrown()));
+            logEventConsumer.accept(new LogEvent(level, name, message, record.getThrown()));
         }
     }
 

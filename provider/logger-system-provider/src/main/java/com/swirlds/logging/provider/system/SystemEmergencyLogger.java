@@ -43,7 +43,7 @@ public class SystemEmergencyLogger implements System.Logger {
             final LogEventConsumer logEventConsumer = SystemLoggerProvider.getLogEventConsumer();
             if (logEventConsumer != null) {
                 logEventConsumer.accept(
-                        new LogEvent(message, name, SystemLoggerConverterUtils.convertFromSystemLogger(level), thrown));
+                        new LogEvent(SystemLoggerConverterUtils.convertFromSystemLogger(level), name, message, thrown));
             } else {
                 EmergencyLoggerProvider.getEmergencyLogger()
                         .log(SystemLoggerConverterUtils.convertFromSystemLogger(level), msg, thrown);
