@@ -8,4 +8,5 @@ public record ParameterizedLogMessage(String message, Object... args) implements
     public String getMessage() {
         return MessageFormatter.arrayFormat(message, args);
     }
+    
 }

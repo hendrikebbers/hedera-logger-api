@@ -22,10 +22,11 @@ import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.LogEvent;
 import com.swirlds.logging.api.extensions.LogEventConsumer;
+import com.swirlds.logging.api.extensions.LogMessage;
+import com.swirlds.logging.api.extensions.ParameterizedLogMessage;
 import com.swirlds.logging.api.extensions.SimpleLogMessage;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
-import com.swirlds.logging.api.internal.format.MessageFormatter;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
@@ -105,38 +106,34 @@ public class LoggerImpl implements Logger {
         logImpl(level, message, throwable);
     }
 
-    private String formatMessage(String message, Object... args) {
-        return MessageFormatter.arrayFormat(message, args);
-    }
-
     @Override
     public void log(Level level, String message, Object... args) {
-        logImpl(level, formatMessage(message, args), null);
+        logImpl(level, new ParameterizedLogMessage(message, args), null);
     }
 
     @Override
     public void log(Level level, String message, Object arg) {
-        logImpl(level, formatMessage(message, arg), null);
+        logImpl(level, new ParameterizedLogMessage(message, arg), null);
     }
 
     @Override
     public void log(Level level, String message, Object arg1, Object arg2) {
-        logImpl(level, formatMessage(message, arg1, arg2), null);
+        logImpl(level, new ParameterizedLogMessage(message, arg1, arg2), null);
     }
 
     @Override
     public void log(Level level, String message, Throwable throwable, Object... args) {
-        logImpl(level, formatMessage(message, args), throwable);
+        logImpl(level, new ParameterizedLogMessage(message, args), throwable);
     }
 
     @Override
     public void log(Level level, String message, Throwable throwable, Object arg1) {
-        logImpl(level, formatMessage(message, arg1), throwable);
+        logImpl(level, new ParameterizedLogMessage(message, arg1), throwable);
     }
 
     @Override
     public void log(Level level, String message, Throwable throwable, Object arg1, Object arg2) {
-        logImpl(level, formatMessage(message, arg1, arg2), throwable);
+        logImpl(level, new ParameterizedLogMessage(message, arg1, arg2), throwable);
     }
 
     protected Logger withMarkerAndContext(final Marker marker, final Map<String, String> context) {
@@ -180,10 +177,14 @@ public class LoggerImpl implements Logger {
     }
 
     public void logImpl(Level level, String message, final Throwable throwable) {
+        logImpl(level, new SimpleLogMessage(message), throwable);
+    }
+
+    public void logImpl(Level level, LogMessage message, final Throwable throwable) {
         if (isEnabled(level)) {
             String threadName = Thread.currentThread().getName();
             Marker marker = getMarker();
-            LogEvent logEvent = new LogEvent(level, getName(), threadName, Instant.now(), new SimpleLogMessage(message),
+            LogEvent logEvent = new LogEvent(level, getName(), threadName, Instant.now(), message,
                     throwable, marker,
                     getContext());
             logEventConsumer.accept(logEvent);
