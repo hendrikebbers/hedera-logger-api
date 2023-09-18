@@ -22,34 +22,31 @@ import com.swirlds.logging.api.Marker;
 import java.time.Instant;
 import java.util.Map;
 
-public record LogEvent(String message,
-                       Instant timestamp,
-                       String threadName,
-                       String loggerName,
-                       Level level,
-                       Marker marker,
-                       Map<String, String> context,
-                       Throwable throwable) {
+public record LogEvent(Level level, String loggerName, String threadName, Instant timestamp, String message,
+                       Throwable throwable, Marker marker,
+                       Map<String, String> context
+) {
 
     public LogEvent(String message, String loggerName, Level level) {
         this(message, loggerName, level, null);
     }
 
     public LogEvent(String message, String loggerName, Level level, Throwable throwable) {
-        this(message, Instant.now(), Thread.currentThread().getName(), loggerName, level, null,
-                Map.of(),
-                throwable);
+        this(level, loggerName, Thread.currentThread().getName(), Instant.now(), message, throwable, null,
+                Map.of()
+        );
     }
 
     public static LogEvent createCopyWithDifferentContext(LogEvent logEvent,
             Map<String, String> context) {
-        return new LogEvent(logEvent.message, logEvent.timestamp, logEvent.threadName, logEvent.loggerName,
-                logEvent.level, logEvent.marker, context, logEvent.throwable);
+        return new LogEvent(logEvent.level, logEvent.loggerName, logEvent.threadName, logEvent.timestamp,
+                logEvent.message,
+                logEvent.throwable, logEvent.marker, context);
     }
 
     public static LogEvent createCopyWithDifferentName(LogEvent logEvent,
             String loggerName) {
-        return new LogEvent(logEvent.message, logEvent.timestamp, logEvent.threadName, loggerName,
-                logEvent.level, logEvent.marker, logEvent.context, logEvent.throwable);
+        return new LogEvent(logEvent.level, loggerName, logEvent.threadName, logEvent.timestamp, logEvent.message,
+                logEvent.throwable, logEvent.marker, logEvent.context);
     }
 }

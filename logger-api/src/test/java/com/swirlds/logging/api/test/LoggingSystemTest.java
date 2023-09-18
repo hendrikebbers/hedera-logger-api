@@ -538,18 +538,19 @@ public class LoggingSystemTest {
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
 
-        LogEvent event1 = new LogEvent("message", Instant.now(), Thread.currentThread().getName(),
-                "test-logger",
-                Level.INFO, new Marker("INFO_MARKER"), Map.of("context", "unit-test", "level", "info"),
-                new RuntimeException("error"));
+        LogEvent event1 = new LogEvent(Level.INFO, "test-logger", Thread.currentThread().getName(), Instant.now(),
+                "message",
+                new RuntimeException("error"), new Marker("INFO_MARKER"),
+                Map.of("context", "unit-test", "level", "info")
+        );
 
         LogEvent event2 = new LogEvent("trace-message", "test-logger",
                 Level.TRACE); //should not be forwarded since INFO is configured as root level
         LogEvent event3 = new LogEvent("error-message", "test-logger", Level.ERROR);
-        LogEvent event4 = new LogEvent("message", Instant.now(), Thread.currentThread().getName(),
-                "test-logger",
-                Level.INFO, new Marker("INFO_MARKER"), Map.of("context", "unit-test"),
-                new RuntimeException("error"));
+        LogEvent event4 = new LogEvent(Level.INFO, "test-logger", Thread.currentThread().getName(), Instant.now(),
+                "message",
+                new RuntimeException("error"), new Marker("INFO_MARKER"), Map.of("context", "unit-test")
+        );
 
         //when
         loggingSystem.accept(event1);

@@ -182,9 +182,9 @@ public class LoggerImpl implements Logger {
         if (isEnabled(level)) {
             String threadName = Thread.currentThread().getName();
             Marker marker = getMarker();
-            LogEvent logEvent = new LogEvent(message, Instant.now(), threadName, getName(), level,
-                    marker,
-                    getContext(), throwable);
+            LogEvent logEvent = new LogEvent(level, getName(), threadName, Instant.now(), message,
+                    throwable, marker,
+                    getContext());
             logEventConsumer.accept(logEvent);
         }
     }

@@ -119,14 +119,11 @@ public class Log4JLogger extends AbstractLogger {
 
     @Override
     public void logMessage(String fqcn, Level level, Marker marker, Message message, Throwable t) {
-        final LogEvent logEvent = new LogEvent(message.getFormattedMessage(),
-                Instant.now(),
-                Thread.currentThread().getName(),
-                name,
-                Log4jConverter.convertFromLog4J(level),
-                Log4jConverter.convertFromLog4J(marker),
-                Map.of(),
-                t);
+        final LogEvent logEvent = new LogEvent(Log4jConverter.convertFromLog4J(level), name,
+                Thread.currentThread().getName(), Instant.now(), message.getFormattedMessage(),
+                t, Log4jConverter.convertFromLog4J(marker),
+                Map.of()
+        );
         final LogEventConsumer logEventConsumer = Log4JLogProvider.getLogEventConsumer();
         if (logEventConsumer == null) {
             EmergencyLoggerProvider.getEmergencyLogger()
