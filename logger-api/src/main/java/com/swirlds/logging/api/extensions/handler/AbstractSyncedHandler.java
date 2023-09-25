@@ -73,4 +73,8 @@ public abstract class AbstractSyncedHandler implements LogHandler {
     }
 
     protected void handleStopAndFinalize() {}
+
+    protected Configuration getConfiguration() {
+        return configuration;
+    }
 }

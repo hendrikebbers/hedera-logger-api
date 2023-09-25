@@ -24,6 +24,7 @@
     <module>logger-api-benchmark</module>
     <module>handler/logger-console-handler</module>
     <module>handler/logger-rollingfile-handler</module>
+    <module>handler/logger-loki-handler</module>
     <module>provider/logger-jul-provider</module>
     <module>provider/logger-system-provider</module>
     <module>provider/logger-log4j-provider</module>
