@@ -3,6 +3,7 @@ package com.swirlds.logging.api.internal.configuration;
 import com.swirlds.config.api.Configuration;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -13,20 +14,34 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
 
+/**
+ * The Logging configuration that is used to configure the logging system. The config is based on a file that is by
+ * default in of the application root folder and named "log.properties". The system environment variable
+ * "LOG_CONFIG_PATH" can be defined to overwrite the path to the configuration file.
+ */
 public class LogConfiguration implements Configuration {
 
     private final Map<String, String> values;
 
     public LogConfiguration() {
         values = new HashMap<>();
-
-        URL configProperties = LogConfiguration.class.getClassLoader().getResource("log.properties");
+        final String logConfigPath = System.getenv("LOG_CONFIG_PATH");
+        final URL configProperties = Optional.ofNullable(logConfigPath)
+                .map(path -> Path.of(path))
+                .map(path -> path.toUri())
+                .map(uri -> {
+                    try {
+                        return uri.toURL();
+                    } catch (final Exception e) {
+                        throw new RuntimeException("Can not convert path to URL!", e);
+                    }
+                }).orElseGet(() -> LogConfiguration.class.getClassLoader().getResource("log.properties"));
         if (configProperties != null) {
-            try (InputStream inputStream = configProperties.openStream()) {
-                Properties properties = new Properties();
+            try (final InputStream inputStream = configProperties.openStream()) {
+                final Properties properties = new Properties();
                 properties.load(inputStream);
                 properties.forEach((key, value) -> values.put((String) key, (String) value));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 final System.Logger systemLogger = System.getLogger(LogConfiguration.class.getName());
                 systemLogger.log(System.Logger.Level.ERROR, "Can not load logging configuration!", e);
             }
