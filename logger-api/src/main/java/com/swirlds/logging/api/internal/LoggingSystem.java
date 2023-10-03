@@ -47,8 +47,6 @@ public class LoggingSystem implements LogEventConsumer {
 
     private final Map<String, LoggerImpl> loggers;
 
-    private final List<Consumer<LogEvent>> listeners;
-
     private final LoggingLevelConfig levelConfig;
 
     public LoggingSystem(@NonNull final Configuration configuration) {
@@ -56,7 +54,6 @@ public class LoggingSystem implements LogEventConsumer {
         this.levelConfig = new LoggingLevelConfig(configuration);
         this.loggers = new ConcurrentHashMap<>();
         this.handlers = new CopyOnWriteArrayList<>();
-        this.listeners = new CopyOnWriteArrayList<>();
     }
 
     public void addHandler(@NonNull final LogHandler handler) {
@@ -64,6 +61,14 @@ public class LoggingSystem implements LogEventConsumer {
             EMERGENCY_LOGGER.logNPE("handler");
         } else {
             handlers.add(handler);
+        }
+    }
+
+    public void removeHandler(@NonNull final LogHandler handler) {
+        if (handler == null) {
+            EMERGENCY_LOGGER.logNPE("handler");
+        } else {
+            handlers.remove(handler);
         }
     }
 
@@ -105,16 +110,15 @@ public class LoggingSystem implements LogEventConsumer {
             if (isEnabled(event.loggerName(), event.level())) {
                 try {
                     final List<Consumer<LogEvent>> eventConsumers = new ArrayList<>();
-                    if (handlers.isEmpty()) {
+                    handlers.stream()
+                            .filter(handler -> handler.isEnabled(event.loggerName(), event.level()))
+                            .forEach(eventConsumers::add);
+
+                    if (eventConsumers.isEmpty()) {
                         if (isEnabled(event.loggerName(), event.level())) {
                             eventConsumers.add(e -> EMERGENCY_LOGGER.log(event));
                         }
-                    } else {
-                        handlers.stream()
-                                .filter(handler -> handler.isEnabled(event.loggerName(), event.level()))
-                                .forEach(eventConsumers::add);
                     }
-                    eventConsumers.addAll(listeners);
                     if (!eventConsumers.isEmpty()) {
                         final Map<String, String> context = new HashMap<>(event.context());
                         context.putAll(GlobalContext.getContextMap());
@@ -134,24 +138,6 @@ public class LoggingSystem implements LogEventConsumer {
                     EMERGENCY_LOGGER.log(Level.ERROR, "Exception in handling log event", throwable);
                 }
             }
-        }
-    }
-
-    public void addListener(@NonNull final Consumer<LogEvent> listener) {
-        if (listener == null) {
-            EMERGENCY_LOGGER.logNPE("listener");
-        } else {
-            listeners.add(listener);
-            EMERGENCY_LOGGER.log(Level.WARN,
-                    "Logging Listener added! This should only be done in unit tests since it can slow down the system.");
-        }
-    }
-
-    public void removeListener(@NonNull final Consumer<LogEvent> listener) {
-        if (listener == null) {
-            EMERGENCY_LOGGER.logNPE("listener");
-        } else {
-            listeners.remove(listener);
         }
     }
 

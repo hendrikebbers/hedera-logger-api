@@ -26,12 +26,6 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>logger-rollingfile-handler</artifactId>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>logger-loki-handler</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
@@ -39,12 +33,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>logger-jul-provider</artifactId>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>logger-system-provider</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>

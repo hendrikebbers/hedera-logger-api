@@ -29,7 +29,9 @@ public interface LogHandler extends LogEventConsumer {
      *
      * @return true if the log handler is active, false otherwise
      */
-    boolean isActive();
+    default boolean isActive() {
+        return true;
+    }
 
     /**
      * Calling that method will stop the log handler and finalize it. This can be used to close files or flush streams.

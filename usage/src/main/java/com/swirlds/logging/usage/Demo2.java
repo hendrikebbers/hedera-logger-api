@@ -13,6 +13,7 @@ public class Demo2 {
     private final static Logger logger = Loggers.getLogger(Demo2.class);
 
     public static void main(String[] args) throws Exception {
+        Context.getGlobalContext().add("app", "demo2");
 
         logger.log(Level.TRACE, "Hello world!");
         logger.log(Level.INFO, "Hello world!");

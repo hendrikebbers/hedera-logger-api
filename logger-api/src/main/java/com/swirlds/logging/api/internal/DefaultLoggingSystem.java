@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 public class DefaultLoggingSystem {
 
@@ -78,12 +77,12 @@ public class DefaultLoggingSystem {
         return internalLoggingSystem.getLogger(loggerName);
     }
 
-    public void addListener(Consumer<LogEvent> listener) {
-        internalLoggingSystem.addListener(listener);
+    public void addListener(LogHandler logHandler) {
+        internalLoggingSystem.addHandler(logHandler);
     }
 
-    public void removeListener(Consumer<LogEvent> listener) {
-        internalLoggingSystem.removeListener(listener);
+    public void removeListener(LogHandler logHandler) {
+        internalLoggingSystem.removeHandler(logHandler);
     }
 
     public static boolean isInitialized() {

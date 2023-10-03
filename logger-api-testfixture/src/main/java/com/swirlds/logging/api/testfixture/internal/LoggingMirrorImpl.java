@@ -17,21 +17,22 @@
 
 package com.swirlds.logging.api.testfixture.internal;
 
-import static com.swirlds.logging.api.testfixture.internal.LoggerTestSupport.disposeMirror;
-
 import com.swirlds.logging.api.extensions.event.LogEvent;
+import com.swirlds.logging.api.extensions.handler.LogHandler;
+import com.swirlds.logging.api.internal.DefaultLoggingSystem;
 import com.swirlds.logging.api.testfixture.LoggingMirror;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class LoggingMirrorImpl extends AbstractLoggingMirror implements Consumer<LogEvent> {
+public class LoggingMirrorImpl extends AbstractLoggingMirror implements LogHandler {
 
     private final List<LogEvent> events = new CopyOnWriteArrayList<>();
 
     public LoggingMirrorImpl() {
+        DefaultLoggingSystem.getInstance().addListener(this);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class LoggingMirrorImpl extends AbstractLoggingMirror implements Consumer
 
     @Override
     public void dispose() {
-        disposeMirror(this);
+        DefaultLoggingSystem.getInstance().removeListener(this);
     }
 
     @Override
@@ -52,5 +53,11 @@ public class LoggingMirrorImpl extends AbstractLoggingMirror implements Consumer
     @Override
     public List<LogEvent> getEvents() {
         return Collections.unmodifiableList(events);
+    }
+
+    @NonNull
+    @Override
+    public String getName() {
+        return "LoggingMirror";
     }
 }
