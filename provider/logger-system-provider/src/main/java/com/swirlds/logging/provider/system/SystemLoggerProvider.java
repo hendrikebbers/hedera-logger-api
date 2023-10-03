@@ -2,28 +2,16 @@ package com.swirlds.logging.provider.system;
 
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.extensions.event.LogEventConsumer;
-import com.swirlds.logging.api.extensions.provider.LogProvider;
+import com.swirlds.logging.api.extensions.provider.AbstractLogProvider;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class SystemLoggerProvider implements LogProvider {
+public class SystemLoggerProvider extends AbstractLogProvider {
 
     private static final AtomicReference<LogEventConsumer> logEventConsumer = new AtomicReference<>();
 
-    private final Configuration configuration;
-
     public SystemLoggerProvider(Configuration configuration) {
-        this.configuration = Objects.requireNonNull(configuration, "configuration must not be null");
-    }
-
-    @Override
-    public boolean isActive() {
-        return true;
-    }
-
-    @Override
-    public String getName() {
-        return "Adapter for java.lang.System.Logger";
+        super("system", configuration);
     }
 
     @Override

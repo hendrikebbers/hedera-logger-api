@@ -1,6 +1,7 @@
 package com.swirlds.logging.api.test;
 
 import com.swirlds.logging.api.Level;
+import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -56,6 +57,7 @@ class LevelTest {
     @Test
     void testDebug() {
         //given
+        EmergencyLoggerImpl.getInstance();
         Level level = Level.DEBUG;
 
         //then
@@ -83,5 +85,5 @@ class LevelTest {
         Assertions.assertTrue(level.enabledLoggingOfLevel(null), "for null param it should return true");
         Assertions.assertEquals("TRACE", level.name());
     }
-    
+
 }

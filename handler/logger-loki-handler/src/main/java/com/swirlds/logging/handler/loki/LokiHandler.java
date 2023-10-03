@@ -68,10 +68,10 @@ public class LokiHandler extends AbstractSyncedHandler {
         value.add("" + TimeUnit.MILLISECONDS.toNanos(event.timestamp().toEpochMilli()));
         value.add(event.message().getMessage());
         final JsonObject metadata = new JsonObject();
-        value.add(metadata);
         context.entrySet().stream()
                 .filter(entry -> !labels.containsKey(entry.getKey()))
                 .forEach(entry -> metadata.addProperty(entry.getKey(), entry.getValue()));
+        value.add(metadata);
 
         try {
             post(json.toString());
@@ -90,7 +90,7 @@ public class LokiHandler extends AbstractSyncedHandler {
         final HttpClient httpClient = HttpClient.newBuilder().build();
         final BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString();
         final HttpResponse<String> response = httpClient.send(request, bodyHandler);
-        if (response.statusCode() != 200) {
+        if (response.statusCode() != 200 && response.statusCode() != 204) {
             throw new IOException(
                     "Unexpected status code: " + response.statusCode() + " response: " + response.body() + " - JSON:"
                             + json);

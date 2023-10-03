@@ -1,27 +1,29 @@
 package com.swirlds.logging.provider.log4j;
 
+import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.extensions.event.LogEventConsumer;
-import com.swirlds.logging.api.extensions.provider.LogProvider;
+import com.swirlds.logging.api.extensions.provider.AbstractLogProvider;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Log4JLogProvider implements LogProvider {
+public class Log4JLogProvider extends AbstractLogProvider {
 
     private static final AtomicReference<LogEventConsumer> logEventConsumer = new AtomicReference<>();
+
+    /**
+     * Creates a new log provider.
+     *
+     * @param configuration the configuration
+     */
+    public Log4JLogProvider(@NonNull final Configuration configuration) {
+        super("log4j", configuration);
+    }
 
     public static LogEventConsumer getLogEventConsumer() {
         return logEventConsumer.get();
     }
 
-    @Override
-    public boolean isActive() {
-        return true;
-    }
-
-    @Override
-    public String getName() {
-        return "Log4J Provider";
-    }
 
     @Override
     public void install(LogEventConsumer consumer) {

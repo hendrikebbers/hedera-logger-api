@@ -1,55 +1,52 @@
 package com.swirlds.logging.api.extensions.handler;
 
 import com.swirlds.config.api.Configuration;
-import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.event.LogEvent;
-import com.swirlds.logging.api.internal.level.LoggingLevelConfig;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public abstract class AbstractSyncedHandler implements LogHandler {
+/**
+ * An abstract log handler that synchronizes the handling of log events. This handler is used as a base class for all
+ * log handlers that need to synchronize the handling of log events like simple handlers that write events to the
+ * console or to a file.
+ */
+public abstract class AbstractSyncedHandler extends AbstractLogHandler {
 
+    /**
+     * The emergency logger that is used if the log handler is stopped.
+     */
     private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
-    private final String configKey;
-
-    private final Configuration configuration;
-
-    private final LoggingLevelConfig loggingLevelConfig;
-
+    /**
+     * The write lock that is used to synchronize the handling of log events.
+     */
     private final Lock writeLock = new ReentrantLock();
 
+    /**
+     * True if the log handler is stopped, false otherwise.
+     */
     private volatile boolean stopped = false;
 
-
-    public AbstractSyncedHandler(String configKey, Configuration configuration) {
-        this.configKey = configKey;
-        this.configuration = configuration;
-        this.loggingLevelConfig = new LoggingLevelConfig(configuration, "logging.handler." + configKey + ".level");
+    /**
+     * Creates a new log handler.
+     *
+     * @param configKey     the configuration key
+     * @param configuration the configuration
+     */
+    public AbstractSyncedHandler(@NonNull final String configKey, @NonNull final Configuration configuration) {
+        super(configKey, configuration);
     }
 
     @Override
-    public String getName() {
-        return getClass().getSimpleName();
-    }
-
-    @Override
-    public boolean isActive() {
-        return configuration.getValue("logging.handler." + configKey + ".enabled", Boolean.class, false);
-    }
-
-    @Override
-    public boolean isEnabled(String name, Level level) {
-        return loggingLevelConfig.isEnabled(name, level);
-    }
-
-    @Override
-    public final void accept(LogEvent event) {
+    public final void accept(@NonNull LogEvent event) {
         try {
             writeLock.lock();
             if (stopped) {
+                //TODO: is the emergency logger really the best idea in that case? If multiple handlers are stopped,
+                // the emergency logger will be called multiple times.
                 EMERGENCY_LOGGER.log(event);
             } else {
                 handleEvent(event);
@@ -59,7 +56,12 @@ public abstract class AbstractSyncedHandler implements LogHandler {
         }
     }
 
-    protected abstract void handleEvent(LogEvent event);
+    /**
+     * Handles the log event synchronously.
+     *
+     * @param event the log event
+     */
+    protected abstract void handleEvent(@NonNull LogEvent event);
 
     @Override
     public final void stopAndFinalize() {
@@ -72,9 +74,9 @@ public abstract class AbstractSyncedHandler implements LogHandler {
         }
     }
 
+    /**
+     * Implementations can override this method to handle the stop and finalize of the handler. The method will be
+     * called synchronously to the handling of log events.
+     */
     protected void handleStopAndFinalize() {}
-
-    protected Configuration getConfiguration() {
-        return configuration;
-    }
 }

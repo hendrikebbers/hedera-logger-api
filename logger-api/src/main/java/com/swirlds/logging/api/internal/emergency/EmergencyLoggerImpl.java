@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
@@ -51,7 +52,7 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
     /**
      * The level that is supported by the logger.
      */
-    private final Level supportedLevel;
+    private final AtomicReference<Level> supportedLevel = new AtomicReference<>();
 
     /**
      * The queue that is used to store the log events. Once the real logging system is available the events can be taken
@@ -70,7 +71,6 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
     private EmergencyLoggerImpl() {
         this.logEvents = new ArrayBlockingQueue<>(LOG_EVENT_QUEUE_SIZE);
         recursionGuard = new ThreadLocal<>();
-        supportedLevel = getSupportedLevelFromSystemProperties();
     }
 
     /**
@@ -139,7 +139,14 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
             logNPE("level");
             return true;
         }
-        return supportedLevel.enabledLoggingOfLevel(level);
+        if (supportedLevel.get() == null) {
+            supportedLevel.set(getSupportedLevelFromSystemProperties());
+        }
+        final Level internalSupportedLevel = supportedLevel.get();
+        if (internalSupportedLevel == null) {
+            return true;
+        }
+        return internalSupportedLevel.enabledLoggingOfLevel(level);
     }
 
     /**

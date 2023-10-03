@@ -8,6 +8,6 @@ public class Log4JLogProviderFactory implements LogProviderFactory {
 
     @Override
     public LogProvider create(Configuration configuration) {
-        return new Log4JLogProvider();
+        return new Log4JLogProvider(configuration);
     }
 }
