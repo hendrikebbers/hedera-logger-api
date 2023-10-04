@@ -1,6 +1,7 @@
 package com.swirlds.logging.api.test;
 
 import com.swirlds.logging.api.internal.LoggerImpl;
+import com.swirlds.logging.api.test.util.DummyConsumer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -53,5 +54,29 @@ public class LoggerImplTest {
         Assertions.assertTrue(infoEnabled);
         Assertions.assertTrue(warnEnabled);
         Assertions.assertTrue(errorEnabled);
+    }
+
+    @Test
+    void testSpecWithNullName() {
+        //given
+        LoggerImpl logger = new LoggerImpl(null, new DummyConsumer());
+
+        //then
+        LoggerApiSpecTest.testSpec(logger);
+    }
+
+    @Test
+    void testSpecWithSimpleLogger() {
+        //given
+        LoggerImpl logger = new LoggerImpl("test-name", new DummyConsumer());
+
+        //then
+        LoggerApiSpecTest.testSpec(logger);
+    }
+
+    @Test
+    void testSpecWithDifferentLoggers() {
+        LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", new DummyConsumer()));
+        LoggerApiSpecTest.testSpec(new LoggerImpl(null, new DummyConsumer()));
     }
 }

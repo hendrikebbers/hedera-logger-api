@@ -1,6 +1,6 @@
 package com.swirlds.logging.api.test;
 
-import com.swirlds.logging.api.Marker;
+import com.swirlds.logging.api.internal.Marker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +33,7 @@ public class MarkerTest {
         Assertions.assertSame(parent, marker.parent());
         Assertions.assertNull(parent.parent());
     }
-    
+
     @Test
     void testEquals() {
         //given

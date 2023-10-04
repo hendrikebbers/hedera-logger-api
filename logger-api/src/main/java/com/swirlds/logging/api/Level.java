@@ -57,4 +57,12 @@ public enum Level {
         }
         return this.levelOrdinal >= level.levelOrdinal;
     }
+
+    public static Level valueOfOrElse(String value, Level defaultLevel) {
+        try {
+            return valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return defaultLevel;
+        }
+    }
 }

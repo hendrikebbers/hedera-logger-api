@@ -1,4 +1,4 @@
-package com.swirlds.logging.api.test;
+package com.swirlds.logging.api.test.util;
 
 import com.swirlds.config.api.Configuration;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -18,6 +18,11 @@ public class SimpleConfiguration implements Configuration {
 
     public void setProperty(String name, String value) {
         properties.put(name, value);
+    }
+
+    public SimpleConfiguration withProperty(String name, String value) {
+        setProperty(name, value);
+        return this;
     }
 
     @NonNull

@@ -5,25 +5,19 @@ import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class LoggingLevelConfig {
 
     private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
-    private final static System.Logger LOGGER = System.getLogger(LoggingLevelConfig.class.getName());
-
     private final static String DEFAULT_PREFIX = "logging.level";
 
     private final Map<String, Level> levelCache;
 
-    private final Configuration configuration;
-
-    private final List<String> levelConfigProperties;
+    private final Map<String, String> levelConfigProperties;
 
     private final String prefix;
 
@@ -38,28 +32,34 @@ public class LoggingLevelConfig {
         this(configuration, prefix, Level.INFO);
     }
 
+    public LoggingLevelConfig(Configuration configuration, Level level) {
+        this(configuration, DEFAULT_PREFIX, level);
+    }
+
     public LoggingLevelConfig(@NonNull Configuration configuration, @NonNull String prefix,
             @NonNull Level defaultLevel) {
-        this.configuration = Objects.requireNonNull(configuration, "configuration must not be null");
         this.prefix = Objects.requireNonNull(prefix, "prefix must not be null");
         this.defaultLevel = Objects.requireNonNull(defaultLevel, "defaultLevel must not be null");
         this.levelCache = new ConcurrentHashMap<>();
-        this.levelConfigProperties = configuration.getPropertyNames()
-                .filter(n -> n.startsWith(this.prefix))
-                .map(n -> n.substring(this.prefix.length()))
-                .map(n -> {
-                    if (n.startsWith(".")) {
-                        return n.substring(1);
-                    } else {
-                        return n;
-                    }
-                })
-                .sorted()
-                .collect(Collectors.toList());
-        LOGGER.log(System.Logger.Level.TRACE, "LoggingLevelConfig initialized with {0} properties",
-                levelConfigProperties.size());
+        this.levelConfigProperties = new ConcurrentHashMap<>();
+        update(configuration);
     }
 
+    public void update(final @NonNull Configuration configuration) {
+        Objects.requireNonNull(configuration, "configuration must not be null");
+        levelConfigProperties.clear();
+        configuration.getPropertyNames()
+                .filter(n -> n.startsWith(this.prefix))
+                .forEach(configPropertyName -> {
+                    final String name = configPropertyName.substring(this.prefix.length());
+                    if (name.startsWith(".")) {
+                        levelConfigProperties.put(name.substring(1), configuration.getValue(configPropertyName));
+                    } else {
+                        levelConfigProperties.put(name, configuration.getValue(configPropertyName));
+                    }
+                });
+        levelCache.clear();
+    }
 
     public boolean isEnabled(@NonNull String name, @NonNull Level level) {
         if (level == null) {
@@ -76,7 +76,7 @@ public class LoggingLevelConfig {
 
     @NonNull
     private Level getConfiguredLevel(@NonNull String name) {
-        return levelConfigProperties.stream()
+        return levelConfigProperties.keySet().stream()
                 .filter(n -> name.trim().startsWith(n))
                 .reduce((a, b) -> {
                     if (a.length() > b.length()) {
@@ -85,16 +85,9 @@ public class LoggingLevelConfig {
                         return b;
                     }
                 })
-                .map(n -> {
-                    if (n.isBlank()) {
-                        return this.prefix;
-                    } else {
-                        return this.prefix + "." + n;
-                    }
-                })
-                .map(configuration::getValue)
+                .map(levelConfigProperties::get)
                 .map(String::toUpperCase)
-                .map(Level::valueOf)
+                .map(n -> Level.valueOfOrElse(n, defaultLevel))
                 .orElse(defaultLevel);
     }
 }

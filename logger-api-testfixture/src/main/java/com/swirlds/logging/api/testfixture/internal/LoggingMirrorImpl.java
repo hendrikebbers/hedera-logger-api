@@ -32,7 +32,7 @@ public class LoggingMirrorImpl extends AbstractLoggingMirror implements LogHandl
     private final List<LogEvent> events = new CopyOnWriteArrayList<>();
 
     public LoggingMirrorImpl() {
-        DefaultLoggingSystem.getInstance().addListener(this);
+        DefaultLoggingSystem.getInstance().addHandler(this);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class LoggingMirrorImpl extends AbstractLoggingMirror implements LogHandl
 
     @Override
     public void dispose() {
-        DefaultLoggingSystem.getInstance().removeListener(this);
+        DefaultLoggingSystem.getInstance().removeHandler(this);
     }
 
     @Override

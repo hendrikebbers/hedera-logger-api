@@ -19,7 +19,6 @@ package com.swirlds.logging.api.internal;
 
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Logger;
-import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.event.LogEvent;
@@ -34,6 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
 
 public class LoggerImpl implements Logger {
 
@@ -148,7 +148,7 @@ public class LoggerImpl implements Logger {
             return withMarkerAndContext(new Marker(markerName, marker), context);
         }
     }
-
+    
     @Override
     public Logger withContext(String key, String value) {
         if (key != null) {
@@ -162,6 +162,9 @@ public class LoggerImpl implements Logger {
 
     @Override
     public Logger withContext(String key, String... values) {
+        if (values == null) {
+            return withContext(key, (String) null);
+        }
         if (key != null) {
             Map<String, String> newContext = new HashMap<>(context);
             newContext.put(key, String.join(",", values));

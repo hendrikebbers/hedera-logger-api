@@ -1,7 +1,10 @@
 package com.swirlds.logging.api.test;
 
+import com.swirlds.base.testfixture.concurrent.ConcurrentTestSupport;
 import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.internal.LoggingSystem;
+import com.swirlds.logging.api.test.util.InMemoryHandler;
+import com.swirlds.logging.api.test.util.SimpleConfiguration;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -20,14 +23,14 @@ public class LoggingSystemParallelStressTest {
         final LoggingSystem loggingSystem = new LoggingSystem(configuration);
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
-        final ParallelStressTester stressTester = new ParallelStressTester(Duration.ofSeconds(60));
+        final ConcurrentTestSupport stressTester = new ConcurrentTestSupport(Duration.ofSeconds(60));
         final List<Runnable> runnables = IntStream.range(0, 100)
                 .mapToObj(i -> loggingSystem.getLogger("logger-" + i))
                 .map(l -> (Runnable) () -> logLikeHell(l))
                 .collect(Collectors.toList());
 
         //when
-        stressTester.runInParallel(runnables);
+        stressTester.executeAndWait(runnables);
 
         //then
         Assertions.assertEquals(140000, handler.getEvents().size());
@@ -44,13 +47,13 @@ public class LoggingSystemParallelStressTest {
         final Logger logger = loggingSystem.getLogger("logger");
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
-        final ParallelStressTester stressTester = new ParallelStressTester(Duration.ofSeconds(60));
+        final ConcurrentTestSupport stressTester = new ConcurrentTestSupport(Duration.ofSeconds(60));
         final List<Runnable> runnables = IntStream.range(0, 100)
                 .mapToObj(l -> (Runnable) () -> logLikeHell(logger))
                 .collect(Collectors.toList());
 
         //when
-        stressTester.runInParallel(runnables);
+        stressTester.executeAndWait(runnables);
 
         //then
         Assertions.assertEquals(140000, handler.getEvents().size());

@@ -1,7 +1,7 @@
 package com.swirlds.logging.provider.log4j;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.Marker;
+import com.swirlds.logging.api.internal.Marker;
 import java.lang.System.Logger;
 import java.util.Objects;
 

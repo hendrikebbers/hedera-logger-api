@@ -1,4 +1,4 @@
-package com.swirlds.logging.api.test;
+package com.swirlds.logging.api.test.util;
 
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;

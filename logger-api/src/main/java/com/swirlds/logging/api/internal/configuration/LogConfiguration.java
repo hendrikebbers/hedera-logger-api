@@ -17,14 +17,21 @@ import java.util.stream.Stream;
 /**
  * The Logging configuration that is used to configure the logging system. The config is based on a file that is by
  * default in of the application root folder and named "log.properties". The system environment variable
- * "LOG_CONFIG_PATH" can be defined to overwrite the path to the configuration file.
+ * "LOG_CONFIG_PATH" can be defined to overwrite the path to the configuration file. The class implements the
+ * {@link Configuration} interface since it will later be replaced by using the "real" configuration system.
  */
 public class LogConfiguration implements Configuration {
 
-    private final Map<String, String> values;
+    /**
+     * The configuration properties
+     */
+    private final Map<String, String> properties;
 
+    /**
+     * Creates a new instance of the logging configuration.
+     */
     public LogConfiguration() {
-        values = new HashMap<>();
+        properties = new HashMap<>();
         final String logConfigPath = System.getenv("LOG_CONFIG_PATH");
         final URL configProperties = Optional.ofNullable(logConfigPath)
                 .map(path -> Path.of(path))
@@ -40,7 +47,7 @@ public class LogConfiguration implements Configuration {
             try (final InputStream inputStream = configProperties.openStream()) {
                 final Properties properties = new Properties();
                 properties.load(inputStream);
-                properties.forEach((key, value) -> values.put((String) key, (String) value));
+                properties.forEach((key, value) -> this.properties.put((String) key, (String) value));
             } catch (final Exception e) {
                 final System.Logger systemLogger = System.getLogger(LogConfiguration.class.getName());
                 systemLogger.log(System.Logger.Level.ERROR, "Can not load logging configuration!", e);
@@ -50,29 +57,29 @@ public class LogConfiguration implements Configuration {
 
     @Override
     public Stream<String> getPropertyNames() {
-        return values.keySet().stream();
+        return properties.keySet().stream();
     }
 
     @Override
     public boolean exists(String s) {
-        return values.containsKey(s);
+        return properties.containsKey(s);
     }
 
     @Override
     public String getValue(String s) throws NoSuchElementException {
-        return values.get(s);
+        return properties.get(s);
     }
 
     @Override
     public String getValue(String s, String s1) {
-        return Optional.ofNullable(values.get(s)).orElse(s1);
+        return Optional.ofNullable(properties.get(s)).orElse(s1);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getValue(String s, Class<T> aClass) throws NoSuchElementException, IllegalArgumentException {
         if (aClass == Boolean.class) {
-            return (T) Boolean.valueOf(values.get(s));
+            return (T) Boolean.valueOf(properties.get(s));
         }
         throw new IllegalStateException("Unsupported type: " + aClass.getName());
     }

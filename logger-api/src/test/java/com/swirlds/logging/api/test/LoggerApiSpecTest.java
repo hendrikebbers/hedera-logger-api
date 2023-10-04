@@ -2,11 +2,8 @@ package com.swirlds.logging.api.test;
 
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Logger;
-import com.swirlds.logging.api.internal.LoggerImpl;
-import com.swirlds.logging.api.internal.LoggingSystem;
 import java.util.Arrays;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 public class LoggerApiSpecTest {
 
@@ -36,57 +33,6 @@ public class LoggerApiSpecTest {
     };
 
     private final static String LOG_ERROR_MESSAGE = "a log call must never throw an exception";
-
-    @Test
-    void testNullName() {
-        //given
-        LoggerImpl logger = new LoggerImpl(null, new DummyConsumer());
-
-        //then
-        testSpec(logger);
-    }
-
-    @Test
-    void testSimpleLogger() {
-        //given
-        LoggerImpl logger = new LoggerImpl("test-name", new DummyConsumer());
-
-        //then
-        testSpec(logger);
-    }
-
-    @Test
-    void testSpecWithDifferentLoggers() {
-        LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", new DummyConsumer()));
-        LoggerApiSpecTest.testSpec(new LoggerImpl(null, new DummyConsumer()));
-    }
-
-    @Test
-    void testLoggingSystemWithoutHandler() {
-        //given
-        final SimpleConfiguration configuration = new SimpleConfiguration();
-        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
-
-        //then
-        testSpec(loggingSystem);
-    }
-
-    @Test
-    void testLoggingSystemWithHandler() {
-        //given
-        final SimpleConfiguration configuration = new SimpleConfiguration();
-        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
-        InMemoryHandler handler = new InMemoryHandler();
-        loggingSystem.addHandler(handler);
-
-        //then
-        testSpec(loggingSystem);
-    }
-
-    public static void testSpec(LoggingSystem system) {
-        LoggerApiSpecTest.testSpec(system.getLogger("test-name"));
-        LoggerApiSpecTest.testSpec(system.getLogger(null));
-    }
 
 
     public static void testSpec(Logger logger) {
@@ -235,18 +181,23 @@ public class LoggerApiSpecTest {
 
         Assertions.assertDoesNotThrow(() -> logger.withContext("key", 1, 2), LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.withContext(null, 1, 2), LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(() -> logger.withContext("key", (int[]) null), LOG_ERROR_MESSAGE);
 
         Assertions.assertDoesNotThrow(() -> logger.withContext("key", 1L, 2L), LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.withContext(null, 1L, 2L), LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(() -> logger.withContext("key", (long[]) null), LOG_ERROR_MESSAGE);
 
         Assertions.assertDoesNotThrow(() -> logger.withContext("key", 1.0D, 2.0D), LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.withContext(null, 1.0D, 2.0D), LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(() -> logger.withContext("key", (double[]) null), LOG_ERROR_MESSAGE);
 
         Assertions.assertDoesNotThrow(() -> logger.withContext("key", 1.0F, 2.0F), LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.withContext(null, 1.0F, 2.0F), LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(() -> logger.withContext("key", (float[]) null), LOG_ERROR_MESSAGE);
 
         Assertions.assertDoesNotThrow(() -> logger.withContext("key", true, false), LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.withContext(null, true, false), LOG_ERROR_MESSAGE);
+        Assertions.assertDoesNotThrow(() -> logger.withContext("key", (boolean[]) null), LOG_ERROR_MESSAGE);
     }
 
     private static void testLogCall(Logger logger, Level level, String message) {
@@ -278,9 +229,6 @@ public class LoggerApiSpecTest {
         Assertions.assertDoesNotThrow(() -> logger.log(level, message, null, "arg1", null), LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.log(level, message, null, null, "arg2"), LOG_ERROR_MESSAGE);
         Assertions.assertDoesNotThrow(() -> logger.log(level, message, null, null, null), LOG_ERROR_MESSAGE);
-
-        Assertions.assertDoesNotThrow(() -> logger.logImpl(level, message, THROW), LOG_ERROR_MESSAGE);
-        Assertions.assertDoesNotThrow(() -> logger.logImpl(level, message, null), LOG_ERROR_MESSAGE);
 
         Arrays.stream(ARGS_VARIANTS).forEach(args -> {
             Assertions.assertDoesNotThrow(() -> logger.log(level, message, args), LOG_ERROR_MESSAGE);

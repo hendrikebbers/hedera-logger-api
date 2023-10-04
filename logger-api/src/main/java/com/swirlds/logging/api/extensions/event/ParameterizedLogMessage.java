@@ -1,5 +1,7 @@
 package com.swirlds.logging.api.extensions.event;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
+
 /**
  * A log message that can be parameterized with arguments. The arguments are inserted into the message at the positions
  * of the {} placeholders.
@@ -11,7 +13,7 @@ package com.swirlds.logging.api.extensions.event;
  * @param args           the arguments
  * @see LogMessage
  */
-public record ParameterizedLogMessage(String messagePattern, Object... args) implements LogMessage {
+public record ParameterizedLogMessage(@Nullable String messagePattern, @Nullable Object... args) implements LogMessage {
 
     static final char DELIM_START = '{';
     static final String DELIM_STR = "{}";

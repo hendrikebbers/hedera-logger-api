@@ -77,11 +77,11 @@ public class DefaultLoggingSystem {
         return internalLoggingSystem.getLogger(loggerName);
     }
 
-    public void addListener(LogHandler logHandler) {
+    public void addHandler(LogHandler logHandler) {
         internalLoggingSystem.addHandler(logHandler);
     }
 
-    public void removeListener(LogHandler logHandler) {
+    public void removeHandler(LogHandler logHandler) {
         internalLoggingSystem.removeHandler(logHandler);
     }
 

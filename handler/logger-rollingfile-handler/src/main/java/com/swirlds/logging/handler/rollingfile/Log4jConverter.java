@@ -1,7 +1,7 @@
 package com.swirlds.logging.handler.rollingfile;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.Marker;
+import com.swirlds.logging.api.internal.Marker;
 import java.util.Objects;
 
 public class Log4jConverter {

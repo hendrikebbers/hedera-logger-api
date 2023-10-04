@@ -3,12 +3,14 @@ package com.swirlds.logging.api.test;
 import com.swirlds.base.context.Context;
 import com.swirlds.base.testfixture.context.WithContext;
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.Marker;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.internal.LoggerImpl;
 import com.swirlds.logging.api.internal.LoggingSystem;
+import com.swirlds.logging.api.internal.Marker;
 import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
+import com.swirlds.logging.api.test.util.InMemoryHandler;
+import com.swirlds.logging.api.test.util.SimpleConfiguration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -599,5 +601,33 @@ public class LoggingSystemTest {
         final List<LogEvent> loggedErrorEvents = getLoggedEvents();
 
         Assertions.assertEquals(1, loggedErrorEvents.size(), "There should be 1 ERROR event");
+    }
+
+
+    @Test
+    void testSpecWithLoggingSystemWithoutHandler() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+
+        //then
+        testSpec(loggingSystem);
+    }
+
+    @Test
+    void testSpecWithLoggingSystemWithHandler() {
+        //given
+        final SimpleConfiguration configuration = new SimpleConfiguration();
+        final LoggingSystem loggingSystem = new LoggingSystem(configuration);
+        InMemoryHandler handler = new InMemoryHandler();
+        loggingSystem.addHandler(handler);
+
+        //then
+        testSpec(loggingSystem);
+    }
+
+    static void testSpec(LoggingSystem system) {
+        LoggerApiSpecTest.testSpec(system.getLogger("test-name"));
+        LoggerApiSpecTest.testSpec(system.getLogger(null));
     }
 }

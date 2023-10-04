@@ -8,12 +8,11 @@ module com.swirlds.logging.api {
     exports com.swirlds.logging.api.extensions.emergency;
     exports com.swirlds.logging.api.extensions.event;
 
-    exports com.swirlds.logging.api.internal to com.swirlds.logging.api.testfixture, com.swirlds.logging.api.test;
-    exports com.swirlds.logging.api.internal.util to com.swirlds.logging.api.testfixture;
-    exports com.swirlds.logging.api.internal.level to com.swirlds.logging.api.testfixture, com.swirlds.logging.handler.synced;
+    exports com.swirlds.logging.api.internal.level to com.swirlds.logging.api.testfixture, com.swirlds.logging.handler.synced, com.swirlds.logging.api.test;
     exports com.swirlds.logging.api.internal.emergency to com.swirlds.logging.api.testfixture, com.swirlds.logging.api.test;
     exports com.swirlds.logging.api.internal.format;
-    
+    exports com.swirlds.logging.api.internal;
+
     uses LogHandlerFactory;
     uses LogProviderFactory;
 
