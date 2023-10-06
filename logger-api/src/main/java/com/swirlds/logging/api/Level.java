@@ -62,6 +62,7 @@ public enum Level {
         try {
             return valueOf(value);
         } catch (IllegalArgumentException e) {
+            EMERGENCY_LOGGER.log(Level.ERROR, "Invalid log level: " + value, e);
             return defaultLevel;
         }
     }
