@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.swirlds.logging.api.internal;
+package com.swirlds.logging.api.extensions.event;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;

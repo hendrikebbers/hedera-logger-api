@@ -18,7 +18,6 @@
 package com.swirlds.logging.api.extensions.event;
 
 import com.swirlds.logging.api.Level;
-import com.swirlds.logging.api.internal.Marker;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;

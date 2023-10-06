@@ -1,6 +1,6 @@
 package com.swirlds.logging.api.test;
 
-import com.swirlds.logging.api.internal.Marker;
+import com.swirlds.logging.api.extensions.event.Marker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

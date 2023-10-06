@@ -1,7 +1,7 @@
 package com.swirlds.base.testfixture.io.internal;
 
-import com.swirlds.base.testfixture.inject.TestInjector;
 import com.swirlds.base.testfixture.io.SystemOutProvider;
+import com.swirlds.base.testfixture.util.TestInjector;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -26,7 +26,7 @@ public class SystemOutExtension implements InvocationInterceptor {
         try (final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             final SystemIoProvider provider = new SystemIoProvider(byteArrayOutputStream);
             System.setOut(new PrintStream(byteArrayOutputStream));
-            TestInjector.injectInTest(SystemOutProvider.class, provider, extensionContext);
+            TestInjector.injectInTest(SystemOutProvider.class, () -> provider, extensionContext);
             invocation.proceed();
         } finally {
             System.setOut(originalSystemOutPrintStream);

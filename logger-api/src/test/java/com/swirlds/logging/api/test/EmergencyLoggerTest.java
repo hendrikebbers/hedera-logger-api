@@ -6,7 +6,7 @@ import com.swirlds.base.testfixture.io.WithSystemOut;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.event.LogMessage;
-import com.swirlds.logging.api.internal.Marker;
+import com.swirlds.logging.api.extensions.event.Marker;
 import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 import jakarta.inject.Inject;
 import java.time.Instant;

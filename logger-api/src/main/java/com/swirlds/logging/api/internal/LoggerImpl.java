@@ -24,6 +24,7 @@ import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.event.LogEventConsumer;
 import com.swirlds.logging.api.extensions.event.LogMessage;
+import com.swirlds.logging.api.extensions.event.Marker;
 import com.swirlds.logging.api.extensions.event.ParameterizedLogMessage;
 import com.swirlds.logging.api.extensions.event.SimpleLogMessage;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -148,7 +149,7 @@ public class LoggerImpl implements Logger {
             return withMarkerAndContext(new Marker(markerName, marker), context);
         }
     }
-    
+
     @Override
     public Logger withContext(String key, String value) {
         if (key != null) {

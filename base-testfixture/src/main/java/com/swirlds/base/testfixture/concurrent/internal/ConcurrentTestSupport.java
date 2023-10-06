@@ -1,7 +1,8 @@
-package com.swirlds.base.testfixture.concurrent;
+package com.swirlds.base.testfixture.concurrent.internal;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import com.swirlds.base.testfixture.concurrent.TestExecutor;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
