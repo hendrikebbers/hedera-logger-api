@@ -4,7 +4,6 @@ import com.swirlds.logging.api.Level;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,21 +38,6 @@ public interface LogEventFactory {
         );
     }
 
-    /**
-     * Creates a new {@link LogEvent} that has all parameters of the given logEvent but a different context.
-     *
-     * @param logEvent the logEvent that should be copied (excluding the context)
-     * @param context  the new context
-     * @return the new copy of the event
-     */
-    @NonNull
-    default LogEvent createLogEvent(@NonNull LogEvent logEvent, @NonNull Map<String, String> context) {
-        Objects.requireNonNull(logEvent);
-        Objects.requireNonNull(context);
-        return createLogEvent(logEvent.level(), logEvent.loggerName(), logEvent.threadName(),
-                logEvent.timestamp(), logEvent.message(),
-                logEvent.throwable(), logEvent.marker(), Collections.unmodifiableMap(context));
-    }
 
     /**
      * Creates a new {@link LogEvent} that has all parameters of the given logEvent but a different loggerName.

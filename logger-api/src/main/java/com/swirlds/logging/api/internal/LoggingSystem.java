@@ -17,8 +17,6 @@
 
 package com.swirlds.logging.api.internal;
 
-import com.swirlds.base.context.internal.GlobalContext;
-import com.swirlds.base.context.internal.ThreadLocalContext;
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
@@ -31,8 +29,6 @@ import com.swirlds.logging.api.internal.event.SimpleLogEventFactory;
 import com.swirlds.logging.api.internal.level.LoggingLevelConfig;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -124,14 +120,9 @@ public class LoggingSystem implements LogEventConsumer {
                         }
                     }
                     if (!eventConsumers.isEmpty()) {
-                        final Map<String, String> context = new HashMap<>(event.context());
-                        context.putAll(GlobalContext.getContextMap());
-                        context.putAll(ThreadLocalContext.getContextMap());
-                        final LogEvent enrichedEvent = logEventFactory.createLogEvent(event,
-                                Collections.unmodifiableMap(context));
                         eventConsumers.forEach(consumer -> {
                             try {
-                                consumer.accept(enrichedEvent);
+                                consumer.accept(event);
                             } catch (final Throwable throwable) {
                                 EMERGENCY_LOGGER.log(Level.ERROR, "Exception in handling log event by consumer",
                                         throwable);

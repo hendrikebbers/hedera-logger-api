@@ -9,6 +9,7 @@ import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.internal.LoggerImpl;
 import com.swirlds.logging.api.internal.LoggingSystem;
 import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
+import com.swirlds.logging.api.internal.event.DefaultLogEvent;
 import com.swirlds.logging.api.test.util.InMemoryHandler;
 import com.swirlds.logging.api.test.util.SimpleConfiguration;
 import java.time.Instant;
@@ -541,12 +542,13 @@ public class LoggingSystemTest {
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
 
-        LogEvent event1 = loggingSystem.getLogEventFactory().createLogEvent(Level.INFO, "test-logger", Thread.currentThread().getName(), Instant.now(),
-                "message",
-                new RuntimeException("error"), new Marker("INFO_MARKER"),
-                Map.of("context", "unit-test", "level", "info")
-        );
-
+        LogEvent event1 = loggingSystem.getLogEventFactory()
+                .createLogEvent(Level.INFO, "test-logger", Thread.currentThread().getName(), Instant.now(),
+                        "message",
+                        new RuntimeException("error"), new Marker("INFO_MARKER"),
+                        Map.of("context", "unit-test", "level", "info")
+                );
+        Context.getGlobalContext().add("new-global", "new-global-value");
         LogEvent event2 = loggingSystem.getLogEventFactory().createLogEvent(Level.TRACE, "test-logger", "trace-message"
         ); //should not be forwarded since INFO is configured as root level
         LogEvent event3 = loggingSystem.getLogEventFactory()
@@ -559,7 +561,6 @@ public class LoggingSystemTest {
 
         //when
         loggingSystem.accept(event1);
-        Context.getGlobalContext().add("new-global", "new-global-value");
         loggingSystem.accept(event2);
         loggingSystem.accept(event3);
         loggingSystem.accept(event4);
@@ -569,10 +570,14 @@ public class LoggingSystemTest {
         Assertions.assertEquals(3, loggedEvents.size());
         Assertions.assertEquals(event1, loggedEvents.get(0));
         Assertions.assertEquals(
-                loggingSystem.getLogEventFactory().createLogEvent(event3, Map.of("new-global", "new-global-value")),
+                new DefaultLogEvent(event3.level(), event3.loggerName(), event3.threadName(), event3.timestamp(),
+                        event3.message(), event3.throwable(), event3.marker(),
+                        Map.of("new-global", "new-global-value")),
                 loggedEvents.get(1));
-        Assertions.assertEquals(loggingSystem.getLogEventFactory().createLogEvent(event4,
-                Map.of("context", "unit-test", "new-global", "new-global-value")), loggedEvents.get(2));
+        Assertions.assertEquals(loggingSystem.getLogEventFactory()
+                .createLogEvent(event4.level(), event4.loggerName(), event4.threadName(), event4.timestamp(),
+                        event4.message(), event4.throwable(), event4.marker(),
+                        Map.of("context", "unit-test", "new-global", "new-global-value")), loggedEvents.get(2));
     }
 
     @Test
