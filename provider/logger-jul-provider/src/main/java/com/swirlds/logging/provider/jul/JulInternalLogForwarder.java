@@ -7,6 +7,7 @@ import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.event.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEventFactory;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 import java.util.logging.Handler;
@@ -22,13 +23,17 @@ public final class JulInternalLogForwarder extends Handler {
 
     private final LogEventConsumer logEventConsumer;
 
+    private final LogEventFactory logEventFactory;
+
     /**
      * Creates a new instance.
      *
      * @param logEventConsumer
      */
-    public JulInternalLogForwarder(@NonNull final LogEventConsumer logEventConsumer) {
+    public JulInternalLogForwarder(@NonNull LogEventFactory logEventFactory,
+            @NonNull final LogEventConsumer logEventConsumer) {
         this.logEventConsumer = Objects.requireNonNull(logEventConsumer, "logEventConsumer must not be null");
+        this.logEventFactory = Objects.requireNonNull(logEventFactory, "logEventFactory must not be null");
     }
 
     @Override
@@ -41,7 +46,7 @@ public final class JulInternalLogForwarder extends Handler {
         final String name = record.getLoggerName();
         if (logEventConsumer.isEnabled(name, level)) {
             final String message = JulUtils.extractMessage(record);
-            logEventConsumer.accept(new LogEvent(level, name, message, record.getThrown()));
+            logEventConsumer.accept(logEventFactory.createLogEvent(level, name, message, record.getThrown()));
         }
     }
 

@@ -3,6 +3,7 @@ package com.swirlds.logging.provider.log4j;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.event.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEventFactory;
 import java.time.Instant;
 import java.util.Map;
 import org.apache.logging.log4j.Level;
@@ -119,16 +120,22 @@ public class Log4JLogger extends AbstractLogger {
 
     @Override
     public void logMessage(String fqcn, Level level, Marker marker, Message message, Throwable t) {
-        final LogEvent logEvent = new LogEvent(Log4jConverter.convertFromLog4J(level), name,
-                Thread.currentThread().getName(), Instant.now(), message.getFormattedMessage(),
-                t, Log4jConverter.convertFromLog4J(marker),
-                Map.of()
-        );
-        final LogEventConsumer logEventConsumer = Log4JLogProvider.getLogEventConsumer();
-        if (logEventConsumer == null) {
-            EmergencyLoggerProvider.getEmergencyLogger().log(logEvent);
+        LogEventFactory logEventFactory = Log4JLogProvider.getLogEventFactory();
+        if (logEventFactory != null) {
+            final LogEvent logEvent = logEventFactory.createLogEvent(Log4jConverter.convertFromLog4J(level), name,
+                    Thread.currentThread().getName(), Instant.now(), message.getFormattedMessage(),
+                    t, Log4jConverter.convertFromLog4J(marker),
+                    Map.of()
+            );
+            final LogEventConsumer logEventConsumer = Log4JLogProvider.getLogEventConsumer();
+            if (logEventConsumer == null) {
+                EmergencyLoggerProvider.getEmergencyLogger().log(logEvent);
+            } else {
+                logEventConsumer.accept(logEvent);
+            }
         } else {
-            logEventConsumer.accept(logEvent);
+            EmergencyLoggerProvider.getEmergencyLogger()
+                    .log(Log4jConverter.convertFromLog4J(level), message.getFormattedMessage(), t);
         }
     }
 

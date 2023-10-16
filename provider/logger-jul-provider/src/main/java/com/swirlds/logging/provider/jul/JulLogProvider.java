@@ -2,6 +2,7 @@ package com.swirlds.logging.provider.jul;
 
 import com.swirlds.config.api.Configuration;
 import com.swirlds.logging.api.extensions.event.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEventFactory;
 import com.swirlds.logging.api.extensions.provider.AbstractLogProvider;
 import com.swirlds.logging.api.extensions.provider.LogProvider;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -24,14 +25,14 @@ public class JulLogProvider extends AbstractLogProvider {
     }
 
     @Override
-    public void install(@NonNull final LogEventConsumer logEventConsumer) {
+    public void install(@NonNull LogEventFactory logEventFactory, @NonNull final LogEventConsumer logEventConsumer) {
         Objects.requireNonNull(logEventConsumer, "logEventConsumer must not be null");
         java.util.logging.Logger rootLogger = LogManager.getLogManager().getLogger("");
         Handler[] handlers = rootLogger.getHandlers();
         for (Handler handler : handlers) {
             rootLogger.removeHandler(handler);
         }
-        rootLogger.addHandler(new JulInternalLogForwarder(logEventConsumer));
+        rootLogger.addHandler(new JulInternalLogForwarder(logEventFactory, logEventConsumer));
         rootLogger.setLevel(java.util.logging.Level.ALL);
     }
 }

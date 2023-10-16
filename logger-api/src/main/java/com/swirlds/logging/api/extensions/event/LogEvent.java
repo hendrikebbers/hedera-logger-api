@@ -18,74 +18,25 @@
 package com.swirlds.logging.api.extensions.event;
 
 import com.swirlds.logging.api.Level;
-import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
 import java.util.Map;
 
-/**
- * A log event that is passed to the {@link LogEventConsumer} for processing.
- *
- * @param level      The log level
- * @param loggerName The name of the logger
- * @param threadName The name of the thread
- * @param timestamp  The timestamp of the log event
- * @param message    The log message (this is not a String since the message can be parameterized. See
- *                   {@link LogMessage} for more details).
- * @param throwable  The throwable
- * @param marker     The marker
- * @param context    The context
- */
-public record LogEvent(@NonNull Level level, @NonNull String loggerName, @NonNull String threadName,
-                       @NonNull Instant timestamp, @NonNull LogMessage message,
-                       @Nullable Throwable throwable, @Nullable Marker marker,
-                       @NonNull Map<String, String> context
-) {
 
-    public LogEvent(@NonNull Level level, @NonNull String loggerName, @NonNull String threadName,
-            @NonNull Instant timestamp, @NonNull String message,
-            @Nullable Throwable throwable, @Nullable Marker marker,
-            @NonNull Map<String, String> context) {
-        this(level, loggerName, threadName, timestamp, new SimpleLogMessage(message), throwable, marker, context);
-    }
+public interface LogEvent {
 
-    public LogEvent(@NonNull Level level, @NonNull String loggerName, @NonNull String message) {
-        this(level, loggerName, message, null);
-    }
+    Level level();
 
+    String loggerName();
 
-    public LogEvent(@NonNull Level level, @NonNull String loggerName, @NonNull String message,
-            @Nullable Throwable throwable) {
-        this(level, loggerName, Thread.currentThread().getName(), Instant.now(), new SimpleLogMessage(message),
-                throwable, null,
-                Map.of()
-        );
-    }
+    String threadName();
 
-    /**
-     * Creates a new {@link LogEvent} that has all parameters of the given logEvent but a different context.
-     *
-     * @param logEvent the logEvent that should be copied (excluding the context)
-     * @param context  the new context
-     * @return the new copy of the event
-     */
-    public static LogEvent createCopyWithDifferentContext(@NonNull LogEvent logEvent,
-            @NonNull Map<String, String> context) {
-        return new LogEvent(logEvent.level, logEvent.loggerName, logEvent.threadName, logEvent.timestamp,
-                logEvent.message,
-                logEvent.throwable, logEvent.marker, context);
-    }
+    Instant timestamp();
 
-    /**
-     * Creates a new {@link LogEvent} that has all parameters of the given logEvent but a different loggerName.
-     *
-     * @param logEvent   the logEvent that should be copied (excluding the loggerName)
-     * @param loggerName the new logger name
-     * @return the new copy of the event
-     */
-    public static LogEvent createCopyWithDifferentName(@NonNull LogEvent logEvent,
-            @NonNull String loggerName) {
-        return new LogEvent(logEvent.level, loggerName, logEvent.threadName, logEvent.timestamp, logEvent.message,
-                logEvent.throwable, logEvent.marker, logEvent.context);
-    }
+    LogMessage message();
+
+    Throwable throwable();
+
+    Marker marker();
+
+    Map<String, String> context();
 }

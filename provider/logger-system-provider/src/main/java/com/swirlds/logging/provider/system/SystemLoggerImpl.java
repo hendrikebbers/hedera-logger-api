@@ -4,6 +4,7 @@ import static com.swirlds.logging.provider.system.SystemLoggerConverterUtils.con
 
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.event.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEventFactory;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -13,9 +14,12 @@ public class SystemLoggerImpl implements System.Logger {
 
     private final LogEventConsumer logEventConsumer;
 
-    public SystemLoggerImpl(final String name, final LogEventConsumer logEventConsumer) {
+    private final LogEventFactory logEventFactory;
+
+    public SystemLoggerImpl(final String name, final LogEventFactory factory, final LogEventConsumer logEventConsumer) {
         this.name = name;
         this.logEventConsumer = logEventConsumer;
+        this.logEventFactory = factory;
     }
 
     @Override
@@ -41,7 +45,7 @@ public class SystemLoggerImpl implements System.Logger {
             } else {
                 message = msg;
             }
-            LogEvent logEvent = new LogEvent(convertedLevel, name, message, thrown);
+            LogEvent logEvent = logEventFactory.createLogEvent(convertedLevel, name, message, thrown);
             logEventConsumer.accept(logEvent);
         }
     }
@@ -57,7 +61,7 @@ public class SystemLoggerImpl implements System.Logger {
             } else {
                 message = MessageFormat.format(format, params);
             }
-            LogEvent logEvent = new LogEvent(convertedLevel, name, message);
+            LogEvent logEvent = logEventFactory.createLogEvent(convertedLevel, name, message);
             logEventConsumer.accept(logEvent);
         }
     }

@@ -3,6 +3,8 @@ package com.swirlds.logging.api.internal.emergency;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.event.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEventFactory;
+import com.swirlds.logging.api.internal.event.SimpleLogEventFactory;
 import com.swirlds.logging.api.internal.format.LineBasedFormat;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -65,6 +67,8 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      */
     private final ThreadLocal<Boolean> recursionGuard;
 
+    private final LogEventFactory logEventFactory = new SimpleLogEventFactory();
+
     /**
      * Creates the singleton instance of the logger.
      */
@@ -107,13 +111,13 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
     @Override
     public void log(@NonNull Level level, @NonNull String message, @Nullable Throwable thrown) {
         if (level == null && message == null) {
-            log(new LogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, UNDEFINED_MESSAGE, thrown));
+            log(logEventFactory.createLogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, UNDEFINED_MESSAGE, thrown));
         } else if (level == null) {
-            log(new LogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, message, thrown));
+            log(logEventFactory.createLogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, message, thrown));
         } else if (message == null) {
-            log(new LogEvent(level, EMERGENCY_LOGGER_NAME, UNDEFINED_MESSAGE, thrown));
+            log(logEventFactory.createLogEvent(level, EMERGENCY_LOGGER_NAME, UNDEFINED_MESSAGE, thrown));
         } else {
-            log(new LogEvent(level, EMERGENCY_LOGGER_NAME, message, thrown));
+            log(logEventFactory.createLogEvent(level, EMERGENCY_LOGGER_NAME, message, thrown));
         }
     }
 
@@ -178,7 +182,8 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
             @NonNull final Supplier<T> supplier) {
         final Boolean guard = recursionGuard.get();
         if (guard != null && guard) {
-            final LogEvent logEvent = new LogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, "Recursion in Emergency logger",
+            final LogEvent logEvent = logEventFactory.createLogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME,
+                    "Recursion in Emergency logger",
                     new IllegalStateException("Recursion in Emergency logger"));
             handle(logEvent);
             if (fallbackLogEvent != null) {
@@ -190,7 +195,8 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
             try {
                 return supplier.get();
             } catch (final Throwable t) {
-                final LogEvent logEvent = new LogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME, "Error in Emergency logger",
+                final LogEvent logEvent = logEventFactory.createLogEvent(Level.ERROR, EMERGENCY_LOGGER_NAME,
+                        "Error in Emergency logger",
                         t);
                 handle(logEvent);
                 if (fallbackLogEvent != null) {

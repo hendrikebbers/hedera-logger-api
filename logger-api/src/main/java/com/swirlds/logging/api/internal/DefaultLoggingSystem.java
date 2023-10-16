@@ -5,7 +5,6 @@ import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.Logger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
-import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
 import com.swirlds.logging.api.extensions.handler.LogHandlerFactory;
 import com.swirlds.logging.api.extensions.provider.LogProvider;
@@ -41,7 +40,8 @@ public class DefaultLoggingSystem {
         EmergencyLoggerImpl.getInstance()
                 .publishLoggedEvents()
                 .stream()
-                .map(event -> LogEvent.createCopyWithDifferentName(event, "EMERGENCY-LOGGER-QUEUE"))
+                .map(event -> this.internalLoggingSystem.getLogEventFactory()
+                        .createLogEvent(event, "EMERGENCY-LOGGER-QUEUE"))
                 .forEach(internalLoggingSystem::accept);
         INITIALIZED.set(true);
     }
@@ -64,7 +64,7 @@ public class DefaultLoggingSystem {
                 .map(factory -> factory.create(configuration))
                 .filter(LogProvider::isActive)
                 .toList();
-        providers.forEach(p -> p.install(internalLoggingSystem));
+        providers.forEach(p -> p.install(internalLoggingSystem.getLogEventFactory(), internalLoggingSystem));
         EMERGENCY_LOGGER.log(Level.DEBUG, providers.size() + " logging providers installed: " + providers);
     }
 

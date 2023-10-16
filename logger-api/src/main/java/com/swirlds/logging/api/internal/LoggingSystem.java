@@ -25,7 +25,9 @@ import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.event.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEventFactory;
 import com.swirlds.logging.api.extensions.handler.LogHandler;
+import com.swirlds.logging.api.internal.event.SimpleLogEventFactory;
 import com.swirlds.logging.api.internal.level.LoggingLevelConfig;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
@@ -48,6 +50,8 @@ public class LoggingSystem implements LogEventConsumer {
     private final Map<String, LoggerImpl> loggers;
 
     private final LoggingLevelConfig levelConfig;
+
+    private final LogEventFactory logEventFactory = new SimpleLogEventFactory();
 
     public LoggingSystem(@NonNull final Configuration configuration) {
         Objects.requireNonNull(configuration, "configuration must not be null");
@@ -76,9 +80,9 @@ public class LoggingSystem implements LogEventConsumer {
     public LoggerImpl getLogger(@NonNull final String name) {
         if (name == null) {
             EMERGENCY_LOGGER.logNPE("name");
-            return loggers.computeIfAbsent(ROOT_LOGGER_NAME, n -> new LoggerImpl(n, this));
+            return loggers.computeIfAbsent(ROOT_LOGGER_NAME, n -> new LoggerImpl(n, logEventFactory, this));
         }
-        return loggers.computeIfAbsent(name.trim(), n -> new LoggerImpl(n, this));
+        return loggers.computeIfAbsent(name.trim(), n -> new LoggerImpl(n, logEventFactory, this));
     }
 
     public boolean isEnabled(@NonNull final String name, @NonNull final Level level) {
@@ -123,7 +127,7 @@ public class LoggingSystem implements LogEventConsumer {
                         final Map<String, String> context = new HashMap<>(event.context());
                         context.putAll(GlobalContext.getContextMap());
                         context.putAll(ThreadLocalContext.getContextMap());
-                        final LogEvent enrichedEvent = LogEvent.createCopyWithDifferentContext(event,
+                        final LogEvent enrichedEvent = logEventFactory.createLogEvent(event,
                                 Collections.unmodifiableMap(context));
                         eventConsumers.forEach(consumer -> {
                             try {
@@ -143,5 +147,9 @@ public class LoggingSystem implements LogEventConsumer {
 
     public void stopAndFinalize() {
         handlers.forEach(LogHandler::stopAndFinalize);
+    }
+
+    public LogEventFactory getLogEventFactory() {
+        return logEventFactory;
     }
 }

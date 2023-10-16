@@ -1,6 +1,7 @@
 package com.swirlds.logging.api.test;
 
 import com.swirlds.logging.api.internal.LoggerImpl;
+import com.swirlds.logging.api.internal.event.SimpleLogEventFactory;
 import com.swirlds.logging.api.test.util.DummyConsumer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ public class LoggerImplTest {
     @Test
     void testSimpleLogger() {
         //given
-        LoggerImpl logger = new LoggerImpl("test-name", new DummyConsumer());
+        LoggerImpl logger = new LoggerImpl("test-name", new SimpleLogEventFactory(), new DummyConsumer());
 
         //when
         final String name = logger.getName();
@@ -31,13 +32,20 @@ public class LoggerImplTest {
 
     @Test
     void testNullLogEventConsumer() {
-        Assertions.assertThrows(NullPointerException.class, () -> new LoggerImpl("test-name", null));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new LoggerImpl("test-name", new SimpleLogEventFactory(), null));
+    }
+
+    @Test
+    void testNullLogEventFactory() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new LoggerImpl("test-name", null, new DummyConsumer()));
     }
 
     @Test
     void testNullName() {
         //given
-        LoggerImpl logger = new LoggerImpl(null, new DummyConsumer());
+        LoggerImpl logger = new LoggerImpl(null, new SimpleLogEventFactory(), new DummyConsumer());
 
         //when
         final String name = logger.getName();
@@ -59,7 +67,7 @@ public class LoggerImplTest {
     @Test
     void testSpecWithNullName() {
         //given
-        LoggerImpl logger = new LoggerImpl(null, new DummyConsumer());
+        LoggerImpl logger = new LoggerImpl(null, new SimpleLogEventFactory(), new DummyConsumer());
 
         //then
         LoggerApiSpecTest.testSpec(logger);
@@ -68,7 +76,7 @@ public class LoggerImplTest {
     @Test
     void testSpecWithSimpleLogger() {
         //given
-        LoggerImpl logger = new LoggerImpl("test-name", new DummyConsumer());
+        LoggerImpl logger = new LoggerImpl("test-name", new SimpleLogEventFactory(), new DummyConsumer());
 
         //then
         LoggerApiSpecTest.testSpec(logger);
@@ -76,7 +84,7 @@ public class LoggerImplTest {
 
     @Test
     void testSpecWithDifferentLoggers() {
-        LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", new DummyConsumer()));
-        LoggerApiSpecTest.testSpec(new LoggerImpl(null, new DummyConsumer()));
+        LoggerApiSpecTest.testSpec(new LoggerImpl("test-name", new SimpleLogEventFactory(), new DummyConsumer()));
+        LoggerApiSpecTest.testSpec(new LoggerImpl(null, new SimpleLogEventFactory(), new DummyConsumer()));
     }
 }

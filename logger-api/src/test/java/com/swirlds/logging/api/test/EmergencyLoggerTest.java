@@ -5,9 +5,11 @@ import com.swirlds.base.testfixture.io.WithSystemError;
 import com.swirlds.base.testfixture.io.WithSystemOut;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.event.LogEvent;
+import com.swirlds.logging.api.extensions.event.LogEventFactory;
 import com.swirlds.logging.api.extensions.event.LogMessage;
 import com.swirlds.logging.api.extensions.event.Marker;
 import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
+import com.swirlds.logging.api.internal.event.SimpleLogEventFactory;
 import jakarta.inject.Inject;
 import java.time.Instant;
 import java.util.List;
@@ -71,6 +73,7 @@ public class EmergencyLoggerTest {
     @Test
     void loggerMustBe100Solid() {
         //given
+        LogEventFactory logEventFactory = new SimpleLogEventFactory();
         EmergencyLoggerImpl emergencyLogger = EmergencyLoggerImpl.getInstance();
         emergencyLogger.publishLoggedEvents(); //clear the queue
 
@@ -87,51 +90,60 @@ public class EmergencyLoggerTest {
         Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null, null, null));
 
         Assertions.assertDoesNotThrow(() -> emergencyLogger.log(null));
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, "loggerName", "threadName",
-                Instant.now(), (String) null,
-                new RuntimeException(), new Marker("marker"),
-                Map.of()
-        )));
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, "loggerName", "threadName",
-                Instant.now(), (LogMessage) null,
-                new RuntimeException(), new Marker("marker"),
-                Map.of()
-        )));
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, "loggerName", "threadName",
-                null, "message",
-                new RuntimeException(), new Marker("marker"),
-                Map.of()
-        )));
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, "loggerName", null,
-                Instant.now(), "message",
-                new RuntimeException(), new Marker("marker"),
-                Map.of()
-        )));
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, null, "threadName",
-                Instant.now(), "message",
-                new RuntimeException(), new Marker("marker"),
-                Map.of()
-        )));
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(null, "loggerName", "threadName",
-                Instant.now(), "message",
-                new RuntimeException(), new Marker("marker"),
-                Map.of()
-        )));
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, "loggerName", "threadName",
-                Instant.now(), "message",
-                new RuntimeException(), null,
-                Map.of()
-        )));
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, "loggerName", "threadName",
-                Instant.now(), "message",
-                new RuntimeException(), new Marker("marker"),
-                null
-        )));
-        Assertions.assertDoesNotThrow(() -> emergencyLogger.log(new LogEvent(Level.INFO, "loggerName", "threadName",
-                Instant.now(), "message",
-                null, new Marker("marker"),
-                Map.of()
-        )));
+        Assertions.assertDoesNotThrow(
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, "loggerName", "threadName",
+                        Instant.now(), (String) null,
+                        new RuntimeException(), new Marker("marker"),
+                        Map.of()
+                )));
+        Assertions.assertDoesNotThrow(
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, "loggerName", "threadName",
+                        Instant.now(), (LogMessage) null,
+                        new RuntimeException(), new Marker("marker"),
+                        Map.of()
+                )));
+        Assertions.assertDoesNotThrow(
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, "loggerName", "threadName",
+                        null, "message",
+                        new RuntimeException(), new Marker("marker"),
+                        Map.of()
+                )));
+        Assertions.assertDoesNotThrow(
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, "loggerName", null,
+                        Instant.now(), "message",
+                        new RuntimeException(), new Marker("marker"),
+                        Map.of()
+                )));
+        Assertions.assertDoesNotThrow(
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, null, "threadName",
+                        Instant.now(), "message",
+                        new RuntimeException(), new Marker("marker"),
+                        Map.of()
+                )));
+        Assertions.assertDoesNotThrow(
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(null, "loggerName", "threadName",
+                        Instant.now(), "message",
+                        new RuntimeException(), new Marker("marker"),
+                        Map.of()
+                )));
+        Assertions.assertDoesNotThrow(
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, "loggerName", "threadName",
+                        Instant.now(), "message",
+                        new RuntimeException(), null,
+                        Map.of()
+                )));
+        Assertions.assertDoesNotThrow(
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, "loggerName", "threadName",
+                        Instant.now(), "message",
+                        new RuntimeException(), new Marker("marker"),
+                        null
+                )));
+        Assertions.assertDoesNotThrow(
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, "loggerName", "threadName",
+                        Instant.now(), "message",
+                        null, new Marker("marker"),
+                        Map.of()
+                )));
 
         //then
         final List<String> allLines = systemErrProvider.getLines().toList();

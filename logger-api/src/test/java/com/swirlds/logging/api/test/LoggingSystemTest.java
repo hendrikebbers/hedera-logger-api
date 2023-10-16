@@ -437,11 +437,12 @@ public class LoggingSystemTest {
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
         final LocalDateTime startTime = LocalDateTime.now();
-        LogEvent event1 = new LogEvent(Level.INFO, "test-logger", "info-message");
-        LogEvent event2 = new LogEvent(Level.TRACE, "test-logger", "trace-message"
+        LogEvent event1 = loggingSystem.getLogEventFactory().createLogEvent(Level.INFO, "test-logger", "info-message");
+        LogEvent event2 = loggingSystem.getLogEventFactory().createLogEvent(Level.TRACE, "test-logger", "trace-message"
         ); //should not be forwarded since INFO is configured as root level
-        LogEvent event3 = new LogEvent(Level.ERROR, "test-logger", "error-message");
-        LogEvent event4 = new LogEvent(Level.INFO, "test-logger", "info-message");
+        LogEvent event3 = loggingSystem.getLogEventFactory()
+                .createLogEvent(Level.ERROR, "test-logger", "error-message");
+        LogEvent event4 = loggingSystem.getLogEventFactory().createLogEvent(Level.INFO, "test-logger", "info-message");
 
         //when
         loggingSystem.accept(event1);
@@ -540,19 +541,21 @@ public class LoggingSystemTest {
         final InMemoryHandler handler = new InMemoryHandler();
         loggingSystem.addHandler(handler);
 
-        LogEvent event1 = new LogEvent(Level.INFO, "test-logger", Thread.currentThread().getName(), Instant.now(),
+        LogEvent event1 = loggingSystem.getLogEventFactory().createLogEvent(Level.INFO, "test-logger", Thread.currentThread().getName(), Instant.now(),
                 "message",
                 new RuntimeException("error"), new Marker("INFO_MARKER"),
                 Map.of("context", "unit-test", "level", "info")
         );
 
-        LogEvent event2 = new LogEvent(Level.TRACE, "test-logger", "trace-message"
+        LogEvent event2 = loggingSystem.getLogEventFactory().createLogEvent(Level.TRACE, "test-logger", "trace-message"
         ); //should not be forwarded since INFO is configured as root level
-        LogEvent event3 = new LogEvent(Level.ERROR, "test-logger", "error-message");
-        LogEvent event4 = new LogEvent(Level.INFO, "test-logger", Thread.currentThread().getName(), Instant.now(),
-                "message",
-                new RuntimeException("error"), new Marker("INFO_MARKER"), Map.of("context", "unit-test")
-        );
+        LogEvent event3 = loggingSystem.getLogEventFactory()
+                .createLogEvent(Level.ERROR, "test-logger", "error-message");
+        LogEvent event4 = loggingSystem.getLogEventFactory()
+                .createLogEvent(Level.INFO, "test-logger", Thread.currentThread().getName(), Instant.now(),
+                        "message",
+                        new RuntimeException("error"), new Marker("INFO_MARKER"), Map.of("context", "unit-test")
+                );
 
         //when
         loggingSystem.accept(event1);
@@ -566,9 +569,9 @@ public class LoggingSystemTest {
         Assertions.assertEquals(3, loggedEvents.size());
         Assertions.assertEquals(event1, loggedEvents.get(0));
         Assertions.assertEquals(
-                LogEvent.createCopyWithDifferentContext(event3, Map.of("new-global", "new-global-value")),
+                loggingSystem.getLogEventFactory().createLogEvent(event3, Map.of("new-global", "new-global-value")),
                 loggedEvents.get(1));
-        Assertions.assertEquals(LogEvent.createCopyWithDifferentContext(event4,
+        Assertions.assertEquals(loggingSystem.getLogEventFactory().createLogEvent(event4,
                 Map.of("context", "unit-test", "new-global", "new-global-value")), loggedEvents.get(2));
     }
 
@@ -596,7 +599,7 @@ public class LoggingSystemTest {
         });
 
         //when
-        loggingSystem.accept(new LogEvent(Level.INFO, "logger", "message"));
+        loggingSystem.accept(loggingSystem.getLogEventFactory().createLogEvent(Level.INFO, "logger", "message"));
 
         final List<LogEvent> loggedErrorEvents = getLoggedEvents();
 

@@ -23,6 +23,7 @@ import com.swirlds.logging.api.extensions.emergency.EmergencyLogger;
 import com.swirlds.logging.api.extensions.emergency.EmergencyLoggerProvider;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.event.LogEventConsumer;
+import com.swirlds.logging.api.extensions.event.LogEventFactory;
 import com.swirlds.logging.api.extensions.event.LogMessage;
 import com.swirlds.logging.api.extensions.event.Marker;
 import com.swirlds.logging.api.extensions.event.ParameterizedLogMessage;
@@ -48,6 +49,8 @@ public class LoggerImpl implements Logger {
 
     private final LogEventConsumer logEventConsumer;
 
+    private final LogEventFactory logEventFactory;
+
     /**
      * Creates a new instance of the logger.
      *
@@ -58,7 +61,7 @@ public class LoggerImpl implements Logger {
      * @throws NullPointerException if the logEventConsumer is null. For all other use cases fallbacks are implemented
      */
     protected LoggerImpl(@NonNull String name, @Nullable final Marker marker, @NonNull Map<String, String> context,
-            @NonNull LogEventConsumer logEventConsumer) {
+            LogEventFactory logEventFactory, @NonNull LogEventConsumer logEventConsumer) {
         if (name == null) {
             EMERGENCY_LOGGER.logNPE("name");
             this.name = "";
@@ -71,6 +74,7 @@ public class LoggerImpl implements Logger {
         } else {
             this.context = Collections.unmodifiableMap(context);
         }
+        this.logEventFactory = Objects.requireNonNull(logEventFactory, "logEventFactory must not be null");
         this.logEventConsumer = Objects.requireNonNull(logEventConsumer, "logEventConsumer must not be null");
     }
 
@@ -81,8 +85,8 @@ public class LoggerImpl implements Logger {
      * @param logEventConsumer the consumer that is used to consume the log events
      * @throws NullPointerException if the logEventConsumer is null. For all other use cases fallbacks are implemented
      */
-    public LoggerImpl(String name, LogEventConsumer logEventConsumer) {
-        this(name, null, Map.of(), logEventConsumer);
+    public LoggerImpl(String name, LogEventFactory logEventFactory, LogEventConsumer logEventConsumer) {
+        this(name, null, Map.of(), logEventFactory, logEventConsumer);
     }
 
     public String getName() {
@@ -138,7 +142,7 @@ public class LoggerImpl implements Logger {
     }
 
     protected Logger withMarkerAndContext(final Marker marker, final Map<String, String> context) {
-        return new LoggerImpl(getName(), marker, context, logEventConsumer);
+        return new LoggerImpl(getName(), marker, context, logEventFactory, logEventConsumer);
     }
 
     @Override
@@ -188,7 +192,7 @@ public class LoggerImpl implements Logger {
         if (isEnabled(level)) {
             String threadName = Thread.currentThread().getName();
             Marker marker = getMarker();
-            LogEvent logEvent = new LogEvent(level, getName(), threadName, Instant.now(), message,
+            LogEvent logEvent = logEventFactory.createLogEvent(level, getName(), threadName, Instant.now(), message,
                     throwable, marker,
                     getContext());
             logEventConsumer.accept(logEvent);
