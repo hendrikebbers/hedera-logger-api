@@ -4,7 +4,6 @@ import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.event.LogMessage;
 import com.swirlds.logging.api.extensions.event.Marker;
-import com.swirlds.logging.api.extensions.event.SimpleLogMessage;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;

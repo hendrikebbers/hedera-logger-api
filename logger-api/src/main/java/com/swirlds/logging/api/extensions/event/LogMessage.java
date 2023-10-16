@@ -1,5 +1,7 @@
 package com.swirlds.logging.api.extensions.event;
 
+import com.swirlds.logging.api.internal.event.ParameterizedLogMessage;
+import com.swirlds.logging.api.internal.event.SimpleLogMessage;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
