@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 /**
@@ -61,6 +63,8 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
      * by the logging system and logged.
      */
     private final ArrayBlockingQueue<LogEvent> logEvents;
+
+    private final Lock logEventsAddLock = new ReentrantLock();
 
     /**
      * A thread local that is used to prevent recursion. This can happen when the logger is used in a broken system.
@@ -224,10 +228,15 @@ public class EmergencyLoggerImpl implements EmergencyLogger {
         if (printStream != null) {
             new LineBasedFormat(new PrintWriter(printStream, true)).print(logEvent);
         }
-        if (logEvents.remainingCapacity() == 0) {
-            logEvents.remove();
+        logEventsAddLock.lock();
+        try {
+            while (logEvents.remainingCapacity() <= 0) {
+                logEvents.remove();
+            }
+            logEvents.add(logEvent);
+        } finally {
+            logEventsAddLock.unlock();
         }
-        logEvents.add(logEvent);
     }
 
     /**
