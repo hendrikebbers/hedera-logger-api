@@ -10,8 +10,15 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * A log event factory that reuses the same log event instance for every log statement on a thread to avoid creating new
+ * log event instances.
+ */
 public class ReuseableLogEventFactory implements LogEventFactory {
 
+    /**
+     * The thread local that holds the log event.
+     */
     private final ThreadLocal<MutableLogEvent> threadLocal = ThreadLocal.withInitial(() -> new MutableLogEvent());
 
     @NonNull

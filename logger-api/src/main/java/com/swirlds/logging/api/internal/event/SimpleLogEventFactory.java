@@ -13,6 +13,9 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A log event factory that simply creates a new log event instance for every log statement.
+ */
 public class SimpleLogEventFactory implements LogEventFactory {
 
     @NonNull

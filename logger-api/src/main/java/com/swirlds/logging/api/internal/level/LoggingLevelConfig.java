@@ -9,33 +9,90 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A configuration that can be used to configure the logging levels of loggers. This class supports to define levels for
+ * packages or classes. The configuration is read from the {@link Configuration} object.
+ * <p>
+ * Like for example in spring boot a configuration like this can be used:
+ * <p>
+ * {@code logging.level.com.swirlds=DEBUG}
+ * <p>
+ * In that case all packages and classes under the package {@code com.swirlds} will be configured to use the level
+ * DEBUG. If a more specific configuration is defined, that configuration will be used instead. For example:
+ * <p>
+ * {@code logging.level.com.swirlds.logging.api=INFO}
+ * <p>
+ * In that case all packages and classes under the package {@code com.swirlds.logging.api} will be configured to use the
+ * level INFO.
+ */
 public class LoggingLevelConfig {
 
+    /**
+     * The emergency logger.
+     */
     private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
+    /**
+     * The default prefix for the configuration.
+     */
     private final static String DEFAULT_PREFIX = "logging.level";
 
+    /**
+     * The cache for the levels.
+     */
     private final Map<String, Level> levelCache;
 
+    /**
+     * The configuration properties.
+     */
     private final Map<String, String> levelConfigProperties;
 
+    /**
+     * The prefix for the configuration.
+     */
     private final String prefix;
 
+    /**
+     * The default level.
+     */
     private final Level defaultLevel;
 
+    /**
+     * Creates a new logging level configuration based on the given configuration.
+     *
+     * @param configuration The configuration.
+     */
     public LoggingLevelConfig(@NonNull Configuration configuration) {
         this(configuration, DEFAULT_PREFIX);
     }
 
-
+    /**
+     * Creates a new logging level configuration based on the given configuration and prefix.
+     *
+     * @param configuration The configuration.
+     * @param prefix        The prefix.
+     */
     public LoggingLevelConfig(Configuration configuration, String prefix) {
         this(configuration, prefix, Level.INFO);
     }
 
-    public LoggingLevelConfig(Configuration configuration, Level level) {
-        this(configuration, DEFAULT_PREFIX, level);
+    /**
+     * Creates a new logging level configuration based on the given configuration and defaultLevel.
+     *
+     * @param configuration The configuration.
+     * @param defaultLevel  The default level.
+     */
+    public LoggingLevelConfig(Configuration configuration, Level defaultLevel) {
+        this(configuration, DEFAULT_PREFIX, defaultLevel);
     }
 
+    /**
+     * Creates a new logging level configuration based on the given configuration, prefix and defaultLevel.
+     *
+     * @param configuration The configuration.
+     * @param prefix        The prefix.
+     * @param defaultLevel  The default level.
+     */
     public LoggingLevelConfig(@NonNull Configuration configuration, @NonNull String prefix,
             @NonNull Level defaultLevel) {
         this.prefix = Objects.requireNonNull(prefix, "prefix must not be null");
@@ -45,6 +102,12 @@ public class LoggingLevelConfig {
         update(configuration);
     }
 
+    /**
+     * Updates the configuration based on the given configuration. That method can be used to change the logging level
+     * dynamically at runtime.
+     *
+     * @param configuration The configuration.
+     */
     public void update(final @NonNull Configuration configuration) {
         Objects.requireNonNull(configuration, "configuration must not be null");
         levelConfigProperties.clear();
@@ -61,6 +124,13 @@ public class LoggingLevelConfig {
         levelCache.clear();
     }
 
+    /**
+     * Returns true if the given level is enabled for the given name.
+     *
+     * @param name  The name.
+     * @param level The level.
+     * @return True if the given level is enabled for the given name.
+     */
     public boolean isEnabled(@NonNull String name, @NonNull Level level) {
         if (level == null) {
             EMERGENCY_LOGGER.logNPE("level");
