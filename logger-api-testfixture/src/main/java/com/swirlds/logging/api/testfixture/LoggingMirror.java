@@ -21,8 +21,20 @@ import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import java.util.List;
 
+/**
+ * A mirror of the logging system that can be used to check the logging events that were generated during a test. A
+ * mirror is automatically cleared before and after a test. By doing so a mirror always contains log events of the
+ * current test. To use the class a test must be annotated with {@link WithLoggingMirror}.
+ *
+ * @see WithLoggingMirror
+ */
 public interface LoggingMirror extends AutoCloseable {
 
+    /**
+     * Returns the number of log events that were generated during a test.
+     *
+     * @return the number of log events that were generated during a test
+     */
     int getEventCount();
 
     @Override
@@ -30,23 +42,67 @@ public interface LoggingMirror extends AutoCloseable {
         dispose();
     }
 
+    /**
+     * Clears the mirror and disposes it. This method is automatically called before and after a test.
+     */
     void dispose();
 
+    /**
+     * Returns a mirror that only contains log events with the given level.
+     *
+     * @param level the level to filter by
+     * @return a mirror that only contains log events with the given level
+     */
     LoggingMirror filterByLevel(Level level);
 
+    /**
+     * Returns a mirror that only contains log events with the given context.
+     *
+     * @param key   the key of the context
+     * @param value the value of the context
+     * @return a mirror that only contains log events with the given context
+     */
     LoggingMirror filterByContext(String key, String value);
 
+    /**
+     * Returns a mirror that only contains log events with the current thread.
+     *
+     * @return a mirror that only contains log events with the current thread
+     */
     default LoggingMirror filterByCurrentThread() {
         return filterByThread(Thread.currentThread().getName());
     }
 
+    /**
+     * Returns a mirror that only contains log events with the given thread.
+     *
+     * @param threadName the name of the thread
+     * @return a mirror that only contains log events with the given thread
+     */
     LoggingMirror filterByThread(String threadName);
 
+    /**
+     * Returns a mirror that only contains log events with the given logger name (based on the class name).
+     *
+     * @param clazz the class to filter by
+     * @return a mirror that only contains log events with the given logger name
+     */
     default LoggingMirror filterByLogger(Class<?> clazz) {
         return filterByLogger(clazz.getName());
     }
 
+    /**
+     * Returns a mirror that only contains log events with the given logger name.
+     *
+     * @param loggerName the logger name to filter by
+     * @return a mirror that only contains log events with the given logger name
+     */
     LoggingMirror filterByLogger(String loggerName);
 
+    /**
+     * Returns a list of all log events that were generated during a test.
+     *
+     * @return a list of all log events that were generated during a test
+     */
     List<LogEvent> getEvents();
 }
