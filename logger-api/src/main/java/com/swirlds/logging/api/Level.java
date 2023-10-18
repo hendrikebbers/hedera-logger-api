@@ -40,6 +40,11 @@ public enum Level {
      */
     private final int levelOrdinal;
 
+    /**
+     * Creates a new level with the given ordinal
+     *
+     * @param levelOrdinal the ordinal of the level
+     */
     Level(int levelOrdinal) {
         this.levelOrdinal = levelOrdinal;
     }
@@ -58,6 +63,13 @@ public enum Level {
         return this.levelOrdinal >= level.levelOrdinal;
     }
 
+    /**
+     * Returns the level for the given name or the given default level if no level can be found for the given name.
+     *
+     * @param value        the name of the level
+     * @param defaultLevel the default level
+     * @return the level for the given name
+     */
     public static Level valueOfOrElse(String value, Level defaultLevel) {
         try {
             return valueOf(value);
