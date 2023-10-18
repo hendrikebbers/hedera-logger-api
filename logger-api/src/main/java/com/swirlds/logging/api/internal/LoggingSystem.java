@@ -36,19 +36,46 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
+/**
+ * The implementation of the logging system.
+ */
 public class LoggingSystem implements LogEventConsumer {
 
+    /**
+     * The emergency logger that is used to log errors that occur during the logging process.
+     */
     private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
+
+    /**
+     * The name of the root logger.
+     */
     public static final String ROOT_LOGGER_NAME = "";
 
+    /**
+     * The handlers of the logging system.
+     */
     private final List<LogHandler> handlers;
 
+    /**
+     * The already created loggers of the logging system.
+     */
     private final Map<String, LoggerImpl> loggers;
 
+    /**
+     * The level configuration of the logging system that checks if a specific logger is enabled for a specific level.
+     */
     private final LoggingLevelConfig levelConfig;
 
+    /**
+     * The factory that is used to create log events.
+     */
     private final LogEventFactory logEventFactory = new SimpleLogEventFactory();
 
+    /**
+     * Creates a new logging system.
+     *
+     * @param configuration the configuration of the logging system
+     */
     public LoggingSystem(@NonNull final Configuration configuration) {
         Objects.requireNonNull(configuration, "configuration must not be null");
         this.levelConfig = new LoggingLevelConfig(configuration);
@@ -56,6 +83,11 @@ public class LoggingSystem implements LogEventConsumer {
         this.handlers = new CopyOnWriteArrayList<>();
     }
 
+    /**
+     * Adds a new handler to the logging system.
+     *
+     * @param handler the handler to add
+     */
     public void addHandler(@NonNull final LogHandler handler) {
         if (handler == null) {
             EMERGENCY_LOGGER.logNPE("handler");
@@ -64,6 +96,11 @@ public class LoggingSystem implements LogEventConsumer {
         }
     }
 
+    /**
+     * Removes a handler from the logging system.
+     *
+     * @param handler the handler to remove
+     */
     public void removeHandler(@NonNull final LogHandler handler) {
         if (handler == null) {
             EMERGENCY_LOGGER.logNPE("handler");
@@ -72,6 +109,12 @@ public class LoggingSystem implements LogEventConsumer {
         }
     }
 
+    /**
+     * Returns the logger with the given name.
+     *
+     * @param name the name of the logger
+     * @return the logger with the given name
+     */
     @NonNull
     public LoggerImpl getLogger(@NonNull final String name) {
         if (name == null) {
@@ -81,6 +124,13 @@ public class LoggingSystem implements LogEventConsumer {
         return loggers.computeIfAbsent(name.trim(), n -> new LoggerImpl(n, logEventFactory, this));
     }
 
+    /**
+     * Checks if the logger with the given name is enabled for the given level.
+     *
+     * @param name  the name of the logger
+     * @param level the level to check
+     * @return true, if the logger with the given name is enabled for the given level, otherwise false
+     */
     public boolean isEnabled(@NonNull final String name, @NonNull final Level level) {
         if (name == null) {
             EMERGENCY_LOGGER.logNPE("name");
@@ -136,10 +186,18 @@ public class LoggingSystem implements LogEventConsumer {
         }
     }
 
+    /**
+     * Stops and finalizes the logging system.
+     */
     public void stopAndFinalize() {
         handlers.forEach(LogHandler::stopAndFinalize);
     }
 
+    /**
+     * Returns the log event factory of the logging system.
+     *
+     * @return the log event factory of the logging system
+     */
     public LogEventFactory getLogEventFactory() {
         return logEventFactory;
     }

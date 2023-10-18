@@ -30,25 +30,45 @@ import com.swirlds.logging.api.internal.event.ParameterizedLogMessage;
 import com.swirlds.logging.api.internal.event.SimpleLogMessage;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 
+/**
+ * The implementation of the logger.
+ */
 public class LoggerImpl implements Logger {
 
+    /**
+     * The emergency logger that is used to log errors that occur during the logging process.
+     */
     private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
+    /**
+     * The name of the logger.
+     */
     private final String name;
 
+    /**
+     * The marker of the logger.
+     */
     private final Marker marker;
 
+    /**
+     * The context of the logger.
+     */
     private final Map<String, String> context;
 
+    /**
+     * The consumer that is used to consume the log events.
+     */
     private final LogEventConsumer logEventConsumer;
 
+    /**
+     * The factory that is used to create the log events.
+     */
     private final LogEventFactory logEventFactory;
 
     /**
@@ -89,26 +109,23 @@ public class LoggerImpl implements Logger {
         this(name, null, Map.of(), logEventFactory, logEventConsumer);
     }
 
+    /**
+     * Returns the name of the logger.
+     *
+     * @return the name of the logger
+     */
     public String getName() {
         return name;
     }
 
-    private Marker getMarker() {
-        return marker;
-    }
-
-    private Map<String, String> getContext() {
-        return context;
-    }
-
     @Override
     public void log(Level level, String message) {
-        logImpl(level, message, null);
+        log(level, message, (Throwable) null);
     }
 
     @Override
     public void log(Level level, String message, Throwable throwable) {
-        logImpl(level, message, throwable);
+        logImpl(level, new SimpleLogMessage(message), throwable);
     }
 
     @Override
@@ -139,10 +156,6 @@ public class LoggerImpl implements Logger {
     @Override
     public void log(Level level, String message, Throwable throwable, Object arg1, Object arg2) {
         logImpl(level, new ParameterizedLogMessage(message, arg1, arg2), throwable);
-    }
-
-    protected Logger withMarkerAndContext(final Marker marker, final Map<String, String> context) {
-        return new LoggerImpl(getName(), marker, context, logEventFactory, logEventConsumer);
     }
 
     @Override
@@ -184,17 +197,31 @@ public class LoggerImpl implements Logger {
         return logEventConsumer.isEnabled(getName(), level);
     }
 
-    public void logImpl(Level level, String message, final Throwable throwable) {
-        logImpl(level, new SimpleLogMessage(message), throwable);
+    /**
+     * Creates a new instance as a copy of this logger with the given marker and context.
+     *
+     * @param marker  the marker
+     * @param context the context
+     * @return the new logger
+     */
+    protected Logger withMarkerAndContext(final Marker marker, final Map<String, String> context) {
+        return new LoggerImpl(getName(), marker, context, logEventFactory, logEventConsumer);
     }
 
+
+    /**
+     * Logs the given message and throwable.
+     *
+     * @param level     the level
+     * @param message   the message
+     * @param throwable the throwable
+     */
     public void logImpl(Level level, LogMessage message, final Throwable throwable) {
         if (isEnabled(level)) {
-            String threadName = Thread.currentThread().getName();
-            Marker marker = getMarker();
-            LogEvent logEvent = logEventFactory.createLogEvent(level, getName(), threadName, Instant.now(), message,
+            Marker marker = this.marker;
+            LogEvent logEvent = logEventFactory.createLogEvent(level, getName(), message,
                     throwable, marker,
-                    getContext());
+                    context);
             logEventConsumer.accept(logEvent);
         }
     }

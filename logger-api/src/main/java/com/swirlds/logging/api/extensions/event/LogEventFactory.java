@@ -8,14 +8,62 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * A factory that creates {@link LogEvent}s.
+ */
 public interface LogEventFactory {
 
+    /**
+     * Creates a new log event.
+     *
+     * @param level      the log level
+     * @param loggerName the name of the logger
+     * @param threadName the name of the thread
+     * @param timestamp  the timestamp
+     * @param message    the log message
+     * @param throwable  the throwable
+     * @param marker     the marker
+     * @param context    the context
+     * @return the new log event
+     */
     @NonNull
     LogEvent createLogEvent(@NonNull Level level, @NonNull String loggerName, @NonNull String threadName,
             @NonNull Instant timestamp, @NonNull LogMessage message,
             @Nullable Throwable throwable, @Nullable Marker marker,
             @NonNull Map<String, String> context);
 
+    /**
+     * Creates a new log event.
+     *
+     * @param level      the log level
+     * @param loggerName the name of the logger
+     * @param message    the log message
+     * @param throwable  the throwable
+     * @param marker     the marker
+     * @param context    the context
+     * @return the new log event
+     */
+    @NonNull
+    default LogEvent createLogEvent(@NonNull Level level, @NonNull String loggerName, @NonNull LogMessage message,
+            @Nullable Throwable throwable, @Nullable Marker marker,
+            @NonNull Map<String, String> context) {
+        return createLogEvent(level, loggerName, Thread.currentThread().getName(), Instant.now(), message, throwable,
+                marker, context);
+    }
+
+    /**
+     * Creates a new log event.
+     *
+     * @param level      the log level
+     * @param loggerName the name of the logger
+     * @param threadName the name of the thread
+     * @param timestamp  the timestamp
+     * @param message    the log message
+     * @param throwable  the throwable
+     * @param marker     the marker
+     * @param context    the context
+     * @return the new log event
+     */
     @NonNull
     default LogEvent createLogEvent(@NonNull Level level, @NonNull String loggerName, @NonNull String threadName,
             @NonNull Instant timestamp, @NonNull String message,
@@ -25,11 +73,28 @@ public interface LogEventFactory {
                 marker, context);
     }
 
+    /**
+     * Creates a new log event.
+     *
+     * @param level      the log level
+     * @param loggerName the name of the logger
+     * @param message    the log message
+     * @return the new log event
+     */
     @NonNull
     default LogEvent createLogEvent(@NonNull Level level, @NonNull String loggerName, @NonNull String message) {
         return createLogEvent(level, loggerName, message, null);
     }
 
+    /**
+     * Creates a new log event.
+     *
+     * @param level      the log level
+     * @param loggerName the name of the logger
+     * @param message    the log message
+     * @param throwable  the throwable
+     * @return the new log event
+     */
     @NonNull
     default LogEvent createLogEvent(@NonNull Level level, @NonNull String loggerName, @NonNull String message,
             @Nullable Throwable throwable) {
@@ -46,7 +111,10 @@ public interface LogEventFactory {
      * @param logEvent   the logEvent that should be copied (excluding the loggerName)
      * @param loggerName the new logger name
      * @return the new copy of the event
+     * @deprecated since it is not compatible with reusing the events per thread. (see
+     * {@link com.swirlds.logging.api.internal.event.ReuseableLogEventFactory})
      */
+    @Deprecated(forRemoval = true)
     @NonNull
     default LogEvent createLogEvent(@NonNull LogEvent logEvent, @NonNull String loggerName) {
         Objects.requireNonNull(logEvent);

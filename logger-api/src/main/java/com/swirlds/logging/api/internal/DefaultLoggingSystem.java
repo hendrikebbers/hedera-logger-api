@@ -17,18 +17,43 @@ import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The default logging system is a singleton that is used as the logging system. It acts as a wrapper around a single
+ * {@link LoggingSystem} instance. In theory it is possible to have multiple logging systems, but in practice at runtime
+ * this is the only one that should be used. A custom {@link LoggingSystem} instance can for example be created for
+ * tests or benchmarks.
+ */
 public class DefaultLoggingSystem {
 
+    /**
+     * The emergency logger.
+     */
     private final static EmergencyLogger EMERGENCY_LOGGER = EmergencyLoggerProvider.getEmergencyLogger();
 
+    /**
+     * The singleton instance holder for a more flexible singelton instantiation.
+     */
     private static class InstanceHolder {
+
+        /**
+         * The real singleton instance.
+         */
         private static final DefaultLoggingSystem INSTANCE = new DefaultLoggingSystem();
     }
 
+    /**
+     * Flag that defines if the logging system has been initialized.
+     */
     private final static AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
+    /**
+     * The logging system that is internally used.
+     */
     private final LoggingSystem internalLoggingSystem;
 
+    /**
+     * The default constructor.
+     */
     private DefaultLoggingSystem() {
         final Configuration configuration = new LogConfiguration();
         this.internalLoggingSystem = new LoggingSystem(configuration);
@@ -46,6 +71,12 @@ public class DefaultLoggingSystem {
         INITIALIZED.set(true);
     }
 
+    /**
+     * Loads all {@link LogHandlerFactory} instances by SPI / {@link ServiceLoader} and installs them into the logging
+     * system.
+     *
+     * @param configuration The configuration.
+     */
     private void installHandlers(final Configuration configuration) {
         final ServiceLoader<LogHandlerFactory> serviceLoader = ServiceLoader.load(LogHandlerFactory.class);
         final List<LogHandler> handlers = serviceLoader.stream()
@@ -57,6 +88,12 @@ public class DefaultLoggingSystem {
         EMERGENCY_LOGGER.log(Level.DEBUG, handlers.size() + " logging handlers installed: " + handlers);
     }
 
+    /**
+     * Loads all {@link LogProviderFactory} instances by SPI / {@link ServiceLoader} and installs them into the logging
+     * system.
+     *
+     * @param configuration The configuration.
+     */
     private void installProviders(final Configuration configuration) {
         final ServiceLoader<LogProviderFactory> serviceLoader = ServiceLoader.load(LogProviderFactory.class);
         final List<LogProvider> providers = serviceLoader.stream()
@@ -68,23 +105,49 @@ public class DefaultLoggingSystem {
         EMERGENCY_LOGGER.log(Level.DEBUG, providers.size() + " logging providers installed: " + providers);
     }
 
+    /**
+     * Returns the singleton instance.
+     *
+     * @return The singleton instance.
+     */
     public static DefaultLoggingSystem getInstance() {
         return InstanceHolder.INSTANCE;
     }
 
+    /**
+     * Returns the logger with the given name.
+     *
+     * @param loggerName The logger name.
+     * @return The logger.
+     */
     @NonNull
     public Logger getLogger(@NonNull String loggerName) {
         return internalLoggingSystem.getLogger(loggerName);
     }
 
+    /**
+     * Adds the given log handler to the logging system.
+     *
+     * @param logHandler The log handler.
+     */
     public void addHandler(LogHandler logHandler) {
         internalLoggingSystem.addHandler(logHandler);
     }
 
+    /**
+     * Removes the given log handler from the logging system.
+     *
+     * @param logHandler
+     */
     public void removeHandler(LogHandler logHandler) {
         internalLoggingSystem.removeHandler(logHandler);
     }
 
+    /**
+     * Returns true if the logging system has been initialized.
+     *
+     * @return True if the logging system has been initialized.
+     */
     public static boolean isInitialized() {
         return INITIALIZED.get();
     }

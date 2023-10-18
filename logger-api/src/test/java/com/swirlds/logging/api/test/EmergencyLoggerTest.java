@@ -6,7 +6,6 @@ import com.swirlds.base.testfixture.io.WithSystemOut;
 import com.swirlds.logging.api.Level;
 import com.swirlds.logging.api.extensions.event.LogEvent;
 import com.swirlds.logging.api.extensions.event.LogEventFactory;
-import com.swirlds.logging.api.extensions.event.LogMessage;
 import com.swirlds.logging.api.extensions.event.Marker;
 import com.swirlds.logging.api.internal.emergency.EmergencyLoggerImpl;
 import com.swirlds.logging.api.internal.event.SimpleLogEventFactory;
@@ -97,8 +96,7 @@ public class EmergencyLoggerTest {
                         Map.of()
                 )));
         Assertions.assertDoesNotThrow(
-                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, "loggerName", "threadName",
-                        Instant.now(), (LogMessage) null,
+                () -> emergencyLogger.log(logEventFactory.createLogEvent(Level.INFO, "loggerName", null,
                         new RuntimeException(), new Marker("marker"),
                         Map.of()
                 )));
