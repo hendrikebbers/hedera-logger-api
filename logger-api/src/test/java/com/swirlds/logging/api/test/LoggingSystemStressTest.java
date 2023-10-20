@@ -7,7 +7,6 @@ import com.swirlds.logging.api.internal.LoggingSystem;
 import com.swirlds.logging.api.test.util.InMemoryHandler;
 import com.swirlds.logging.api.test.util.LoggingUtils;
 import com.swirlds.logging.api.test.util.SimpleConfiguration;
-import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -18,11 +17,8 @@ import org.junit.jupiter.api.Test;
 @WithTestExecutor
 public class LoggingSystemStressTest {
 
-    @Inject
-    TestExecutor testExecutor;
-
     @Test
-    void testMultipleLoggersInParallel() {
+    void testMultipleLoggersInParallel(TestExecutor testExecutor) {
         //given
         final SimpleConfiguration configuration = new SimpleConfiguration();
         final LoggingSystem loggingSystem = new LoggingSystem(configuration);
@@ -44,7 +40,7 @@ public class LoggingSystemStressTest {
     }
 
     @Test
-    void testOneLoggerInParallel() {
+    void testOneLoggerInParallel(TestExecutor testExecutor) {
         //given
         final SimpleConfiguration configuration = new SimpleConfiguration();
         final LoggingSystem loggingSystem = new LoggingSystem(configuration);

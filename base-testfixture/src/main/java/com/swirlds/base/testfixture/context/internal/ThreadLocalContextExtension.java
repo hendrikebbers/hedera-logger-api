@@ -25,5 +25,4 @@ public class ThreadLocalContextExtension implements BeforeEachCallback, AfterEac
         ThreadLocalContext.getInstance().clear();
         Optional.ofNullable(savedSate.get()).ifPresent(map -> map.forEach(ThreadLocalContext.getInstance()::add));
     }
-
 }
