@@ -1,6 +1,9 @@
 package com.swirlds.logging.api.internal.configuration;
 
 import com.swirlds.config.api.Configuration;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
@@ -16,8 +19,8 @@ import java.util.stream.Stream;
 
 /**
  * The Logging configuration that is used to configure the logging system. The config is based on a file that is by
- * default in of the application root folder and named "log.properties". The system environment variable
- * "LOG_CONFIG_PATH" can be defined to overwrite the path to the configuration file. The class implements the
+ * default in of the application root folder and named {@code log.properties}. The system environment variable
+ * {@code LOG_CONFIG_PATH} can be defined to overwrite the path to the configuration file. The class implements the
  * {@link Configuration} interface since it will later be replaced by using the "real" configuration system.
  */
 public class LogConfiguration implements Configuration {
@@ -34,8 +37,8 @@ public class LogConfiguration implements Configuration {
         properties = new HashMap<>();
         final String logConfigPath = System.getenv("LOG_CONFIG_PATH");
         final URL configProperties = Optional.ofNullable(logConfigPath)
-                .map(path -> Path.of(path))
-                .map(path -> path.toUri())
+                .map(Path::of)
+                .map(Path::toUri)
                 .map(uri -> {
                     try {
                         return uri.toURL();
@@ -55,85 +58,88 @@ public class LogConfiguration implements Configuration {
         }
     }
 
+    @NonNull
     @Override
     public Stream<String> getPropertyNames() {
         return properties.keySet().stream();
     }
 
     @Override
-    public boolean exists(String s) {
-        return properties.containsKey(s);
+    public boolean exists (@NonNull String property) {
+        return properties.containsKey(property);
     }
 
     @Override
-    public String getValue(String s) throws NoSuchElementException {
-        return properties.get(s);
+    public String getValue (@NonNull String property) throws NoSuchElementException {
+        return properties.get(property);
     }
 
     @Override
-    public String getValue(String s, String s1) {
-        return Optional.ofNullable(properties.get(s)).orElse(s1);
+    public String getValue (@NonNull String property, @Nullable String defaultValue) {
+        return Optional.ofNullable(properties.get(property)).orElse(defaultValue);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getValue(String s, Class<T> aClass) throws NoSuchElementException, IllegalArgumentException {
-        if (aClass == Boolean.class) {
-            return (T) Boolean.valueOf(properties.get(s));
+    public <T> T getValue (@NonNull String property, @NonNull Class<T> type) throws NoSuchElementException, IllegalArgumentException {
+        if (type == Boolean.class) {
+            return (T) Boolean.valueOf(properties.get(property));
         }
-        throw new IllegalStateException("Unsupported type: " + aClass.getName());
+        throw new IllegalStateException("Unsupported type: " + type.getName());
     }
 
     @Override
-    public <T> T getValue(String s, Class<T> aClass, T t) throws IllegalArgumentException {
-        return Optional.ofNullable(getValue(s, aClass)).orElse(t);
+    public <T> T getValue (@NonNull String property, @NonNull Class<T> type, T defaultValue) throws IllegalArgumentException {
+        return Optional.ofNullable(getValue(property, type)).orElse(defaultValue);
     }
 
     @Override
-    public List<String> getValues(String s) {
+    public List<String> getValues (@NonNull String property) {
         throw new IllegalStateException("Collections not supported");
     }
 
     @Override
-    public List<String> getValues(String s, List<String> list) {
+    public List<String> getValues (@NonNull String property, List<String> defaultValue) {
         throw new IllegalStateException("Collections not supported");
     }
 
     @Override
-    public <T> List<T> getValues(String s, Class<T> aClass) throws NoSuchElementException, IllegalArgumentException {
+    public <T> List<T> getValues (@NonNull String property, @NonNull Class<T> type) throws NoSuchElementException, IllegalArgumentException {
         throw new IllegalStateException("Collections not supported");
     }
 
     @Override
-    public <T> List<T> getValues(String s, Class<T> aClass, List<T> list) throws IllegalArgumentException {
+    public <T> List<T> getValues (@NonNull String property, @NonNull Class<T> type, @Nullable List<T> defaultValue) throws IllegalArgumentException {
         throw new IllegalStateException("Collections not supported");
     }
 
     @Override
-    public Set<String> getValueSet(String s) {
+    public Set<String> getValueSet (@NonNull String property) {
         throw new IllegalStateException("Collections not supported");
     }
 
     @Override
-    public Set<String> getValueSet(String s, Set<String> set) {
+    public Set<String> getValueSet (@NonNull String property, @Nullable Set<String> defaultValue) {
         throw new IllegalStateException("Collections not supported");
     }
 
     @Override
-    public <T> Set<T> getValueSet(String s, Class<T> aClass) throws NoSuchElementException, IllegalArgumentException {
+    public <T> Set<T> getValueSet (@NonNull String property, @NonNull Class<T> type) throws NoSuchElementException, IllegalArgumentException {
         throw new IllegalStateException("Collections not supported");
     }
 
     @Override
-    public <T> Set<T> getValueSet(String s, Class<T> aClass, Set<T> set) throws IllegalArgumentException {
+    public <T> Set<T> getValueSet (@NonNull String property, @NonNull Class<T> type, @Nullable Set<T> defaultValue) throws IllegalArgumentException {
         throw new IllegalStateException("Collections not supported");
     }
 
+    @NonNull
     @Override
-    public <T extends Record> T getConfigData(Class<T> aClass) {
+    public <T extends Record> T getConfigData (@NonNull Class<T> configType) {
         throw new IllegalStateException("Records not supported");
     }
 
+    @NonNull
     @Override
     public Collection<Class<? extends Record>> getConfigDataTypes() {
         throw new IllegalStateException("Records not supported");

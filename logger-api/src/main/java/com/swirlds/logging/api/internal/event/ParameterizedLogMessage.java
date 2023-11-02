@@ -1,6 +1,7 @@
 package com.swirlds.logging.api.internal.event;
 
 import com.swirlds.logging.api.extensions.event.LogMessage;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 
 /**
@@ -20,6 +21,7 @@ public record ParameterizedLogMessage(@Nullable String messagePattern, @Nullable
     static final String DELIM_STR = "{}";
     private static final char ESCAPE_CHAR = '\\';
 
+    @NonNull
     @Override
     public String getMessage() {
         if (messagePattern == null) {
@@ -83,19 +85,11 @@ public record ParameterizedLogMessage(@Nullable String messagePattern, @Nullable
             return false;
         }
         char potentialEscape = messagePattern.charAt(delimeterStartIndex - 1);
-        if (potentialEscape == ESCAPE_CHAR) {
-            return true;
-        } else {
-            return false;
-        }
+        return potentialEscape == ESCAPE_CHAR;
     }
 
     private static boolean isDoubleEscaped(String messagePattern, int delimeterStartIndex) {
-        if (delimeterStartIndex >= 2 && messagePattern.charAt(delimeterStartIndex - 2) == ESCAPE_CHAR) {
-            return true;
-        } else {
-            return false;
-        }
+        return delimeterStartIndex >= 2 && messagePattern.charAt(delimeterStartIndex - 2) == ESCAPE_CHAR;
     }
 
     private static void deeplyAppendParameter(StringBuilder sbuf, Object o) {
